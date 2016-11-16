@@ -1,0 +1,367 @@
+---
+title: "Introducción a R"
+author: "Jacinto Carrasco Castillo"
+date: "27 de octubre de 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# 1. R interactivo
+
+### Crea una secuencia de números impares 
+
+```{r}
+seq(1, by=2, length.out = 10)
+```
+
+### Crea números del 1 al 30
+
+```{r}
+1:30
+```
+
+### Busca en la ayuda qué hace la función `seq()`. Describe qué hace. Utilízala para crear números del 1 al 30 con un incremento de 0.5. ¿Qué otros parámetros te ofrece la función `seq()`? Utilízalos en un ejemplo.
+
+```{r}
+seq(from = 1, to = 30, by = 0.5)
+```
+
+Otros parámetros de la función `seq` son `length.out` que nos permite prefijar el número de elementos que tendrá la salida. Por ejemplo, si queremos obtener un vector de 5 números que vayan del 1 al 2, fijamos a 5 este parámetro:
+
+```{r}
+seq(1, 2, length.out = 5)
+```
+
+Otro parámetro es `along.with`, que podría realizar la misma función aunque de un modo distinto. Si tenemos un vector `x` y queremos obtener una secuencia de la misma longitud que `x`, usaremos este argumento. Aplicado el mismo ejemplo que antes, disponemos del vector `x` con cinco elementos y creamos un vector
+
+```{r}
+x <- letters[1:5]
+seq(1,2, along.with = x)
+```
+
+Sería equivalente a usar `length.out = length(x)`.
+
+### Crea una secuencia de números indicando el principio y la longitud de la secuencia de números
+
+```{r}
+seq(from = 1, to = 4, length.out = 10)
+seq(from = -1, to = -10, along.with = 1:20)
+```
+
+### Crea letras minúsculas, mayúsculas, nombre de los meses del año y nombre de los meses del año abreviado
+
+Usaremos las variables `letters`, `LETTERS`, `month.names` y `month.abb`.
+
+### Investiga la función `rep()`. Repite un vector del 1 al 8 cinco veces.
+
+Esta función nos permite repetir un vector el número de veces que fijemos.
+
+```{r}
+rep(1:8, 5)
+```
+
+### Haz lo mismo con las primeras ocho letras del abecedario en mayúsculas
+
+```{r}
+rep(letters[1:8], 5)
+```
+
+
+# 2. Vectores
+
+### Crea los siguientes vectores:
++ Un vector del 1 al 20
+
+```{r}
+1:20
+```
+
++ Un vector del 20 al 1
+```{r}
+20:1
+```
+
++ Utilizando el comando `c()` crea un vector que tenga el siguiente patrón 1,2,3,4,5…20,19,18,17….1
+```{r}
+c(1:20,20:1)
+```
+
+### Genera una secuencia de números del 1 al 30 utilizando el operador : y asígnalo al vector x. El vector resultante x tiene 30 elementos. Recuerda que el operador ‘:’ tiene prioridad sobre otros operadores aritméticos en una expresión. Genera un vector `x` que contenga números del 1 al 9. Utilizando el operador ‘:’ y utilizando otras opciones.  PISTA: `seq()`
+
+```{r}
+x <- 1:30
+x
+x <- 1:9
+x
+x <- seq(from = 1, to = 9)
+x
+```
+
+
+### Genera un vector x que contenga 9 números comprendidos entre 1 y 5
+
+Hay varias formas de entender este enunciado, o bien obteniendo una secuencia de 9 números que van del 1 al 5 o obteniendo 9 números aleatorios entre el 1 y el 5.
+
+```{r}
+seq(1, 5, length.out = 9)
+runif(9, min = 1, max = 5)
+```
+
+
+### Busca que hace la función `sequence()`. ¿Cuál es la diferencia con la función `seq()`?
+
+   La función `sequence(n)` genera el vector `1:n`. Sería equivalente a la función `seq(1, n)`. La función `seq` permite generar una secuencia a partir de múltiples parámetros.
+
+### Crea un vector numérico utilizando la función `c()`
+
+```{r}
+x <- c(1,3,4,5,2,4,1.4)
+x
+```
+
+### Accede al segundo elemento del vector
+
+```{r}
+x[2]
+```
+
+### Crea un vector numérico `z` que contenga del 1 al 10. Cambia el modo del vector a carácter. 
+```{r}
+z <- 1:10
+z <- as.character(z)
+z
+```
+
+### Ahora cambia el vector z a numérico de nuevo
+```{r}
+as.numeric(z)
+```
+
+### Busca en la ayuda que hace la función `scan()`. Utilízala para leer un fichero cualquiera y asigna la lectura a un vector “z”.
+
+```{r}
+scan("iris.csv", what = character(), sep =";")
+```
+
+
+
+### Crea un vector x con 100 elementos, selecciona de ese vector una muestra al azar de tamaño 5. Busca que hace la función `sample()`.
+```{r}
+x <- 1:100
+sample(x, size = 5)
+```
+
+Estamos obteniendo aquí 5 elementos sin repetición.
+
+### Genera un vector de tipo con 100 números entre el 1 y el 4 de forma random. Para ello mira en la ayuda la función `runif()`. Obliga a que el vector resultante sea de tipo integer. Ordena el vector por tamaño usando la función `sort()`. ¿Qué devuelve la función `sort`?. Si quisieras invertir el orden de los elementos del vector qué función utilizarías. Utiliza la función `order()` sobre x. ¿Cuál es la diferencia con la función `sort()`?
+
+```{r}
+x <- runif(100, 1, 4)
+x <- as.integer(x)
+x
+sort(x)
+```
+
+La función `sort()` devuelve el vector ordenado de menor a mayor. Si ponemos el atributo `decreasing` a `TRUE` obtenemos el orden descendente. La función `order` nos da cuál es la permutación del vector que debemos realizar para ordenarlo. Si tenemos el vector `x`, sería equivalente hacer `sort(x)` que `x[order(x)]`.
+
+### Crea un vector x que contenga los números ordenados del 1 al 10 de forma consecutiva. Investiga la función `rep()`. Una vez comprobado que funciona, elimina las entradas repetidas del vector, para ello consulta la función `unique()`.
+
+   La función `rep` repite los valores del vector que pasamos como entrada.
+   
+```{r}
+x <- 1:10
+r <- rep(x, 3)
+r
+unique(r)
+```
+
+
+### Crea un vector cualquiera. Devuelve de ese vector una muestra cinco números seleccionada al azar. Usa la función `sample()`, prueba a determinar los valores que quieres extraer con y sin remplazo.
+
+Para extraer con reemplazo pasamos como `TRUE` el argumento `replace`. Si no añadimos el tamaño de la muestra obtenemos una permutación del vector.
+
+```{r}
+x <- 1:3
+sample(x)
+sample(x, size = 2)
+sample(x, size = 5, replace = TRUE)
+```
+
+
+### Comprueba que objetos tienes ahora en tu espacio de trabajo. Prueba con la función `ls()`
+
+```{r}
+ls()
+```
+
+
+# 3. Explora el indexado de Vectores
+
+### Ejecuta los siguientes comandos y comprueba su resultado
+
+```{r}
+x <- 1:10
+names(x) <- letters[x]
+
+x[1:3]
+x[c(1,10)]
+x[c(-1,-2)]
+x[ x > 5]
+x[c("a","d")]
+x[]
+x <- 1:10; y <- c(x[1:5],99,x[6:10]); y
+```
+
+* En primer lugar creamos el vector `x` con los enteros del 1 al 10. 
+* Cambiamos en la siguiente orden el nombre de los elementos de `x` poniéndole las 10 primeras letras del abecedario. 
+* Obtenemos los tres primeros elementos del vector introduciendo como índices el vector 1:3
+* Obtenemos el vector `x` salvo el primer y el segundo elemento
+* Obtenemos los valores del vector `x` tales que sean mayores que 5. Para ello estamos introduciendo un vector lógico que tiene `T` en las posiciones que sean mayores que 5 y `F` en las que no.
+* Obtenemos los valores en las posiciones con nombre "a" y "d"
+* Obtenemos todos los valores del vector `x`
+* Almacenamos en `x` el vector de enteros del 1 al 10 y en la variable `y` introducimos un vector con las primeras cinco posiciones del vector `x`, el valor 99 y las posiciones de la 6 a la 10 del vector `x`.
+
+### Crea un vector con números del 1 al 100 y extrae los valores del 2 al 23.
+
+```{r}
+x <- 1:100
+x[2:23]
+```
+
+### Del mismo vector x extrae ahora todos los valores menos del 2:23
+
+```{r}
+x[-(2:23)]
+```
+
+
+### Cambia el número en la posición 5 por el valor 99 
+
+```{r}
+x[5] <- 99
+x
+```
+
+### Crea un vector lógico del vector letters, (e.g. comprobando si existe c en el vector letters).
+
+Por ejemplo creamos este vector lógico comparando cada letra con el valor "c". R replicará automáticamente el valor "c" para obtener un vector de la longitud de `letters` y compararlo con este vector. Lógicamente habrá sólo una posición con el valor `TRUE` y concluimos que "c" existe en `letters` (habría otros modos de comprobar esto, por ejemplo aplicando `any()` al vector resultante o con el operador `\%in\%`).
+
+```{r}
+letters == "c"
+```
+
+### ¿Qué devuelve el siguiente comando? which(rep(letters,2)=="c") 
+
+Devuelve las posiciones en las que se encuentra el carácter "c" en la repetición de `letters` dos veces. Estas serán 3 y $26 + 3 = 29$
+
+```{r}
+which(rep(letters,2)=="c")
+```
+
+
+### ¿Qué devuelve el siguiente comando? match(c("c","g"), letters) 
+
+Devuelve las posiciones donde los elementos coinciden.
+
+```{r}
+match(c("c","g"), letters) 
+```
+
+
+
+### Crea un vector x de elementos -5 -1, 0, 1, . . . , 6. Escribe un código en R del tipo x[ 'something' ], para extraer
+
+```{r}
+x <- -5:6
+```
+
+
+* Elementos de x menores que  0,
+```{r}
+x[x < 0]
+```
+* Elementos de x menores o igual que 0,
+```{r}
+x [x <= 0]
+```
+
+* Elementos de x mayor o igual que 3,
+```{r}
+x[x >= 3]
+```
+
+* Elementos de x menor que 0 o mayor que  4 
+```{r}
+x[x < 0 | x > 4]
+```
+
+* Elementos de x mayor que 0 y menor que 4
+```{r}
+x[x > 0 & x < 4]
+```
+
+* Elementos de x distintos de 0
+```{r}
+x[x != 0]
+```
+
+### El código `is.na` se usa para identificar valores ausentes (NA). Crea el vector `x<- c(1,2,NA)` y averigua qué pasa cuando escribes `is.na(x)`. Prueba con `x[ x!=NA ]` ¿obtienes con este comando los missing values de x?. ¿Cuál es tu explicación?
+
+Al escribir `is.na(x)` obtenemos un vector lógico con `T` en las posiciones donde se encuentre un valor no disponible.
+Al hacer la comparación `x != NA` no estamos obteniendo si cada elemento de `x` está o no disponible, ya que no es posible comparar un valor no disponible con otro y decidir si son iguales o no.
+
+```{r}
+x <- c(1,2,NA)
+is.na(x)
+x[x != NA]
+```
+
+
+### Determine what objects are in the current workspace(`objects()`)
+
+```{r}
+objects()
+```
+
+
+# 4. Búsqueda de valores idénticos y distintos en Vectores
+
+### Haz la intersección de dos vectores month.name[1:4] y  month.name[3:7] usando la función `intersect()`.
+
+```{r}
+x <- month.name[1:4]
+y <- month.name[3:7]
+intersect(x,y)
+```
+
+
+### Recupera los valores idénticos entre dos vectores usando %in%. Esta función devuelve un vector lógico de los elementos idénticos. Utiliza esa función para poder extraer ese subset del vector original.
+
+```{r}
+x[x %in% y]
+```
+
+
+### Si x=month.name[1:4] e y= month.name[3:7] recupera los valores únicos en el primer vector. Para ello investiga la función `diff()`.¿Puedes usarlo con caracteres?. Busca una alternativa.
+
+   No podemos usar la función `diff` con caracteres por lo que optamos por tomar de `x` aquellos valores que no estén en `y`.
+   
+```{r}
+x[!(x %in% y)]
+```
+
+### Une dos vectores sin duplicar las entradas repetidas. Investiga la función `union()`.
+
+```{r}
+union(x,y)
+```
+
+### Recupera las entradas duplicadas en `x` e `y`
+
+```{r}
+intersect(x,y)
+```
+

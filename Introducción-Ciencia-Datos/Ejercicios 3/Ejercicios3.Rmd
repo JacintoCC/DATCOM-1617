@@ -1,0 +1,613 @@
+---
+title: "Ejercicios3"
+author: "Jacinto Carrasco Castillo"
+date: "8 de noviembre de 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("/mnt/DATA/Universidad/1º MCD/Introducción a la Ciencia de Datos/IntroducciónProgramaciónR/Ejercicios 3")
+```
+
+
+# 1. Lists
+
+Las listas son colecciones de objetos que pueden tener modos diferentes (e.g. numéricos, vectores, arrays,...)
+
+### Ejemplo de cómo crear una lista. Ejecuta los comandos y describe que es lo que ocurre
+
+```{r}
+# Se crea una lista con los atributos name con el valor "Fred",
+#  el atributo wife con el valor "Mary", el atributo numérico
+#  que indica el número de hijos con el valor 3
+#  y un vector con tres valores con las edades de los hijos
+my_list <- list(name="Fred", wife="Mary", no.children=3, child.ages=c(4,7,9))
+
+# Se muestran los elementos que contiene la lista creada
+attributes(my_list)
+
+# Se muestran los nombres de dichos elementos
+names(my_list) 
+
+# Se muestra el segundo elemento (con el nombre del atributo)
+my_list[2]
+
+# Se muestra el valor del segundo elemento de la lista
+my_list[[2]]
+
+# Se accede al valor del segundo elemento de la lista
+my_list$wife
+
+# Se accede a la segunda posición del vector que se corresponde
+#  con el cuarto elemento de la lista
+my_list[[4]][2] 
+
+# Se calcula la longitud de dicho vector
+length(my_list[[4]]) 
+
+# Se cambia el elemento "wife" por un vector del 1 al 12
+my_list$wife <- 1:12 
+
+# Se pone a NULL este elemento (eliminamos este)
+my_list$wife <- NULL
+
+# Se añade a my_list un atributo consistente en los nombres de los meses
+my_list <- c(my_list, list(my_title2=month.name[1:12]))
+
+# Se pasa a vector la lista, nótese que todos los elementos pasan
+#  a considerarse character
+unlist(my_list)
+
+# Se crea un data.frame a partir de este vector
+data.frame(unlist(my_list))
+
+# Se crea una matrix (una columna, diecisiete filas) con este vector
+matrix(unlist(my_list))
+```
+
+#2. `apply()`
+
+Utilizando el siguiente `dataset`
+
+```{r}
+myMA <- matrix(rnorm(100000), 10000, 10, 
+               dimnames=list(1:10000, paste("C", 1:10, sep=""))) 
+```
+
+* Calcula la media para fila en la matriz `myMA`
+```{r}
+mean.by.row <- apply(myMA, 1, mean)
+mean.by.row[1:10]
+```
+
+Se han mostrado sólo los 10 primeros valores dado que la salida es demasiado grande. 
+
+* Calcula la media para cada columna en la matriz
+```{r}
+apply(myMA, 2, mean)
+```
+
+* Calcula las filas de la matriz anterior que contienen missing values NA. Antes de calcularlos recuerda (na.rm=T).
+```{r}
+which(apply(myMA, 1, anyNA))
+```
+
+
+# 3. sapply()
+
+* Dado el vector `d1` 
+```{r}
+d1 <- cbind(c(1:5),c(1,5,2,7,14),c(11:15))
+```
+
+* Sustituye los números 1,2,7 y 14 por su palabra en alemán “eins”,”zwei”,”sieben” y “vierzehn” utilizando `sapply()`.
+```{r}
+numberToGerman <- function(x) {
+  switch(as.character(x),
+         "1" = "eins",
+         "2" = "zwei",
+         "7" = "sieben",
+         "14" = "vierzehn",
+         x
+  )
+}
+
+sapply(d1, numberToGerman)
+```
+
+
+* Carga la librería `lattice` y mira qué dimensión tiene el `dataset` `barley` y qué tipo de objeto es.
+
+```{r}
+library(lattice)
+dim(barley)
+class(barley)
+```
+* Averigua cuántos campos componen el objeto
+
+Al mirar cuáles son las dimensiones del objeto, observamos que hay 120 elementos con cuatro campos cada uno. 
+
+```{r}
+str(barley)
+```
+
+Observamos que hay una variable de tipo numérico y tres de tipo `factor`.
+
+* Obtén con `lapply()` la longitud de cada uno de los elementos de la lista. Sugerencia: `unique()`
+
+```{r}
+lapply(barley, length)
+```
+
+
+* Obtén el resultado anterior en un vector
+
+```{r}
+sapply(barley, length)
+```
+
+
+# 4. `table()`
+
+* La función  `table()` cuenta el numero de elementos repetidos en un vector. Es la función más básica de clustering.
+
+Cuenta el número de entradas idénticas en la variable `Sepal.Length` del dataset `iris`.
+
+```{r}
+table.iris <- table(iris$Sepal.Length)
+table.iris
+```
+
+ 
+# 5. Exploratory Data Analysis
+
+a. Ejemplo 1, hip dataset
+
+* Descargate el  dataset hip con el siguiente commando 
+```{r}
+hip  <-read.table("http://astrostatistics.psu.edu/datasets/HIP_star.dat", header=T,fill=T)
+```
+
+* Una vez descargado comprueba la dimensión y los nombres de las columnas del dataset. ¿Qué dimensión tiene? ¿qué datos alberga?
+```{r}
+dim(hip)
+colnames(hip)
+str(hip)
+```
+
+Tenemos 2719 instancias con 9 características de tipo numérico. 
+
+* Muestra por pantalla la columna de la variable RA
+
+```{r}
+hip[1:10, "RA"]
+```
+
+Mostramos únicamente las diez primeras filas.
+
+* Calcula las tendencias centrales de todos los datos del dataset (mean, media) utilizando la function `apply`
+```{r}
+apply(hip, 2, mean, na.rm = T)
+apply(hip, 2, median,na.rm = T)
+```
+
+* Haz lo mismo para las medidas de dispersión mínimo y máximo. ¿Seria posible hacerlo con un único comando?¿Que hace la función `range()`
+
+```{r}
+apply(hip, 2, min, na.rm = T)
+apply(hip, 2, max,na.rm = T)
+apply(hip, 2, range,na.rm = T)
+```
+
+
+* Sin embargo las medidas mas populares de dispersión son la varianza (`var()`), su desviación standard (`sd()`) y la desviación absoluta de la mediana o MAD. Calcula estas medidas para los valores de RA
+
+```{r}
+var(hip$RA)
+sd(hip$RA)
+mad(hip$RA)
+```
+
+
+
+* Imagina que quieres calcular dos de estos valores de una sola vez. ¿Te serviría este código?
+```{r}
+f = function(x) c(median(x), mad(x))  
+f(hip[,1])
+```
+
+Sí, nos dará la mediana y el MAD de la primera columna de la matriz.
+
+* ¿Cuál sería el resultado de aplicar `apply(hip,2,f)`?
+
+```{r}
+apply(hip,2,f)
+```
+
+Obtendríamos una matriz donde la primera fila es la mediana de cada variable y la segunda
+es la MAD.
+
+
+* Vamos a medir la dispersión de la muestra utilizando el concepto de cuartiles. El percentil 90 es aquel dato que excede en un 10\% a todos los demás datos. El cuartil (quantile) es el mismo concento, solo que habla de proporciones en vez de porcentajes. De forma que el percentil 90 es lo mismo que el cuartil 0.90. La mediana “median” de un dataset es el valor más central, en otras palabras exactamente la mitad del dataset excede la media. Calcula el cuartil .10 y .50 para la columna RA del dataset hip. Sugerencia: `quantile()`
+
+```{r}
+quantile(hip$RA, c(0.10, 0.5))
+```
+
+
+* Los cuantiles 0.25 y 0.75 se conocen como el *first quartile* y el *third quartile*, respectivamente. Calcula los cuatro cuartiles para RA con un único comando.
+```{r}
+quantile(hip$RA)
+```
+
+* Otra medida de dispersion es la diferencia entre el primer y el tercer cuartil conocida como rango intercuartil (IQR) Inter Quantile Range. ¿Obtienes ese valor con la función `summary()`?
+
+```{r}
+summary(hip$RA)
+```
+
+No, no se obtiene el rango intercuartílico aunque podríamos obtener este valor restando el valor del primer cuartil al valor del tercer cuartil.
+
+* Hasta ahora has ignorado la presencia de  valores perdidos NA. La función `any()` devuelve 
+`TRUE` si se encuentra al menos un `TRUE` en el vector que damos como argumento. 
+Su combinación con `is.na` es muy útil. ¿Qué obtienes cuando ejecutas el siguiente comando? 
+¿Cómo lo interpretas?
+
+```{r}
+hasNA <- function(x) any(is.na(x)) 
+apply(hip,2,hasNA)   
+```
+
+* Prueba a ejecutar el siguiente comando.
+
+   Puesto que en la columna `B.V` se encuentran valores `NA` y el siguiente enunciado nos dice 
+que tenemos `NA` para toda la columna, estaremos aplicando sobre esta columna una función 
+que implique a todos los valores, tal como la media, la suma o el máximo.
+
+```{r}
+mean(hip$B.V)
+```
+
+
+* Como has observado nos devuelve NA para toda la columna, normalmente querríamos poder usar la 
+función sobre el resto de datos que no son NA: Para ello podemos utilizar la función `na.omit`. 
+¿Qué ocurre cuando lo hacemos?. Usando `apply` calcula la media para `hip` y `hip1`. Intenta 
+calcular la media de forma que solo cambie la de B.V cuando ignores los valores NA.
+
+```{r}
+hip1 <- na.omit(hip)
+dim(hip1)
+```
+
+Cuando usamos la función `na.omit` estamos eliminando esas filas (muestras) para las que 
+hay algún valor `NA`. En cambio, si queremos obtener las medias para todas las filas, 
+podemos poner el atributo `na.rm` a `TRUE`.
+
+```{r}
+apply(hip, 2, mean, na.rm = T)
+apply(hip1, 2, mean)
+```
+
+
+* Obten una idea aproximada de tus datos mediante la creación de un boxplot del `hip` dataset. 
+Para incluir todos los boxplot en un único gráfico usando `ggplot` se ha usado la función `multiplot` disponible en [Cookbook-R](http://www.cookbook-r.com/Graphs/Multiple_graphs_on_one_page_(ggplot2)/)
+
+```{r, include=FALSE}
+attach(hip)
+library(ggplot2)
+# Multiple plot function
+#
+# ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# - cols:   Number of columns in layout
+# - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+#
+# If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# then plot 1 will go in the upper left, 2 will go in the upper right, and
+# 3 will go all the way across the bottom.
+#
+multiplot <- function(..., plotlist=NULL, file, cols=1, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+```
+
+```{r}
+p1 <- ggplot(hip, aes(x = factor(0), y = HIP)) + geom_boxplot(na.rm = T) +
+         labs(title ="HIP", x = "", y = "hip")
+p2 <- ggplot(hip, aes(x = factor(0), y = Vmag)) + geom_boxplot(na.rm = T) +
+         labs(title ="Vmag", x = "", y = "Vmag")
+p3 <- ggplot(hip, aes(x = factor(0), y = RA)) + geom_boxplot(na.rm = T) +
+         labs(title ="RA", x = "", y = "RA")
+p4 <- ggplot(hip, aes(x = factor(0), y = DE)) + geom_boxplot(na.rm = T) +
+         labs(title ="DE", x = "", y = "DE")
+p5 <- ggplot(hip, aes(x = factor(0), y = Plx)) + geom_boxplot(na.rm = T) +
+         labs(title ="Plx", x = "", y = "Plx")
+p6 <- ggplot(hip, aes(x = factor(0), y = pmRA)) + geom_boxplot(na.rm = T) +
+         labs(title ="pmRA", x = "", y = "pmRA")
+p7 <- ggplot(hip, aes(x = factor(0), y = pmDE)) + geom_boxplot(na.rm = T) +
+         labs(title ="pmDE", x = "", y = "pmDE")
+p8 <- ggplot(hip, aes(x = factor(0), y = e_Plx)) + geom_boxplot(na.rm = T) +
+         labs(title ="e_Plx", x = "", y = "e_Plx")
+p9 <- ggplot(hip, aes(x = factor(0), y = B.V)) + geom_boxplot(na.rm = T) +
+         labs(title ="B.V", x = "", y = "B.V")
+multiplot(p1,p2,p3,p4,p5,p6,p7,p8,p9, cols=3)
+
+```
+
+
+*Crea un *scatterplot* que te compare los valores de RA y DE. Representa los puntos con el símbolo ‘.’ Y que estos puntos sean de color rojo si DE excede de 0. Sugerencia `ifelse()`
+
+```{r}
+ggplot(hip, aes(x = RA, y = DE)) + 
+   geom_point(shape = ".", colour = ifelse(DE > 0, "red", "blue"))
+```
+
+
+* Haz un scatterplot de RA y pmRA. ¿Ves algún patrón?
+
+```{r}
+ggplot(hip, aes(x = RA, y = pmRA)) + geom_point()
+```
+
+Entre RA y pmRA sí se ve una mayor correlación que entre RA y DE. Se observa que decrece el pmRA
+conforme aumenta  el RA hasta 100 y cómo despues vuelve a aumentar ligeramente, habiendo
+mayor dispersión en los extremos del rango que ocupa RA.
+
+* En vez de crear los plots por separado para cada par de columnas, hazlos con un solo comando con el scatterplot matrix.
+
+```{r}
+library(GGally)
+ggpairs(hip)
+```
+
+* Para poder acceder a las variables por su nombre usa `attach(hip)`.Vamos a seleccionar las estrellas Hyadas del dataset aplicando los siguientes filtros:
+   * RA in the range (50,100) 
+   * DE in the range (0,25) 
+   * pmRA in the range (90,130) 
+   * pmDE in the range (-60,-10) 
+   * e_Plx <5 
+   * Vmag >4 OR B.V <0.2 (this eliminates 4 red giants) 
+
+* Crea un nuevo dataset con la aplicación de estos filtro. El Nuevo dataset se llama `hyades`. ¿Qué dimensiones tiene? Grafica un scatterplot de Vmag vs B.V
+
+```{r}
+hyades <- hip[RA >= 50 & RA <= 100 &
+              DE >= 0 & DE <= 25 &
+              pmRA >= 90 & pmRA <= 130 &
+              pmDE >= -60 & pmDE <= -10 &
+              e_Plx < 5 &
+              (Vmag > 4 | B.V < 0.2), ]
+dim(hyades)
+```
+
+```{r}
+ggpairs(hyades)
+
+```
+
+
+   Obtenemos una mayor correlación en varias pares de variables.
+   
+# b. Ejemplo 2, iris dataset
+
+
+* Vamos a utilizar el ejemplo del dataset iris que está incluido en la distribución de R. Este dataset fue creado por Douglas Fisher.  Consta de tres clases y tipos de 3 clases de tipos de flores:
+_setosa_
+_virginica_
+_versicolor_
+  
+Cada una de ellas con cuatro atributos:
+   * sepal width
+   * sepal length
+   * petal width
+   * petal length
+
+* Inspecciona las primeras filas del dataset y calcula el `summary()` del mismo con cada atributo del dataset.
+
+```{r}
+str(iris)
+summary(iris)
+```
+
+
+* Crea un histograma de petal.width , teniendo en cuenta que el numero de bins es variable fija este a 9. Añádele color y nombres al eje x "Petal Width" y al gráfico dale el nombre de  "Histogram of Petal Width". Crea un histograma para cada variable
+
+```{r}
+ggplot(iris, aes(Petal.Width)) + geom_histogram(bins = 9, fill = "light blue") +
+   labs(title = "Histogram of Petal Width", x="Petal Width")
+ggplot(iris, aes(Sepal.Width)) + geom_histogram(bins = 9, fill = "light blue") +
+   labs(title = "Histogram of Sepal Width", x="Sepal Width")
+ggplot(iris, aes(Petal.Length)) + geom_histogram(bins = 9, fill = "light blue") +
+   labs(title = "Histogram of Petal Length", x="Petal Length")
+ggplot(iris, aes(Sepal.Length)) + geom_histogram(bins = 9, fill = "light blue") +
+   labs(title = "Histogram of Sepal Length", x="Sepal Length")
+ggplot(iris, aes(Species, fill = Species)) + stat_count() +
+   labs(title = "Histogram of iris species", x="species")
+```
+
+* Crea los cuartiles del dataset
+
+```{r}
+iris.quantiles <- apply(iris[ ,-5], 2, quantile)
+```
+
+* Representa en un boxplot la variable de ancho de hoja dependiendo del tipo de hoja que tengan
+
+```{r}
+ggplot(iris, aes(x = Species, y = Petal.Width, colour = Species)) + geom_boxplot(na.rm = T) +
+         labs(title ="Petal Width", x = "Species", y = "Petal Width")
+```
+
+* Crea los cuartiles para cada tipo de iris y represéntalos en un plot como líneas cada una de un color
+
+```{r}
+quantile.species.sw <- tapply(iris$Sepal.Width, iris$Species, quantile)
+quantile.species.sw <- data.frame("setosa" = quantile.species.sw$setosa, 
+                                  "versicolor" = quantile.species.sw$versicolor,
+                                  "virginica" = quantile.species.sw$virginica)
+ggplot(quantile.species.sw, aes(c(0,25,50,75,100))) + 
+  geom_line(aes(y = setosa, colour = "setosa")) + 
+  geom_line(aes(y = versicolor, colour = "versicolor")) +
+  geom_line(aes(y = virginica, colour = "virginica")) +
+  labs(x = "Quantile", y = "Sepal Width (cm)", title = "Quantiles by specie")
+```
+
+
+* Crea los boxplot de la longitud del pétalo en función de la especie de Iris.
+
+
+```{r}
+ggplot(iris, aes(x = Species, y = Petal.Length, fill = Species)) + geom_boxplot(na.rm = T) +
+         labs(title ="Petal Length", x = "Species", y = "Petal Length")
+```
+
+
+* Compara con scatter plots las variables entre sí.
+
+```{r}
+ggpairs(iris)
+```
+
+
+
+# Extra
+##6. Cómo crear subgrupos de datos en R
+
+#### Busca información sobre la function `cut()`. Para ilustrar su uso vamos a utilizar el dataset state.x77. Si no lo tienes instalado instala el paquete R-Datasets. Usa la función `head()` para ver cómo son tus datos.
+
+Con `cut` transformamos una variable numérica en un vector de tipo `factor`, habiendo asignado
+cada punto a un intervalo. 
+
+* Extrae la columna Frost y asigna el resultado a la variable `frost`
+
+```{r}
+frost <- state.x77[, "Frost"]
+```
+
+Tu Nuevo objeto es un vector numérico. Ahora intenta agrupar los datos en `frost` en tres 
+niveles. Para crear bins en tus datos puedes utilizar la función `cut()`. ¿Qué obtienes como
+nombres de los niveles?
+
+```{r}
+cut(frost, breaks = 3)
+```
+
+Se obtienen como nombre los intervalos en los que se divide el rango de la variable original. 
+
+#### En la realidad no existen estados que tengan frost en días negativos. Esto es porque R añade un poco de *padding*. Prueba a solucionar el problema utilizando el parámetro `include.lowest=TRUE` en `cut()`
+
+```{r}
+cut(frost, breaks = 3, include.lowest = T)
+```
+
+Al añadir este atributo, indicamos si se debe incluir el extremo inferior de los intervalos,
+que es distinto a lo que se pide en el enunciado. Para indicar que el menor número es 0,
+lo indicaríamos añadiendo también los extremos de los intervalos:
+
+```{r}
+cut(frost, breaks = c(0,62.7,125,188), include.lowest = T)
+```
+
+Los nombres de los niveles no son demasiado informativos, especifica nuevos nombres para los 
+niveles. Después de este paso has creado un factor que clasifica los estados en bajo, medio y
+alto según el número de heladas.
+Ahora cuenta el número de estados que hay en cada uno de los niveles. 
+PISTA: utiliza la función `table()`
+
+```{r}
+levels.frost <- cut(frost, breaks = c(0,62.7,125,188), 
+                    labels = c("bajo","medio","alto"),
+                    include.lowest = T)
+table(levels.frost)
+```
+
+
+## 7. Cómo ordenar datos, hacer selecciones con `if`, calcular condicionales totales, transponer columnas y filas
+
+
+* Vamos a volver a utilizar el datasets `mtcars`.  Ordena este data set de forma ascendente según
+su valo de `hp`. PISTA: `with()`
+
+```{r}
+sort.hp <- mtcars[order(mtcars$hp), ]
+```
+
+* Hazlo ahora de forma descendente
+```{r}
+sort.hp <- mtcars[order(mtcars$hp, decreasing = T), ]
+```
+
+* Calcula la media de la columna mpg. 
+```{r}
+mean(mtcars$mpg)
+```
+
+*Calcula la media de mpg para aquellos datos cuyo valor de hp sea menor que 150 y por separado para aquellos cuyo valor de hp sea mayor o igual a 150
+
+```{r}
+mean.low <- mean(mtcars$mpg[mtcars$hp < 150])
+mean.high <- mean(mtcars$mpg[mtcars$hp >= 150])
+```
+
+
+* Busca los valores únicos de la columna cyl de mtcars. PISTA `unique()`
+
+```{r}
+unique(mtcars$cyl)
+```
+
+* Obten los datos de mpg cyl disp hp para “Toyota Corolla"
+
+```{r}
+mtcars["Toyota Corolla", c("mpg","cyl","disp","hp")]
+```
+
+* Crea una nueva variable mpgClass de tipo categórico cuyo valor es “Low“ si el valor de mpg es menor que la media de la columna mpg y “High” si es mayor que la media de mpg. PISTA `ifelse()`.
+Combina ese comando con `with()` para añadir la nueva variable a mtcars
+
+```{r}
+mtcars.with.class <- with(mtcars, {
+   mpgClass <- factor(ifelse(mpg < median(mpg), "Low", "High"))
+   data.frame(mtcars, mpgClass)
+})
+```
+
+
+* ¿Qué pasa cuando ejecutas este comando? 
+```{r}
+with(mtcars, tapply(hp, list(cyl, gear), mean))
+```
+
+Se calcula la media para la variable `hp` cuando agrupamos por `cyl` y `gear`.

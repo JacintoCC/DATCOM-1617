@@ -1,0 +1,134 @@
+---
+title: "Visualización"
+author: "Jacinto Carrasco Castillo"
+date: "2 de noviembre de 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+```{r, include=FALSE}
+setwd("/mnt/DATA/Universidad/1º MCD/Introducción a la Ciencia de Datos/Visualización en R")
+library(ggplot2)
+```
+
+# Exercise 1
+### Plot distance against stretch.
+
+```{r}
+strecth <- c(46, 54, 48, 50, 44, 42, 52)
+distance <- c(148, 182, 173, 166,109, 141, 166)
+exercise.1 <- data.frame(strecth,distance)
+
+ggplot(exercise.1, aes(strecth, distance)) + geom_point(color = "blue") +
+   labs(title = "Exercise 1", x = "Strecht", y = "Distance")
+```
+
+# Exercise 2
+
+   The table on the right have ten observations, taken during the years 1970-79, are on October
+snow cover for Eurasia (snow cover is in millions of square kilometers).
+
+```{r}
+year <- c(1970, 1971,1972, 1973, 1974,1975,1976,1977,1978,1979)
+snow.cover <- c(6.5,12.0,14.9,10.0,10.7,7.9,21.9,12.5,14.5,9.2)
+exercise.2 <- data.frame(year,snow.cover)
+```
+
+#### Plot snow cover versus year
+
+```{r}
+ggplot(exercise.2, aes(year, snow.cover)) + geom_line() +
+   labs(title = "October snow cover for Eurasia", x = "Year", y = "Snow cover (mm)") +
+   scale_x_continuous(breaks = year)
+```
+
+
+
+
+#### Plot a histogram of the snow cover values
+
+```{r}
+ggplot(exercise.2, aes(snow.cover)) + geom_histogram(bins = 8) +
+   labs(title = "Histogram of october snow cover for Eurasia", x = "Snow cover (mm)") 
+```
+
+
+### Exercise 3
+
+   Usaremos el paquete `xlsx` para la lectura del fichero `NY.xls`. 
+
+```{r}
+require(xlsx)
+exercise.3 <- read.xlsx("NY.xls", 1)
+str(exercise.3)
+```
+
+   Comprobamos que ha leído las columnas 9 y 11 como `factor` debido a que tiene valores `NR` así que pasamos estos valores a `NA` y las columnas a tipo numérico:
+   
+```{r}
+exercise.3$Total.Precipitation..in.[exercise.3$Total.Precipitation..in. == "NR"] <- NA
+exercise.3$Max.24hr.Precipitation..in.[exercise.3$Max.24hr.Precipitation..in. == "NR"] <- NA
+```
+
+```{r}
+exercise.3 <- transform(exercise.3, Total.Precipitation..in. = 
+                        as.numeric(levels(exercise.3$Total.Precipitation..in.))
+                           [exercise.3$Total.Precipitation..in.],
+                        Max.24hr.Precipitation..in. = 
+                        as.numeric(levels(exercise.3$Max.24hr.Precipitation..in.))
+                           [exercise.3$Max.24hr.Precipitation..in.])
+```
+
+#### Convert ºF to ºC and `in` to `mm`.
+
+   Crearemos una función para pasar de grados Farenheit a grados centígrados, al igual que una función para pasar de pulgadas a milímetros.
+
+```{r}
+farenheitToCelsius <- function(x){
+   return( (x-32) * 5 / 9 )
+}
+
+temperatures.c <- apply(exercise.3[ ,2:8], 2, farenheitToCelsius)
+colnames(temperatures.c) <- c("Lowest.Temperature.C",
+                              "Highest.Temperature.C",
+                              "Warmest.Minimum.Temperature.C",
+                              "Coldest.Minimum.Temperature.C",
+                              "Average.Minimum.Temperature.C",
+                              "Average.Maximum.Temperature.C",
+                              "Mean.Temperature.C")  
+
+precipitation.mm <- exercise.3[ ,9:12] * 25.4
+colnames(precipitation.mm) <- c("Total.Precipitation.mm", "Total.Snowfall.mm",
+                                "Max.24hr.Precipitation.mm","Max.24hr.Snowfall.mm")
+
+exercise.3.c.mm <- data.frame(exercise.3[1], temperatures.c, precipitation.mm)
+```
+
+
+
+#### Plot `year` vs. `warmest minimum temperature`
+
+```{r}
+ggplot(exercise.3.c.mm, aes(Year, Warmest.Minimum.Temperature.C)) + 
+   geom_line(colour = 2) +
+   labs(title = "Warmest minimum temperature in years", x = "Year", 
+        y = "Temperature (Cº)")
+```
+
+
+#### Plot `year` vs. `warmest minimum temperature` and `coldest minimum temperature`
+
+
+```{r}
+ggplot(exercise.3.c.mm, aes(Year)) + 
+   geom_line(aes(y = Warmest.Minimum.Temperature.C, colour = "Warmest Min Temp")) +
+   geom_line(aes(y = Coldest.Minimum.Temperature.C, colour = "Coldest Min Temp")) +
+   scale_colour_manual(values=c("#0072B2", "#D55E00")) +
+   labs(title = "Minimum temperature in years", x = "Year", 
+     y = "Temperature (Cº)")
+```
+
