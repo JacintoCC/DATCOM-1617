@@ -1,0 +1,775 @@
+---
+title: "Ejercicios evaluación continua - Regresión"
+author: "Jacinto Carrasco Castillo"
+date: "9 de noviembre de 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Documentos/DATCOM-1617/Introducción-Ciencia-Datos/Regresión")
+```
+
+```{r}
+require(ggplot2)
+require(tidyr)
+require(MASS)
+require(kknn)
+require(akima)
+require(plot3D)
+require(MASS)
+require(kknn)
+```
+
+ Se ha considerado que los ficheros de datos están en la carpeta donde se ejecuta el archivo.
+   
+# Statistical Linear Regression - Laboratorio 1.pdf
+
+## Lectura en formato KEEL
+
+   Comenzamos leyendo el fichero `california.dat` en formato KEEL. Para acceder a los atributos
+ usaremos su nombre. Añadimos también el fichero al entorno para acceder directamente a sus 
+ atributos.
+   
+
+```{r}
+California <- read.csv("california.dat", comment.char="@")
+
+```
+
+ Asignación manual
+```{r}
+colnames(California) <- c("Longitude", "Latitude", "HousingMedianAge",
+                          "TotalRooms", "TotalBedrooms", "Population", 
+                          "Households", "MedianIncome", "MedianHouseValue")
+
+
+attach(California)
+```
+
+
+## Visualización inicial.
+
+   Comenzamos haciendo una visualización de la variable de salida con respecto a las demás. 
+Para ello, usaremos `ggplot2` y `tidyr` para agrupar los gráficos.
+
+
+```{r}
+California %>%
+  gather(-MedianHouseValue, key = "var", value = "value") %>% 
+  ggplot(aes(x = value, y = MedianHouseValue)) +
+    geom_point() +
+    facet_wrap(~ var, scales = "free") +
+    theme_bw()
+```
+
+
+    Observamos que no hay ninguna relación directa para ninguna de las variables pero se aprecia
+ cómo la variable `MedianIncome` tiene una relación algo mayor, con lo que no la descartaremos.
+ También se observa que los valores más altos del precio se encuentran en determinados 
+ intervalos para `Latitude` y `Longitude`, con lo que será interesante combinar estos aspectos
+ de algún modo.  
+ 
+ Crearemos un `data.frame` donde iremos almacenando los valores de $R^2$ ajustado y el valor
+ de `RMSE`.
+
+
+```{r}
+error.measures <- data.frame("R.squared" = numeric(0),
+                             "RMSE" = numeric(0))
+```
+
+
+ Calculamos en primer lugar un modelo de regresión lineal usando todas las variables:
+
+```{r}
+fit.lm.all <- lm(MedianHouseValue ~ . ,data=California)
+fit.lm.all
+summary.lm.all <- summary(fit.lm.all)
+summary.lm.all
+confint(fit.lm.all)
+
+error.measures["lm.all", ] <- c("R.squared" = summary.lm.all$adj.r.squared,
+                                "RMSE" = summary.lm.all$sigma)
+```
+
+
+### Eliminación de las variables menos influyentes
+ 
+  Partiendo del modelo completo, probamos a ir eliminando variables. Aunque según los p-valores
+ obtenidos no hay ninguna para la que no podamos descartar que no intervenga, el mayor p-valor
+ es de la variable `Households`, así que probamos a calcular su error cuando no la consideramos
+ en el modelo.
+
+```{r}
+fit.lm.woHhold <- lm(MedianHouseValue ~ . - Households ,data=California)
+fit.lm.woHhold
+summary.lm.woHhold <- summary(fit.lm.woHhold)
+summary.lm.woHhold
+confint(fit.lm.woHhold)
+
+error.measures["lm.woHhold", ] <- c("R.squared" = summary.lm.woHhold$adj.r.squared,
+                                    "RMSE" = summary.lm.woHhold$sigma)
+```
+
+
+
+ Observamos un pequeño aumento del error pero podríamos quitarla del modelo para mejorar su
+ interpretabilidad.  
+ Descartamos ir construyendo el modelo a partir de las variables más influyentes ya que para
+ todas las variables (salvo `Households`) el p-valor es menor a $2 \cdot 10^{16}$. 
+
+### Cambios en el modelo
+ Como veíamos en el modelo con todas las variables, estamos partiendo de un $R^2$ 
+ ajustado de $0.637$. Buscamos mejorar este valor haciendo modificaciones. 
+ En el modelo vemos como todos los valores
+ tienen un $p$-valor prácticamente 0 con lo que podemos rechazar la hipótesis de que no
+ intervengan en el modelo. Probamos sin embargo un modelo lineal que incluya únicamente
+ la variable con la que parecía tener mayor correlación:
+
+```{r}
+fit.lm.MI <- lm(MedianHouseValue ~ MedianIncome ,data=California)
+fit.lm.MI
+summary.lm.MI <- summary(fit.lm.MI)
+summary.lm.MI
+confint(fit.lm.MI)
+error.measures["lm.MI", ] <- c("R.squared" = summary.lm.MI$adj.r.squared,
+                                "RMSE" = summary.lm.MI$sigma)
+```
+
+
+   Observamos un importante retroceso al considerar únicamente esta variable. Probaremos usando
+ `MedianIncome` al cuadrado.
+
+```{r}
+fit.lm.MI2 <- lm(MedianHouseValue ~ MedianIncome + I(MedianIncome^2) ,data=California)
+fit.lm.MI2
+summary.lm.MI2 <- summary(fit.lm.MI2)
+summary.lm.MI2
+confint(fit.lm.MI2)
+error.measures["lm.MI2", ] <- c("R.squared" = summary.lm.MI2$adj.r.squared,
+                                "RMSE" = summary.lm.MI2$sigma)
+```
+
+
+    Debido a que seguimos perdiendo con respecto a usar todas las variables, descartaremos
+ usar únicamente este atributo.  
+    Usaremos ahora la localización. Probamos en primer lugar usando `Location` y `Latitude`,
+ aunque la relación que observamos en las gráficas no es lineal.
+
+```{r}
+fit.lm.LatLong <- lm(MedianHouseValue ~ Latitude + Longitude ,data=California)
+fit.lm.LatLong
+summary.lm.LatLong <- summary(fit.lm.LatLong)
+summary.lm.LatLong
+confint(fit.lm.LatLong)
+error.measures["lm.LatLong", ] <- c("R.squared" = summary.lm.LatLong$adj.r.squared,
+                                    "RMSE" = summary.lm.LatLong$sigma)
+
+ggplot(California, aes(x = Longitude , y = Latitude)) + geom_point() +
+   labs(title = "Latitude - Longitude, California", x = "Longitude", "Longitude")
+```
+
+```{r}
+df.fitted.LatLong <- data.frame(x = Latitude, y = Longitude, z = fit.lm.LatLong$fitted.values)
+
+par(mfrow = c(1,2))
+
+M <- mesh(seq(min(Latitude),max(Latitude), length.out = 30),
+          seq(min(Longitude),max(Longitude),length.out = 30))
+
+surf.pred <- matrix(predict.lm(fit.lm.LatLong, 
+                               data.frame(Latitude = c(M$x), Longitude = c(M$y))),
+                    ncol = 30, nrow = 30)
+scatter3D(Latitude, Longitude, MedianHouseValue, phi = 40, theta = 80)
+surf3D(M$x, M$y, surf.pred, phi = 40, theta = 80,
+       colvar = F, pch=2, surface=surf.pred , add = T)
+
+scatter3D(Latitude, Longitude, MedianHouseValue, phi = 40, theta = -20)
+surf3D(M$x, M$y, surf.pred, phi = 40, theta = -20,
+       colvar = F, pch=2, surface=surf.pred , add = T)
+
+par(mfrow = c(1,1))
+```
+
+
+    Como vemos, el resultado no es bueno. En la gráfica de `MedianIncome` con respecto
+ a las dos variables por separado se observan precios elevados en dos intervalos, con lo que 
+ para intentar recoger esta variabilidad tendríamos que usar una función de grado 4.
+
+
+```{r}
+
+
+fit.lm.LatLongPoly <- lm(MedianHouseValue ~ poly(Latitude, 4) + poly(Longitude, 4),
+                         data=California)
+fit.lm.LatLongPoly
+summary.lm.LatLongPoly <- summary(fit.lm.LatLongPoly)
+summary.lm.LatLongPoly
+confint(fit.lm.LatLongPoly)
+error.measures["lm.LatLongPoly", ] <- c("R.squared" = summary.lm.LatLongPoly$adj.r.squared,
+                                        "RMSE" = summary.lm.LatLongPoly$sigma)
+```
+
+
+ En la gráfica de la latitud y la longitud se observa un mapa con puntos de California
+ con una mayor concentración en lo que suponemos que son las zonas más pobladas que
+ coinciden con las zonas donde hay valores más altos. Como estamos aplicando modelos
+ lineales, observamos una correlación lineal en la gráfica. Debido a que los datos más
+ elevados están en la costa (esto es en la parte suroeste), quizá podríamos probar a 
+ incluir la variable `Longitude/Latitude`
+
+```{r}
+
+
+fit.lm.LatLongQ <- lm(MedianHouseValue ~ Latitude + Longitude + I(Longitude/Latitude),
+                         data=California) 
+fit.lm.LatLongQ
+summary.lm.LatLongQ <- summary(fit.lm.LatLongQ)
+summary.lm.LatLongQ
+confint(fit.lm.LatLongQ)
+error.measures["lm.LatLongQ", ] <- c("R.squared" = summary.lm.LatLongQ$adj.r.squared,
+                                        "RMSE" = summary.lm.LatLongQ$sigma)
+```
+
+Representación de este modelo
+```{r}
+df.fitted.LatLong <- data.frame(x = Latitude, y = Longitude, z = fit.lm.LatLongQ$fitted.values)
+M <- mesh(seq(min(Latitude),max(Latitude), length.out = 50),
+          seq(min(Longitude),max(Longitude),length.out = 50))
+surf.pred <- matrix(predict.lm(fit.lm.LatLongQ, 
+                               data.frame(Latitude = c(M$x), Longitude = c(M$y))),
+                    ncol = 50, nrow = 50)
+
+par(mfrow = c(1,2))
+scatter3D(Latitude, Longitude, MedianHouseValue, phi = 40, theta = 80)
+points3D(Latitude, Longitude,fit.lm.LatLongQ$fitted.values  , phi = 40, theta = 80,
+       colvar = F, pch=2, add = T)
+
+scatter3D(Latitude, Longitude, MedianHouseValue, phi = 40, theta = -20)
+points3D(Latitude, Longitude,fit.lm.LatLongQ$fitted.values  , phi = 40, theta = -20,
+         colvar = F, pch=2, add = T)
+
+par(mfrow = c(1,1))
+```
+
+
+ Como vemos, estamos ajustando pequeñas partes del modelo pero aún falta ponerlo en común
+ y mejorar el primer resultado. Probamos entonces a incluir en el modelo a la mediana de los
+ ingresos al cuadrado y los polinomios de la latitud y la longitud.
+
+```{r}
+
+
+fit.lm.Def <- lm(MedianHouseValue ~ poly(Latitude,4) + poly(Longitude,4) + 
+                    I(Longitude/Latitude) + 
+                    HousingMedianAge + TotalRooms + TotalBedrooms +
+                    Population + Households + 
+                    MedianIncome + I(MedianIncome^2),
+                 data=California) 
+fit.lm.Def
+summary.lm.Def <- summary(fit.lm.Def)
+summary.lm.Def
+confint(fit.lm.Def)
+error.measures["lm.Def", ] <- c("R.squared" = summary.lm.Def$adj.r.squared,
+                                "RMSE" = summary.lm.Def$sigma)
+```
+
+
+ Cuando tenemos el modelo completo vemos que el grado 4º para la variable Longitude
+ tiene un $p$-valor asociado mayor, con lo que la descartamos del modelo. 
+ El coeficiente para el grado 3º de la variable Longitude es muy elevado con lo que
+ dejamos únicamente Longitude y Longitude al cuadrado.
+ 
+```{r}
+
+
+fit.lm.Def2 <- lm(MedianHouseValue ~ poly(Latitude,4) +
+                    Longitude + I(Longitude^2) +
+                    HousingMedianAge + TotalRooms + TotalBedrooms +
+                    Population + I(Longitude/Latitude) +
+                    MedianIncome + I(MedianIncome^2),
+                 data=California) 
+fit.lm.Def2
+summary.lm.Def2 <- summary(fit.lm.Def2)
+summary.lm.Def2
+confint(fit.lm.Def2)
+error.measures["lm.Def2", ] <- c("R.squared" = summary.lm.Def2$adj.r.squared,
+                                 "RMSE" = summary.lm.Def2$sigma)
+```
+
+### Resumen
+
+```{r}
+error.measures
+```
+
+ El error es muy similar y tenemos menos variables con lo que consideraremos mejor a este 
+ modelo. En resumen, nos queda el modelo lineal para todas las variables salvo Household
+ como el más simple con una buena tasa de error y el que incluye el polinomio con los datos
+ de la latitud a la cuarta, las variables Longitude y MedianIncome al cuadrado y a la 
+ interacción entre Longitude y Latitude como el que tiene mejor tasa de error.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Statistical Linear Regression - Laboratorio 2.pdf
+
+### Obtención del modelo para un conjunto de datos
+
+```{r}
+fit.knn.all <- kknn(MedianHouseValue ~ ., California, California)
+names(fit.knn.all)
+
+fitted.knn.all <- fit.knn.all$fitted.values
+ggplot(data.frame(California, fitted  = fitted.knn.all), aes(x = MedianIncome)) +
+   geom_point(aes(y = MedianHouseValue)) + geom_point(aes(y = fitted), colour = "blue")
+```
+   
+ Debido a la cantidad de puntos no llegamos a distinguir si el ajuste es bueno o se 
+ produce una mayor distancia en otras dimensiones.
+
+### Funciones para comparar los modelos
+
+ Obtención del MSE
+```{r}
+MSE <- function(values, fitted.values){  
+   return(mean((values - fitted.values)^2))
+} 
+```
+
+
+ Obtención del RMSE
+```{r}
+RMSE <- function(values, fitted.values){  
+   return(sqrt(MSE(values,fitted.values)))
+}  
+```
+
+
+ Obtención del $R^2$ de un modelo
+```{r}
+R.squared <- function(values, fitted.values){
+   return(1 - sum((values - fitted.values)^2) / sum((values - mean(values))^2) )
+}
+```
+
+   Estimación del error
+```{r}
+RMSE.knn.all <- RMSE(MedianHouseValue, fitted.knn.all)
+R.sq.knn.all <- R.squared(MedianHouseValue, fitted.knn.all)
+   
+error.measures["knn.all", ] <- c("R.squared" = R.sq.knn.all,
+                                 "RMSE" = RMSE.knn.all)
+```
+
+
+ El error es mucho menor, aunque podemos pensar que se debe a un mayor sobreajuste, 
+ teniendo en cuenta que no estamos separando tampoco en datos de entrenamiento y de test.
+
+```{r}
+fit.knn.MI <- kknn(MedianHouseValue ~ MedianIncome , California, California)
+fitted.knn.MI <- fit.knn.MI$fitted.values
+
+RMSE.knn.MI <- RMSE(MedianHouseValue,fitted.knn.MI)
+R.sq.knn.MI <- R.squared(MedianHouseValue,fitted.knn.MI)
+
+error.measures["knn.MI", ] <- c("R.squared" = R.sq.knn.MI,
+                                "RMSE" = RMSE.knn.MI)
+
+```
+
+  Usando MedianIncome al cuadrado.
+
+```{r}
+fit.knn.MI2 <- kknn(MedianHouseValue ~ MedianIncome + I(MedianIncome^2), California, California)
+fitted.knn.MI2 <- fit.knn.MI2$fitted.values
+
+RMSE.knn.MI2 <- RMSE(MedianHouseValue,fitted.knn.MI2)
+R.sq.knn.MI2 <- R.squared(MedianHouseValue, fitted.knn.MI2)
+
+error.measures["knn.MI2", ] <- c("R.squared" = R.sq.knn.MI2,
+                                 "RMSE" = RMSE.knn.MI2)
+
+```
+
+
+ Usando `Location` y `Latitude`
+
+```{r}
+fit.knn.LatLong <- kknn(MedianHouseValue ~ Latitude + Longitude ,
+                        California, California)
+fitted.knn.LatLong <- fit.knn.LatLong$fitted.values
+
+RMSE.knn.LatLong <- RMSE(MedianHouseValue, fitted.knn.LatLong)
+R.sq.knn.LatLong <- R.squared(MedianHouseValue, fitted.knn.LatLong)
+
+error.measures["knn.LatLong", ] <- c("R.squared" = R.sq.knn.LatLong,
+                                     "RMSE" = RMSE.knn.LatLong)
+
+```
+
+ Aunque debemos comprobar que no se deba al sobreajuste, obtenemos un valor muy bueno
+ usando únicamente la latitud y la longitud. Probamos con el mejor modelo 
+ encontrado para el ajuste lineal
+
+
+
+```{r}
+fit.knn.Def2 <- kknn(MedianHouseValue ~ poly(Latitude,4) +
+                        Longitude + I(Longitude^2) +
+                        HousingMedianAge + TotalRooms + TotalBedrooms +
+                        Population + I(Longitude/Latitude) +
+                        MedianIncome + I(MedianIncome^2),
+                     California, California) 
+fitted.knn.Def2 <- fit.knn.Def2$fitted.values
+
+RMSE.knn.Def2 <- RMSE(MedianHouseValue, fitted.knn.Def2)
+R.sq.knn.Def2 <- R.squared(MedianHouseValue, fitted.knn.Def2)
+
+error.measures["knn.Def2", ] <- c("R.squared" = R.sq.knn.Def2,
+                                  "RMSE" = RMSE.knn.Def2)
+
+
+
+```
+
+De esta manera, tenemos los siguientes errores hasta el momento
+
+```{r}
+error.measures
+```
+
+# CROSS-VALIDATION
+
+## Validación cruzada para California. 
+
+```{r}
+name <- "california"
+
+```
+
+ Función para aplicar CV a lm
+```{r}
+# @name Run linear model in a fold
+#
+# @description Run linear model in a fold and get MSE error
+# @param i Fold number
+# @param x Dataset name
+# @param tt "test" if test error is wanted, "train" otherwise
+# @return MSE
+run_lm_fold <- function(i, x, tt = "test"){
+   # Read train file
+   file <- paste(x, "-5-", i, "tra.dat", sep="")
+   x_tra <- read.csv(file, comment.char="@")
+   
+   # Read test file
+   file <- paste(x, "-5-", i, "tst.dat", sep="")
+   x_tst <- read.csv(file, comment.char="@")
+   
+   # Number of imput attributes
+   In <- length(names(x_tra)) - 1
+   
+   # Rename attributes
+   names(x_tra)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tra)[In+1] <- "Y"
+   names(x_tst)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tst)[In+1] <- "Y"
+   
+   if(tt == "train")
+      test <- x_tra
+   else
+      test <- x_tst
+   
+   # Train linear model
+   fitMulti <- lm(Y ~ ., data = x_tra)
+   yprime <- predict(fitMulti,test)
+   
+   #MSE
+   return(MSE(test$Y, yprime))
+}
+
+lmMSEtrain <- mean(sapply(1:5, run_lm_fold, name, "train"))
+lmMSEtest <- mean(sapply(1:5, run_lm_fold,  name, "test"))
+
+```
+
+
+ Función para aplicar CV a KNN
+```{r}
+# @name Run k-nearest neighbours in a fold
+#
+# @description Run KNN in a fold and get MSE error
+# @param i Fold number
+# @param x Dataset name
+# @param tt "test" if test error is wanted, "train" otherwise
+# @return MSE
+run_knn_fold <- function(i, x, tt = "test"){
+   # Read train file
+   file <- paste(x, "-5-", i, "tra.dat", sep="")
+   x_tra <- read.csv(file, comment.char="@")
+   
+   # Read test file
+   file <- paste(x, "-5-", i, "tst.dat", sep="")
+   x_tst <- read.csv(file, comment.char="@")
+   
+   # Number of imput attributes
+   In <- length(names(x_tra)) - 1
+   
+   # Rename attributes
+   names(x_tra)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tra)[In+1] <- "Y"
+   names(x_tst)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tst)[In+1] <- "Y"
+   
+   if(tt == "train")
+      test <- x_tra
+   else
+      test <- x_tst
+   
+   # Train linear model
+   fitMulti <- kknn(Y ~ ., x_tra, test)
+   yprime <- fitMulti$fitted.value
+   
+   #MSE
+   return(MSE(test$Y, yprime))
+}
+
+knnMSEtrain <- mean(sapply(1:5, run_knn_fold, name, "train"))
+knnMSEtest <- mean(sapply(1:5, run_knn_fold,  name, "test"))
+
+```
+
+ Se observa un mejor resultado en KNN que en el modelo lineal, aunque observamos cómo
+ hay una mayor diferencia entre el train y el test en KNN (mayor ajuste) que en
+ el modelo lineal
+
+Aplicaremos ahora CV a los modelos probados anteriormente.  
+
+Función para aplicar CV a lm:
+
+```{r}
+# @name Run linear model in a fold
+#
+# @description Run linear model in a fold and get MSE error
+# @param i Fold number
+# @param x Dataset name
+# @param model Model to be applied
+# @return list with train and test MSE and R squared
+run_lm_fold <- function(i, x, model = "Y ~ ."){
+   # Read train file
+   file <- paste(x, "-5-", i, "tra.dat", sep="")
+   x_tra <- read.csv(file, comment.char="@")
+   
+   # Read test file
+   file <- paste(x, "-5-", i, "tst.dat", sep="")
+   x_tst <- read.csv(file, comment.char="@")
+   
+   # Number of imput attributes
+   In <- length(names(x_tra)) - 1
+   
+   # Rename attributes
+   names(x_tra)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tra)[In+1] <- "Y"
+   names(x_tst)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tst)[In+1] <- "Y"
+   
+   # Train linear model
+   fitMulti <- lm(model, data = x_tra)
+   predict.train <- predict(fitMulti, x_tra)
+   predict.test <- predict(fitMulti, x_tst)
+   
+   # MSE train
+   
+   return(c("MSE train" = MSE(x_tra$Y, predict.train),
+            "R.squared train" = R.squared(x_tra$Y, predict.train),
+            "MSE test" = MSE(x_tst$Y, predict.test),
+            "R.squared test" = R.squared(x_tst$Y, predict.test)))
+}
+
+run_lm_CV <- function(name, model = "Y ~ ."){
+   apply(sapply(1:5, run_lm_fold, name, model), 1, mean)
+}
+
+```
+
+   Variable donde iremos guardando el error
+```{r}
+error.measures <- data.frame("MSE train" = numeric(0),
+                             "R.squared train" = numeric(0),
+                             "MSE test" = numeric(0),
+                             "R.squared test" = numeric(0))
+
+```
+
+ Mostramos los nombres de las variables y su código:
+```{r}
+rbind(names(California)[-ncol(California)],
+      paste("X", 1:(ncol(California)-1), sep=""))
+
+```
+
+
+Error para LM
+```{r}
+error.measures["lm.all", ] <- run_lm_CV(name)
+error.measures["lm.woHhold", ] <- run_lm_CV(name, "Y ~ . - X7")
+error.measures["lm.MI", ] <- run_lm_CV(name, "Y ~ X8")
+error.measures["lm.LatLong", ] <- run_lm_CV(name, "Y ~ X1 + X2")
+error.measures["lm.Def2", ] <- run_lm_CV(name, "Y ~ X1 + I(X1^2) + poly(X2,4) + I(X1/X2) +
+                    X3 + X4 + X5 + X6 + X8 + I(X8^2)")
+
+```
+
+
+Función para aplicar CV a KNN
+
+```{r}
+# @name Run KNN in a fold
+#
+# @description Run KNN in a fold and get MSE error
+# @param i Fold number
+# @param x Dataset name
+# @param model Model to be applied
+# @return list with train and test MSE and R squared
+run_knn_fold <- function(i, x, model = "Y ~ ."){
+   # Read train file
+   file <- paste(x, "-5-", i, "tra.dat", sep="")
+   x_tra <- read.csv(file, comment.char="@")
+   
+   # Read test file
+   file <- paste(x, "-5-", i, "tst.dat", sep="")
+   x_tst <- read.csv(file, comment.char="@")
+   
+   # Number of imput attributes
+   In <- length(names(x_tra)) - 1
+   
+   # Rename attributes
+   names(x_tra)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tra)[In+1] <- "Y"
+   names(x_tst)[1:In] <- paste("X", 1:In, sep="")
+   names(x_tst)[In+1] <- "Y"
+   
+   # Train linear model
+   predict.train <- kknn(model, x_tra, x_tra)$fitted.values
+   predict.test <- kknn(model, x_tra, x_tst)$fitted.values
+   
+   # MSE train
+   
+   return(c("MSE train" = MSE(x_tra$Y, predict.train),
+            "R.squared train" = R.squared(x_tra$Y, predict.train),
+            "MSE test" = MSE(x_tst$Y, predict.test),
+            "R.squared test" = R.squared(x_tst$Y, predict.test)))
+}
+
+
+run_knn_CV <- function(name, model = "Y ~ ."){
+   apply(sapply(1:5, run_knn_fold, name, model), 1, mean)
+}
+
+```
+
+ Error del modelo para KNN
+
+```{r}
+error.measures["knn.all", ] <- run_knn_CV(name)
+error.measures["knn.woHhold", ] <- run_knn_CV(name, "Y ~ . - X7")
+error.measures["knn.MI", ] <- run_knn_CV(name, "Y ~ X8")
+error.measures["knn.LatLong", ] <- run_knn_CV(name, "Y ~ X1 + X2")
+error.measures["knn.Def2", ] <- run_knn_CV(name, "Y ~ X1 + I(X1^2) + poly(X2,4) + I(X1/X2) +
+                    X3 + X4 + X5 + X6 + X8 + I(X8^2)")
+
+```
+
+```{r}
+error.measures
+```
+
+
+ En vista de los resultados, podemos observar cómo se produce sobreajuste con el 
+ modelo más complejo en KNN, ya que obtiene un error muy bueno en entrenamiento y sin embargo
+ en test es superado por un modelo más simple, usando únicamente latitud y longitud.
+
+
+
+
+
+## Comparativa general entre distintos algoritmos
+
+```{r}
+# Leemos la tabla con los errores medios de test
+resultados <- read.csv("regr_test_alumnos.csv")
+tablatst <- cbind(resultados[,2:dim(resultados)[2]])
+colnames(tablatst) <- names(resultados)[2:dim(resultados)[2]]
+rownames(tablatst) <- resultados[,1]
+# Leemos la tabla con los errores medios de train
+resultados <- read.csv("regr_train_alumnos.csv")
+tablatra <- cbind(resultados[,2:dim(resultados)[2]])
+colnames(tablatra) <- names(resultados)[2:dim(resultados)[2]]
+rownames(tablatra) <- resultados[,1]
+
+```
+
+
+```{r}
+# lm (other) vs knn (ref)
+# + 0.1 porque wilcox R falla para valores == 0 en la tabla
+difs <- (tablatst[,1] - tablatst[,2]) / tablatst[,1]
+wilc_1_2 <- cbind(ifelse (difs<0, abs(difs)+0.1, 0+0.1), ifelse (difs>0, abs(difs)+0.1, 0+0.1))
+colnames(wilc_1_2) <- c(colnames(tablatst)[1], colnames(tablatst)[2])
+head(wilc_1_2)
+
+LMvsKNNtst <- wilcox.test(wilc_1_2[,1], wilc_1_2[,2], alternative = "two.sided", paired=TRUE)
+Rmas <- LMvsKNNtst$statistic
+pvalue <- LMvsKNNtst$p.value
+LMvsKNNtst <- wilcox.test(wilc_1_2[,2], wilc_1_2[,1], alternative = "two.sided", paired=TRUE)
+Rmenos <- LMvsKNNtst$statistic
+
+Rmas
+Rmenos
+pvalue
+
+```
+
+ El p-value es mayor que 0.05 luego no podemos descartar la hipótesis nula, es decir,
+ no hemos encontrado diferencias significativas entre los dos algoritmos.
+
+### Comparativa múltiple
+```{r}
+test_friedman <- friedman.test(as.matrix(tablatst))
+test_friedman
+```
+
+ El p-valor es menor que 0.05 luego rechazamos la hipótesis nula de que todos
+ los algoritmos tengan igual media.
+```{r}
+tam <- dim(tablatst)
+groups <- rep(1:tam[2], each=tam[1])
+pairwise.wilcox.test(as.matrix(tablatst), groups, p.adjust = "holm", paired = TRUE)
+```
+
+ Ningún p-valor es menor a 0.05 luego no podemos rechazar ninguna hipótesis nula
+ con un 95% de significación, aunque se observa cómo la probabildad de 
+ obtener estos datos siendo el primer algoritmo y el tercero igual de eficaces
+ es sólo 0.081.
+
+ Observaremos si hay diferencia entre train y test para KNN
+```{r}
+traVStstKNN <- wilcox.test(cbind(tablatra[ ,2], tablatst[ ,2]))
+traVStstKNN
+```
+
+Como era de esperar en un método como KNN, existen diferencias entre los resultados
+ de entrenamiento y los de test.

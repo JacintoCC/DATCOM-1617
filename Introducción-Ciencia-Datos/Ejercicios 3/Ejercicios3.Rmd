@@ -1,5 +1,5 @@
 ---
-title: "Ejercicios3"
+title: "Ejercicios 3"
 author: "Jacinto Carrasco Castillo"
 date: "8 de noviembre de 2016"
 output: pdf_document
@@ -7,7 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-setwd("/mnt/DATA/Universidad/1º MCD/Introducción a la Ciencia de Datos/IntroducciónProgramaciónR/Ejercicios 3")
+ setwd("~/Documentos/DATCOM-1617/Introducción-Ciencia-Datos/Ejercicios 3")
 ```
 
 
@@ -558,27 +558,30 @@ table(levels.frost)
 
 
 * Vamos a volver a utilizar el datasets `mtcars`.  Ordena este data set de forma ascendente según
-su valo de `hp`. PISTA: `with()`
+su valo de `hp`. PISTA: `with()`  
+
+El comando `with` nos sirve para acceder dentro de ese entorno a los atributos de `mtcars`
+directamente.
 
 ```{r}
-sort.hp <- mtcars[order(mtcars$hp), ]
+sort.hp <- with(mtcars, mtcars[order(hp), ])
 ```
 
 * Hazlo ahora de forma descendente
 ```{r}
-sort.hp <- mtcars[order(mtcars$hp, decreasing = T), ]
+sort.hp <- with(mtcars, mtcars[order(hp, decreasing = T), ])
 ```
 
 * Calcula la media de la columna mpg. 
 ```{r}
-mean(mtcars$mpg)
+with(mtcars, mean(mpg))
 ```
 
 *Calcula la media de mpg para aquellos datos cuyo valor de hp sea menor que 150 y por separado para aquellos cuyo valor de hp sea mayor o igual a 150
 
 ```{r}
-mean.low <- mean(mtcars$mpg[mtcars$hp < 150])
-mean.high <- mean(mtcars$mpg[mtcars$hp >= 150])
+mean.low <- with(mtcars, mean(mpg[hp < 150]))
+mean.high <- with(mtcars, mean(mpg[hp >= 150])) 
 ```
 
 

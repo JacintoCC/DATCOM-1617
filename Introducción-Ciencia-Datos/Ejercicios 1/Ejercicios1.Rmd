@@ -7,6 +7,7 @@ output: pdf_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Documentos/DATCOM-1617/Introducción-Ciencia-Datos/Ejercicios 1")
 ```
 
 # 1. R interactivo
@@ -24,6 +25,9 @@ seq(1, by=2, length.out = 10)
 ```
 
 ### Busca en la ayuda qué hace la función `seq()`. Describe qué hace. Utilízala para crear números del 1 al 30 con un incremento de 0.5. ¿Qué otros parámetros te ofrece la función `seq()`? Utilízalos en un ejemplo.
+
+La función `seq` genera secuencias numéricas. Los parámetros que podemos pasarle son
+`from` y `to` para definir los extremos y `by` para indicar el incremento en cada paso.
 
 ```{r}
 seq(from = 1, to = 30, by = 0.5)
@@ -108,12 +112,14 @@ Hay varias formas de entender este enunciado, o bien obteniendo una secuencia de
 ```{r}
 seq(1, 5, length.out = 9)
 runif(9, min = 1, max = 5)
+sample(1:5, size = 9, replace = T)
 ```
 
 
 ### Busca que hace la función `sequence()`. ¿Cuál es la diferencia con la función `seq()`?
 
-   La función `sequence(n)` genera el vector `1:n`. Sería equivalente a la función `seq(1, n)`. La función `seq` permite generar una secuencia a partir de múltiples parámetros.
+   La función `sequence(n)` genera el vector `1:n`. Sería equivalente a la función `seq(1, n)`. La función `seq` permite generar una secuencia a partir de múltiples parámetros. La función
+`sequence(x)` concatena los vectores `1:n` para cada `n` en el vector `x`.
 
 ### Crea un vector numérico utilizando la función `c()`
 
@@ -142,8 +148,10 @@ as.numeric(z)
 
 ### Busca en la ayuda que hace la función `scan()`. Utilízala para leer un fichero cualquiera y asigna la lectura a un vector “z”.
 
+   La función `scan` lee una estructura de datos o fichero.
+   
 ```{r}
-scan("iris.csv", what = character(), sep =";")
+z <- scan("iris.csv", what = character(), sep =";")
 ```
 
 

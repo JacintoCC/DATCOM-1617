@@ -1,0 +1,149 @@
+---
+title: "Clasificación"
+author: "Jacinto Carrasco Castillo"
+date: "16 de noviembre de 2016"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Documentos/DATCOM-1617/Introducción-Ciencia-Datos/Clasificación")
+require(class)
+require(caret)
+require(ISLR)
+```
+
+# KNN
+
+
+   Lectura y formateo de los datos:
+   
+```{r}
+# import the CSV file
+wbcd <- read.csv("wisc_bc_data.csv", stringsAsFactors = FALSE)
+# examine the structure of the wbcd data frame
+str(wbcd)
+# drop the id feature
+wbcd <- wbcd[,-1]
+# table of diagnosis
+table(wbcd$diagnosis)
+# recode diagnosis as a factor
+wbcd$diagnosis <- factor(wbcd$diagnosis, levels = c("B", "M"),
+labels = c("Benign", "Malignant"))
+```
+
+   Primera inspección de los datos 
+```{r}
+# table or proportions with more informative labels
+round(prop.table(table(wbcd$diagnosis)) * 100, digits = 1)
+# summarize three numeric features
+summary(wbcd[c("radius_mean", "area_mean", "smoothness_mean")])
+```
+
+   Función de normalización
+```{r}
+# create normalization function
+normalize <- function(x) {
+   return ((x - min(x)) / (max(x) - min(x)))
+}
+# test normalization function - result should be identical
+normalize(c(1, 2, 3, 4, 5))
+normalize(c(10, 20, 30, 40, 50))
+
+```
+
+   Normalización de los datos
+```{r}
+# normalize the wbcd data
+wbcd_n <- as.data.frame(lapply(wbcd[,2:31], normalize))
+# confirm that normalization worked
+summary(wbcd_n$area_mean)
+# Visualize data
+plot(wbcd[,2:5])
+
+plot(wbcd_n[,1:4], col=wbcd[,1])
+# Calculate correlation
+cor(wbcd[,2:5])
+
+```
+
+
+   Partición en datos de entrenamiento y test
+```{r}
+index.train <- sample(nrow(wbcd_n), size = 0.8*nrow(wbcd_n))
+
+# create training and test data
+wbcd.train <- wbcd_n[index.train, ]
+wbcd.test  <- wbcd_n[-index.train, ]
+# create labels for training and test data
+wbcd.train.labels <- wbcd[index.train, 1]
+wbcd.test.labels <- wbcd[-index.train, 1]
+```
+
+## Exercise 1
+
+Try with different $k$ choices and do a quick comparison. 
+You can draw a plot to show the results.
+
+```{r}
+knnTrainTest <- function(train, test, tra.label, tst.label, k){
+   train.pred <- knn(train, train, cl = tra.label , k = k)
+   train.acc <- sum(train.pred == tra.label)/nrow(train)
+
+   test.pred <- knn(train, test, cl = tra.label , k = k)
+   test.acc <- sum(test.pred == tst.label)/nrow(test)
+
+   return(c("Train" = train.acc,"Test"= test.acc))
+}
+
+results <- sapply(1:23, function(k) knnTrainTest(wbcd.train, wbcd.test, 
+                                                 wbcd.train.labels, wbcd.test.labels,
+                                                 k))
+   
+df <- data.frame("K" = rep(1:23, 2), Err = 1 - c(results[1, ], results[2,]), 
+                 Type = factor(c(rep("Train",23), rep("Test", 23)), 
+                               levels = c("Train", "Test"), ordered = T))
+ggplot(data = df, aes(x = K, y = Err, fill = Type, order = Type)) + 
+   geom_bar(position = "dodge" , stat = "identity") + 
+   labs(title = "Error Train y Test KNN", y = "Error")
+```
+
+   Mostramos una gráfica con el error (para observar mejor las diferencias que usando 
+   la *accuracy*) de entrenamiento y de test y se aprecia cómo hay un gran sobreajuste
+   cuando $k$ es menor que 5 al ser un alto error de test y cómo este error va bajando 
+   hasta mantenerse estable una vez $k > 12$. El error de entrenamiento también crece 
+   un poco cuando $k > 13$, con lo que deberíamos considerar usar $k = 13$.
+   
+# Regresión logística
+
+
+## Exercise 2: Using the Smarket dataset. Perform 10 fold-cv with logistic regression.
+
+
+```{r}
+attach(Smarket)
+
+names(Smarket)
+summary(Smarket)
+pairs(Smarket,col=Smarket$Direction)
+```
+
+   Usaremos el paquete `caret` para este ejercicio. Para hacer validación cruzada con 10
+   particiones, indicamos como método de control `trainControl(method = "cv", number = 10)`.
+   Observamos una buena medida de *accuracy* con lo que estamos rebajando el sobreajuste.
+   
+```{r, warning=F}
+train <- Year < 2005
+
+glmFit <- train(Smarket[train, -9], y = Smarket[train, 9],
+                method = "glm",
+                preProcess = c("center", "scale"),
+                tuneLength = 10,
+                trControl = trainControl(method = "cv", number = 10))
+
+pred <- predict(glmFit, newdata = Smarket[!train, -9])
+accuracy <- sum(pred == Smarket[!train, 9])/length(pred)
+accuracy
+```
+

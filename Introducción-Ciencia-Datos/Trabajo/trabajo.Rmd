@@ -1,0 +1,1496 @@
+---
+title: "Trabajo integrador - Introducción a la Ciencia de Datos"
+author: "Jacinto Carrasco Castillo"
+date: "27 de diciembre de 2016"
+output: pdf_document
+toc: true
+---
+
+```{r setup, include=FALSE}
+setwd("~/Documentos/DATCOM-1617/Introducción-Ciencia-Datos/Trabajo")
+require(ggplot2)
+require(tidyr)
+require(ggbiplot)
+require(kknn)
+require(class)
+require(caret)
+require(moments)
+require(MASS)
+```
+\newpage
+# Análisis de datos
+
+## Análisis de los datos de regresión.
+
+```{r}
+forestFires <- read.csv("forestFires/forestFires.dat", 
+                        header = F, comment.char = "@")
+names.forestFires <- c("X", "Y", "Month", "Day", "FFMC", "DMC", "DC", "ISI", "Temp", 
+                       "RH", "Wind", "Rain", "Area")
+colnames(forestFires) <- names.forestFires
+attach(forestFires)
+```
+
+
+
+### Descripción de la base de datos
+
+La base de datos para el problema de regresión es *Forest Fires*. En este problema
+disponemos de diversos datos metereológicos y relativos al terreno y la vegetación durante 
+incendios en el parque natural de Montesinho, situado en el noreste de Portugal. La
+variable de salida es la extensión quemada. Indicamos las variables disponibles en
+el modelo y sus unidades.
+
+  *  Coordenada X en el mapa del parque (1-9)
+  *  Coordenada Y en el mapa del parque (2-9)
+  *  Mes del año en el que se produce el incendio
+  *  Día de la semana en el que se produce el incendio
+  *  FFMC (*Fine Fuel Moisture Code*), combustible en la superficie, importante en la 
+  probabilidad de inicio del incendio y en la propagación.
+  *  DMC (*Duff moisture code*), materia orgánica en una capa poco profunda
+  *  DC (*Drought code*), capa profunda de materia orgánica
+  *  ISI (*Initial spread index*) combina FFMC y velocidad del viento.
+  *  Temperatura ($Cº$)
+  *  Humedad relativa ($\%$)
+  *  Velocidad del viento ($Km/h$)
+  *  Lluvia tenida lugar media hora antes del incendio ($mm/mm^2$)
+  *  Área quemada: Variable de salida, área quemada en el bosque ($ha$)  
+
+### Generación de hipótesis
+
+Las hipótesis que podemos realizar antes de observar los datos son:
+
+ * Sin más información, no estamos en condiciones de realizar hipótesis sobre la relación
+ entre las coordenadas de los incendios y su extensión.
+ * El mayor número de incendios así como los incendios más graves se producen en verano.
+ * Se espera un mayor número de incendios durante el fin de semana debido al mayor número
+ de excursionistas.
+ * A mayor sean los índices del FWI, esperamos mayor extensión en los incendios al
+ haber más cantidad de combustible disponible para arder, una mayor propagación
+ y una mayor dificultad para la extinción.
+ * A mayor temperatura y velocidad se espera una mayor dificultad para extinguir
+ los incendios. 
+ * Con mayor humedad relativa y lluvia esperaremos incendios de menor extensión.
+
+ 
+### Trabajo con el conjunto de datos
+
+   Comenzamos mostrando la estructura del `data.frame`:
+
+```{r}
+str(forestFires)
+```
+
+
+   * Las variables `X` e `Y` son de tipo entero. El parque natural ha sido dividido en
+   cuadrantes. La variable `X` toma valores del 1 al 9 y la variable `Y` toma valores del
+   2 al 9.
+   * `Month` es de tipo entero y se corresponde con los 12 meses del año.
+   * `Day` es de tipo entero, toma valores del 1 al 7, que se corresponde con los días de 
+   la semana.
+   * Las variables del FWI son de tipo numérico, así como las variables metereológicas.
+   * La variable `RH` toma valores enteros aunque su amplitud es lo suficientemente grande como
+   para tratarlos de igual manera que si fuesen de tipo numérico.
+   * Debemos ser conscientes de que el índice ISI combina el índice FFMC y la velocidad del
+   viento.
+
+
+  Mostramos ahora un resumen del conjunto de datos. Como todos los
+  datos son numéricos, el resumen incluirá para todos las variables los valores
+  mínimo y máximo, media, mediana, cuartiles y la desviación típica.
+ 
+```{r}
+summary(forestFires)
+sapply(forestFires, sd)
+```
+
+   Las variables interesantes para describir con los datos obtenidos son las
+numéricas. En concreto, para variables como la lluvia y el área en el primer cuartil
+todos los datos son 0. Esto nos indica que la distribución de estas dos variables
+están sesgadas a la izquierda. Además, la alta desviación típica de la variable de 
+salida indica que habrá valores muy alejados de la media. 
+Para las demás variables las correspondientes medias y
+medianas son cercanas con lo que esperaremos distribuciones más simétricas.  
+   Comprobamos si hay algún valor `NA` en nuestro conjunto de datos:
+
+```{r}
+anyNA(forestFires)
+```
+
+   Mostramos ahora la distribución de las variables para entender mejor los datos de
+   los que disponemos:
+   
+
+```{r fig.align='center', fig.width=3, fig.height=2}
+ggplot(forestFires, aes(X,Y)) + 
+   geom_point(color = densCols(data.frame(X,Y), 
+                               colramp = colorRampPalette(heat.colors(100)))) 
+ggplot(forestFires, aes(Month)) + geom_histogram(bins = 12)
+ggplot(forestFires, aes(Day)) + geom_histogram(bins = 7)
+ggplot(forestFires, aes(FFMC)) + geom_histogram()
+ggplot(forestFires, aes(DMC)) + geom_histogram()
+ggplot(forestFires, aes(DC)) + geom_histogram()
+ggplot(forestFires, aes(ISI)) + geom_histogram()
+ggplot(forestFires, aes(Temp)) + geom_histogram()
+ggplot(forestFires, aes(RH)) + geom_histogram()
+ggplot(forestFires, aes(Wind)) + geom_histogram()
+ggplot(forestFires, aes(Rain)) + geom_histogram()
+ggplot(forestFires, aes(Area)) + geom_histogram()
+```
+
+   Hasta ahora hemos visto únicamente las distribuciones de los datos de los que disponemos,
+   no su influencia en la variable de salida, con lo que podremos únicamente describir
+   su relevancia en cuanto al número de incendios, no así la extensión. Las apreciaciones
+   más relevantes que se pueden realizar son el mayor número de incendios en los meses de
+   agosto y septiembre y en menor medida en marzo y julio con respecto al resto de meses,
+   el mayor número de incendios también de viernes a domingo, aunque la diferencia es menor
+   con respecto a los demás días que para los meses. Para los valores de temperatura, 
+   humedad relativa y viento nos encontramos con distribuciones que se asemejan a la normal,
+   lo que nos hace pensar que no son tan influyentes para que se origine un fuego aunque
+   deben influir en la extensión de los incendios. El valor que sí influye es el de la
+   lluvia, pues la mayoría de datos registrados tienen un valor de lluvia 0. Pero sin duda,
+   lo más relevante es que la inmensa mayoría de datos tienen un valro de área 
+   quemada 0, con lo que nos será más difícil realizar una regresión de manera correcta
+   y que no obtengamos simplemente un valor 0 para todos los datos de entrada.  
+   Mostramos ahora gráficos que relacionen la variable de salida con las variables de
+   entrada para ver si las hipótesis realizadas previamente son sostenidas por los datos.
+   En estos gráficos obviamos las dos instancias con un valor de área quemada
+   excesivamente alto, para que así se aprecie algo mejor la relación entre la variable
+   de salida y las de entrada y no se vea distorsionada por estos dos *outlayers*. 
+   
+   
+   
+### Feature engineering 
+```{r}
+forestFires[Area < 300, ] %>%
+  gather(- Area, key = "var", value = "value") %>% 
+  ggplot(aes(x = value, y = Area)) +
+    geom_point() +
+    facet_wrap(~ var, scales = "free") +
+    theme_bw()
+```
+
+
+   Viendo el área quemada con respecto a las distintas variables comprobamos que 
+   las hipótesis realizadas en un principio no se corresponden tanto con los
+   datos como nos gustaría, y es que los incendios de mayor envergadura no 
+   se encuentran en valores extremos, sino que siguen la distribución del 
+   número de incendios. Aunque sí veíamos que influía en el número de incendios, 
+   el que sea fin de semana o no no es tan relevante para la superficie quemada.
+   El mes sí que es importante, con lo que podemos pensar en incluir una 
+   variable que recoja si estamos en verano o no. La humedad relativa, la
+   temperatura y el viento siguen la distribución del número de incendios, 
+   con lo que no podemos sacar mucho más.
+   
+   
+```{r}
+forestFires$Summer <- Month %in% 6:9
+```
+
+
+Basándonos en la fuente aportada sobre este sistema de incendios, creamos la variable `BUI`, que representa
+el combustible disponible. Combina el `DMC` y el `DC` mediante una media armónica. 
+
+```{r}
+calculate_BUI <- function(DMC, DC){
+   0.8*DMC*DC / (DMC + 0.4 * DC)
+}
+
+forestFires$BUI <- calculate_BUI(DMC, DC)
+```
+
+Calculamos también el índice `FWI`, el cual representa la intensidad potencial del fuego. No debemos considerar
+*a priori* esta variable como la más importante del modelo únicamente porque comparta nombre con el 
+sistema de índices, como se indica en la descripción de dicho sistema.
+
+```{r}
+calculate_FWI <- function(BUI, ISI){
+   D <- ifelse(BUI < 80, 0.626*BUI^0.809 + 2, 1000/(25 + 108.64 * exp(-0.023*BUI)))
+   arg.log <- 0.1 * ISI * D
+   
+   log.FWI <- 2.72 * (0.434 * log(arg.log))^0.647
+   FWI <- ifelse(arg.log < 1, arg.log, exp(log.FWI))
+}
+
+forestFires$FWI <- calculate_FWI(forestFires$BUI, forestFires$ISI)
+```
+
+```{r, eval=TRUE, include=FALSE}
+detach(forestFires)
+attach(forestFires)
+```
+
+```{r  fig.height=3}
+forestFires[Area < 300,c("BUI","FWI","Summer","Area") ] %>%
+  gather(-Area, key = "var", value = "value") %>% 
+  ggplot(aes(x = value, y = Area)) +
+    geom_point() +
+    facet_wrap(~ var, scales = "free") +
+    theme_bw()
+```
+
+
+### Fuentes
+
+[Historia del sistema FWI](https://www.frames.gov/files/6014/1576/1411/FWI-history.pdf)
+
+```{r include=F, eval=T}
+detach(forestFires)
+```
+
+\newpage
+## Análisis de los datos de clasificación
+
+ Comenzamos leyendo los datos:
+ 
+```{r}
+contraceptive <- read.csv("contraceptive/contraceptive.dat", 
+                          header = F, comment.char = "@")
+names.contraceptive <- c("Age", "W_Education", "H_Education", "Children", 
+                         "W_Religion", "W_Working", "H_Occupation", 
+                         "SoL", "Exposure", "Method")
+colnames(contraceptive) <- names.contraceptive
+contraceptive <- transform(contraceptive, 
+                           W_Education = factor(W_Education, ordered = T),
+                           H_Education = factor(H_Education, ordered = T),
+                           W_Religion = as.factor(W_Religion),
+                           W_Working = as.factor(W_Working),
+                           H_Occupation = as.factor(H_Occupation),
+                           SoL = as.factor(SoL),
+                           Exposure = as.factor(Exposure),
+                           Method = as.factor(Method))
+attach(contraceptive)
+```
+
+### Descripción de la base de datos
+
+   Este conjunto de datos es un subconjunto de una encuesta sobre el uso de métodos
+   anticonceptivos en Indonesia en 1987 realizada a mujeres casadas (parejas heterosexuales).
+   Los datos son en su mayoría de tipo categórico.
+   
+* Edad de la mujer (`Age`).
+* Educación de la mujer categorizada del 1 (baja) al 4 (alta) (`W_Education`).
+* Educación del hombre categorizada de igual manera (`H_Education`).
+* Número de hijos (`Children`).
+* Religión de la mujer (`W_Religion`)- 0: No islámica, 1: islámica.
+* Trabajando (`W_Working`): Variable binaria acerca de si la mujer está trabajando 
+actualmente o no.
+* Ocupación del hombre (`H_Occupation`) dividida en cuatro categorías.
+* *Status* social (`SoL`) categorizada del 1 (bajo) al 4 (alto)
+* Exposición mediática: Variable binaria dividida en *Good*$=0$ ó *Not Good*$=1$.
+* Método anticonceptivo usado - Variable de salida. Las categorías correspondientes 
+son: 1 - No usa, 2 - Método a largo plazo, 3 - Método a corto plazo. 
+
+```{r}
+str(contraceptive)
+```
+
+
+```{r}
+summary(contraceptive)
+sapply(contraceptive[ ,c("Age", "Children")], sd)
+```
+
+   Para este conjunto de datos se obtienen los mismos valores que en el caso anterior
+   para las variables `Age` y `Children` mientras que para las demás, categóricas,
+   se indica únicamente el número de elementos de cada clase. 
+
+
+### Generación de hipótesis
+
+La hipótesis que podemos realizar de manera general es que el uso de anticonceptivos
+en Indonesia en 1987 no seguirá unos patrones distintos a los de una sociedad
+occidental hoy en día.
+
+* Se esperará un mayor uso de métodos anticonceptivos en parejas jóvenes 
+sin trabajo debido a una mayor inestabilidad económica.
+* No conocemos a qué se refiere con exposición pública así que no 
+tendremos en cuenta a la hora de generar nuevas variables este dato. Sin 
+embargo, por la fecha en la que fueron tomados los datos, podemos pensar
+que la presión ejercida sobre las mujeres iba en la dirección de tener 
+hijos.
+* Los métodos anticonceptivos a largo plazo se esperarán en parejas mayores de una
+edad avanzada, ya con hijos. Esta hipótesis se plantea ya que las parejas mayores
+no querrán tener más hijos de los que ocuparse por lo que estarán dispuestos a
+someterse a intervenciones quirúrgicas como una ligadura de trompas o una vasectomía.
+* También en parejas jóvenes que estén trabajando se puede esperar un mayor uso
+de métodos anticonceptivos a largo plazo como el DIU, considerando que han planificado
+su vida y que un embarazo, debido a la discriminación laboral sufrida por las mujeres
+(mayor si consideramos el año en el que se obtuvieron los datos), 
+puede significar incluso el final de la trayectoria laboral. 
+* La renuncia a los métodos anticonceptivos es esperable por una parte en parejas
+con varios hijos (si se tienen ya muchos hijos es porque se ha descartado el 
+uso de anticonceptivos anteriormente) o en parejas en edad adulta sin hijos o con 
+menos hijos de lo habitual.
+* Los métodos anticonceptivos a corto plazo (preservativos, píldoras anticonceptivas)
+serán más habituales las parejas que estén más dispuestas a tener hijos en un futuro
+cercano, que serían fundamentalmente jóvenes.
+* Debido a que el único dato sobre la religión que tenemos es si la mujer de la pareja
+es musulmana o no, debemos esperar un menor uso de anticonceptivos entre este grupo 
+de la población, puesto que en el grupo no musulmán se incluirán también personas 
+que no profesen ninguna religión y por tanto no estén bajo unas doctrinas que 
+señalen a los métodos anticonceptivos como contrarios a lo correcto y moral.
+
+
+### Trabajo con el conjunto de datos
+
+Comenzamos buscando si hay valores perdidos en el conjunto de datos.
+
+```{r}
+anyNA(contraceptive)
+```
+
+
+```{r fig.align='center', fig.width=3, fig.height=2}
+ggplot(contraceptive, aes(Age)) + geom_histogram(bins = 30)
+ggplot(contraceptive, aes(W_Education)) + geom_bar()
+ggplot(contraceptive, aes(H_Education)) + geom_bar()
+ggplot(contraceptive, aes(Children)) + geom_histogram(bins = 15)
+ggplot(contraceptive, aes(W_Religion)) + geom_bar()
+ggplot(contraceptive, aes(H_Occupation)) + geom_bar()
+ggplot(contraceptive, aes(SoL)) + geom_bar()
+ggplot(contraceptive, aes(Exposure)) + geom_bar()
+ggplot(contraceptive, aes(Method)) + geom_bar()
+```
+
+   Al igual que con los datos de regresión, únicamente vemos ahora la distribución de 
+las variables del conjunto de datos. 
+Sobre la distribución de la edad, realizamos un test de Kolmogorov-Smirnov para ver si 
+sigue una distribución uniforme, 
+hipótesis que descartamos. Entonces, si nos fijamos en la forma de la distribución, 
+encontramos un menor número de muestras
+de mujeres casadas para menores de 20 años y también menor (aunque en menor 
+proporción) para mayores de 38 años.
+
+```{r}
+ks.test(Age, "punif", min(Age), max(Age))
+```
+
+En cuanto a la educación, encontramos un mayor número de muestras conforme se aumenta
+el nivel de educación tanto de la mujer,
+como del marido. Ocurre lo mismo con el nivel de vida. A primera vista ni la religión 
+ni la exposición nos van a resultar
+determinantes debido a los pocos datos que tenemos de una de las dos clases en 
+comparación, igual ocurre con la clase 4 de la
+ocupación del marido. La gráfica con el número de hijos nos indica que lo habitual es 
+tener hasta 5 hijos. Por último, 
+en cuanto a la variable de salida observamos una mayor proporción de mujeres que
+no utilizan métodos anticonceptivos mientras que la menor proporción se encuentra
+entre las que usan métodos a corto plazo. Sin embargo, a diferencia de los datos
+del conjunto del problema de regresión, las categorías no se encuentran tan
+desbalanceadas.
+
+### Feature engineering 
+
+Aunque en este caso no se ha encontrado una fuente tan descriptiva del conjunto de 
+datos como en el caso anterior, en base a la información de la que ya disponemos, 
+como el número de hijos, podemos realizar una clasificación en función del número de 
+hijos en varias categorías que puede resultar más eficaz a la hora de realizar
+una clasificación:
+
+```{r fig.align='center',fig.width=3, fig.height=2}
+quantile(Children)
+contraceptive$Children.cat <- cut(Children, c(0,1,3,5,16), include.lowest = T,
+                                  labels =  c("No", "Few", "Some", "Many"),
+                                  right = F)
+ggplot(contraceptive, aes(Children.cat)) + geom_bar()
+```
+
+```{r include=FALSE, eval=T}
+detach(contraceptive)
+attach(contraceptive)
+```
+
+
+Ahora tenemos unas clases más balanceadas para la clasificación. 
+
+```{r include=FALSE, eval=T}
+detach(contraceptive)
+```
+
+
+
+
+
+
+
+
+
+
+
+\newpage
+# Regresión
+
+```{r include=FALSE, eval=T}
+attach(forestFires)
+```
+
+
+```{r eval=T, include=F}
+#' @description Get the associated MSE for predicted values
+#' 
+#' @name MSE MSE for data
+#' @param values Original values
+#' @param fitted.values Fitted values of data
+#' @return MSE 
+MSE <- function(values, fitted.values){  
+   return(mean((values - fitted.values)^2))
+} 
+
+#' @description Get the associated RMSE for predicted values
+#' 
+#' @name RMSE RMSE for data
+#' @param values Original values
+#' @param fitted.values Fitted values of data
+#' @return RMSE 
+RMSE <- function(values, fitted.values){  
+   return(sqrt(MSE(values,fitted.values)))
+} 
+
+#' @description Get the adjusted R squared measure of error 
+#' 
+#' @name R.squared R squared
+#' @param values Original values
+#' @param fitted.values Fitted values of data
+#' @return R squared
+R.squared <- function(values, fitted.values){
+   return(1 - sum((values - fitted.values)^2) / sum((values - mean(values))^2) )
+}
+
+#' @description Read KEEL partitions 
+#' 
+#' @name file.name Name file
+#' @param num.CV Number of partitions
+#' @param colnames Column names
+#' @return List with training partitions in a list and test partitions in 
+#'         another list.
+load_KEEL_CV_files <- function(file.name, num.CV, colnames){
+   partition <- list()
+   partition$tra <- list()
+   partition$tst <- list()
+   
+   for(i in 1:num.CV){
+      # Read train file
+      file <- paste(file.name, "-", num.CV, "-", i, "tra.dat", sep="")
+      partition$tra[[i]] <- read.csv(file, comment.char="@", header = F,
+                                     col.names = colnames)
+      
+      # Read test file
+      file <- paste(file.name, "-", num.CV, "-", i, "tst.dat", sep="")
+      partition$tst[[i]] <- read.csv(file, comment.char="@", header = F, 
+                                     col.names = colnames)
+   }
+   
+   return(partition)
+}
+```
+
+Puesto que añadiremos al modelo las variables propuestas en la primera parte del 
+trabajo, comenzamos leyendo, cargando y modificando las particiones del repositorio 
+KEEL:
+
+
+```{r}
+forestFires.partition <- load_KEEL_CV_files("forestFires/forestFires", 5,
+                                            names.forestFires)
+
+transf.forestFires <- function(x){ 
+   x$Summer <- x$Month %in% 6:9
+   x$BUI <- calculate_BUI(x$DMC, x$DC)
+   x$FWI <- calculate_FWI(x$BUI, x$ISI)
+   new.names.forestFires <- c(names.forestFires[-13], "Summer", "BUI", 
+                              "FWI", "Area")
+   x <- x[ , new.names.forestFires]
+   colnames(x) <- new.names.forestFires
+   return(x)
+}
+
+forestFires.partition$tra <- lapply(forestFires.partition$tra, transf.forestFires)
+forestFires.partition$tst <- lapply(forestFires.partition$tst, transf.forestFires)
+```
+
+## Regresión lineal simple
+
+```{r, eval=TRUE, include=FALSE}
+
+#' @name Run KNN model in a fold
+#' 
+#' @description Run KNN in a fold and get MSE error and R^2
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @param k k for KNN
+#' @return list with train and test MSE and R squared
+run_knn_fold <- function(i, part.dataset, model = "Y ~ .", k = 7){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   fitMulti <- kknn(model, x_tra, x_tra, k = k)
+   predict.train <- fitMulti$fitted.value
+   fitMulti <- kknn(model, x_tra, x_tst, k = k)
+   predict.test <-fitMulti$fitted.value
+   
+   # MSE train
+
+   return(c("MSE train" = MSE(x_tra[ ,n_att], predict.train),
+            "R.squared train" = R.squared(x_tra[ ,n_att], predict.train),
+            "MSE test" = MSE(x_tst[ ,n_att], predict.test),
+            "R.squared test" = R.squared(x_tst[ ,n_att], predict.test)))
+}
+
+run_knn_CV <- function(part.dataset, model, k = 7){
+   apply(sapply(1:5, run_knn_fold, part.dataset, model, k), 1, mean)
+}
+```
+
+```{r, eval=TRUE, include=FALSE}
+
+#' @name Run linear model in a fold
+#' 
+#' @description Run linear model in a fold and get MSE error and R^2
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @return list with train and test MSE and R squared
+run_lm_fold <- function(i, part.dataset, model = "Y ~ ."){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   # Train linear model
+   fitMulti <- lm(model, data = x_tra)
+   predict.train <- predict(fitMulti,x_tra)
+   predict.test <- predict(fitMulti, x_tst)
+
+   # MSE train
+
+   return(c("MSE train" = MSE(x_tra[ ,n_att], predict.train),
+            "R.squared train" = R.squared(x_tra[ ,n_att], predict.train),
+            "MSE test" = MSE(x_tst[ ,n_att], predict.test),
+            "R.squared test" = R.squared(x_tst[ ,n_att], predict.test)))
+}
+
+run_lm_CV <- function(part.dataset, model){
+   apply(sapply(1:5, run_lm_fold, part.dataset, model), 1, mean)
+}
+
+
+```
+
+   Usaremos funciones basadas en los ejercicios de regresión de la evaluación continua
+para la estimación del error a través de la validación cruzada. El código de estas funciones se 
+incluyen en el apéndice.
+
+Como las cinco variables más influyentes podríamos considerar `DMC, BUI, FWI, RH` y `Temp`:
+Escogemos `DMC` por ser la variable simple de entre los índices del sistema FWI para la que
+se aprecia una ligera correlación; las variables `BUI` y `FWI` por ser combinación de varias,
+esperamos que se hayan construido de manera que favorezca la predicción del riesgo de incendios
+y que por tanto nos ayude en la tarea de regresión; y como variables metereológicas, 
+escogemos `RH` y `Temp` por las gráficas obtenidas.
+Guardaremos el error de validación cruzada para cada uno de los modelos lineales simples
+y los modelos lineales múltiples.
+
+```{r, include=FALSE}
+error.measures <- data.frame("MSE train" = numeric(0),
+                             "R.squared train" = numeric(0),
+                             "MSE test" = numeric(0),
+                             "R.squared test" = numeric(0))
+```
+
+Para cada una de estas variables entrenamos el modelo:
+
+```{r}
+fit.DMC <-lm(Area ~ DMC, data = forestFires)
+summary(fit.DMC)
+
+fit.BUI <-lm(Area ~ BUI, data = forestFires)
+summary(fit.BUI)
+
+fit.FWI <-lm(Area ~ FWI, data = forestFires)
+summary(fit.FWI)
+
+fit.RH <-lm(Area ~ RH, data = forestFires)
+summary(fit.RH)
+
+fit.Temp <-lm(Area ~ Temp, data = forestFires)
+summary(fit.Temp)
+```
+
+
+   La única variable que puede tener un poco de influencia y para la que podemos
+   descartar que su coeficiente asociado en la regresión sea 0 es la variable 
+   `Temp`. Para la humedad relativa su $p$-valor asociado es $0.08$ y para las variables
+   `DMC` y `BUI` es $0.09$, con lo que podemos relajar las condiciones para considerar que
+   son influyentes y así tener un poco más de información
+
+```{r}
+error.measures["lm.DMC", ]  <- run_lm_CV(forestFires.partition, 
+                                         model = "Area ~ DMC")
+error.measures["lm.BUI", ]  <- run_lm_CV(forestFires.partition,
+                                         model = "Area ~ BUI")
+error.measures["lm.FWI", ]  <- run_lm_CV(forestFires.partition, 
+                                         model = "Area ~ FWI")
+error.measures["lm.Temp", ] <- run_lm_CV(forestFires.partition, 
+                                         model = "Area ~ Temp")  
+error.measures["lm.RH", ]   <- run_lm_CV(forestFires.partition, 
+                                         model = "Area ~ RH")
+error.measures
+```
+
+   
+   Como podíamos suponer por la gráfica de la distribución de la magnitud de los incendios, 
+la regresión lineal no se ajustará muy bien debido al elevado número de incendios menores
+que llevan a desestimar los incendios mayores, con lo que el error es muy elevado y la
+varianza explicada muy poca, llegando a tener incluso resultados peores que si tomásemos
+el valor medio de la salida en los conjuntos de test. La variable más prometedora,
+aunque por una diferencia mínima y sin que se pueda considerar que obtiene un buen 
+resultado es la temperatura, como parecía indicar que fuera la única que podíamos 
+considerar relevante con los test realizados. Las siguientes dos variables que 
+conducen al menor error son la humedad relativa y los coeficientes `DMC` y `BUI`, los cuales
+tienen unos resultados muy similares.
+
+## Regresión lineal múltiple
+
+  Si probamos el modelo lineal con todas las variable observamos que para ninguna de las 
+  variables obtenemos un $p$-valor menor que $0.05$ y que, de hecho, si observamos el
+  $p$-valor asociado a la hipótesis nula consistente en que todas las variables sean 0, 
+  concluimos que no podemos descartarla pues es 0.5.
+
+```{r}
+fit.all <-lm(Area ~ ., data = forestFires)
+summary(fit.all)
+error.measures["lm.all", ] <- run_lm_CV(forestFires.partition, model = "Area ~ .")
+```
+
+
+   Para el modelo con todas las variables obtenemos un mayor error que usando únicamente 
+   la temperatura, con lo que consideraremos esto un retroceso.
+   Para formar por tanto un modelo lineal con múltiples variables, optamos por ir añadiendo
+   variables según el $p$-valor obtenido en el modelo simple hasta que ya no podemos
+   descartar que todas sean 0 (obtenemos un $p$-valor de 0.089 para las tres variables
+   que se descartan que sea 0 en el modelo simple).
+   
+```{r}
+fit.mostrelevant <- lm(Area ~ Temp + RH + DMC, data = forestFires)
+summary(fit.mostrelevant)
+error.measures["lm.mostrelevant", ] <- run_lm_CV(forestFires.partition,
+                                                 model = Area ~ Temp + RH + DMC)
+```
+
+
+   Aunque en el modelo con estas variables el error de entrenamiento es menor que en los 
+   demás modelos, en test obtenemos resultados peores al modelo con sólo la variable `Temp`
+   con lo que podemos suponer que comienza a haber sobreajuste. 
+   
+### Interacciones
+
+   Para los modelos con interacción combinamos la lluvia y la temperatura (esperando 
+   obtener la lluvia en el denominador debido a que a mayor lluvia menor área quemada)
+   
+```{r}
+fit.inter.1 <- lm(Area ~ Temp + Rain + Temp*Rain, data = forestFires)
+summary(fit.inter.1)
+error.measures["lm.inter.1", ] <- run_lm_CV(forestFires.partition, 
+                                            model = Area ~ Temp + Rain + Temp*Rain)
+```
+
+   
+
+```{r}
+fit.inter.2 <- lm(Area ~ BUI + RH + RH*BUI + Temp + Temp*BUI + Temp*RH + 
+                     I(BUI^2) + I(RH^2) , data = forestFires)
+summary(fit.inter.2)
+error.measures["lm.inter.2", ] <- run_lm_CV(forestFires.partition,
+               model = Area ~ BUI + RH + RH*BUI + Temp + Temp*BUI + 
+                                       Temp*RH + I(BUI^2) + I(RH^2))
+```
+
+   Con este segundo modelo, más complejo que los anteriores, observamos cierto sobreaprendizaje
+   al incrementarse el error en test mientras que disminuye en entrenamiento.  
+   
+   Consideraremos que los mejores modelos obtenidos son el que incluye únicamente la variable 
+   `Temp`, el que incluye las tres variables más influyentes `mostrelevant` y el modelo 1 con 
+   la interacción entre la temperatura y la lluvia debido a su simplicidad y a que son los 
+   modelos con menor error en test manteniendo un equilibrio con los datos de entrenamiento, 
+   lo que nos lleva a pensar que se ajusta bien a los datos a la vez que generaliza de manera
+   aceptable.
+
+## k-NN
+
+ En primer lugar escalaremos el conjunto de datos
+ 
+```{r}
+scaled.forestFires <- forestFires.partition
+ncol.forestFires <- ncol(forestFires.partition$tra[[1]])
+
+for(i in 1:5){
+   scale.factor <- scale(forestFires.partition$tra[[i]][ ,-ncol.forestFires ])
+   scaled.forestFires$tra[[i]][ ,-ncol.forestFires] <- as.data.frame(scale.factor)
+   scaled.forestFires$tst[[i]][ ,-ncol.forestFires] <- 
+      as.data.frame(scale(forestFires.partition$tst[[i]][ ,-ncol.forestFires],
+                          center = attr(scale.factor,"scaled:center"),
+                          scale = attr(scale.factor,"scaled:scale")))
+}
+```
+
+   Para el `KNN`, conociendo ya el problema, se plantean las cuestiones:
+* Si fijamos un $k$ pequeño, los incendios mayores tendrán como vecinos cercanos a incendios pequeños con lo que tendrá un 
+mal resultado. De igual manera, un incendio pequeño se verá afectado si tiene por vecino a un incendio con una gran superficie
+quemada. 
+* Si fijamos un $k$ grande, nos pasará como en regresión, y puesto que la mayoría de incendios son incendios pequeños, 
+el algoritmo tenderá a predecir que los nuevos incendios son pequeños, lo que es cierto y reducirá el error, pero realmente
+no soluciona nuestro problema.
+
+```{r  fig.width=5}
+err.k <-unname(sapply(3:30, function(k)  run_knn_CV(scaled.forestFires, 
+                                                    model = Area ~ ., k = k)[3]))
+ggplot(data.frame(K = 3:30, err.k), aes(x = K, y = err.k)) + geom_line() + 
+   labs(title = "Evolución del MSE en test para K", y = "MSE")
+```
+
+   Observamos cómo se cumple la situación descrita anteriormente.
+
+   Incluimos en los errores para realizar la comparación de los modelos los relativos a los 
+modelos seleccionados en el punto previo. Usaremos $k = 20$.
+
+```{r}
+k = 20
+
+
+error.measures["knn.all", ] <- run_knn_CV(scaled.forestFires, 
+                                          model = Area ~ ., k)
+error.measures["knn.Temp", ] <- run_knn_CV(scaled.forestFires, 
+                                           model = Area ~ Temp, k)
+error.measures["knn.mostrelevant", ] <- run_knn_CV(scaled.forestFires, 
+                                       model = Area ~ Temp + RH + DMC, k)
+error.measures["knn.inter.1", ] <- run_knn_CV(scaled.forestFires,
+                           model = Area ~ Temp + Rain + Temp*Rain, k)
+error.measures
+```
+
+
+   Se observa que no se mejora con `knn` el error en test para ninguno de los modelos.
+
+## Comparación 
+
+   Sustituimos los valores obtenidos en las tablas de resultados.
+
+```{r}
+regr.train <- read.csv("regr_train_alumnos.csv")
+error.train <- c(error.measures["lm.all", "MSE.train"],
+                 error.measures["knn.all", "MSE.train"])
+error.original.train <- regr.train[11, c("out_train_lm", "out_train_kknn")]
+regr.train[11, c("out_train_lm", "out_train_kknn")] <- error.train
+
+print(error.original.train)
+print(error.train)
+```
+
+
+```{r}
+regr.test <- read.csv("regr_test_alumnos.csv")
+error.test <- c(error.measures["lm.all", "MSE.test"],
+                error.measures["knn.all", "MSE.test"])
+error.original.test <- regr.test[11, c("out_test_lm", "out_test_kknn")]
+regr.test[11, c("out_test_lm", "out_test_kknn")] <- error.train
+
+print(error.original.test)
+print(error.test)
+```
+ 
+   Vemos que los errores son ligeramente inferiores a los que encontramos en las tablas salvo 
+   para el error de entrenamiento de KNN, que es muy superior.
+
+### Comparación de KNN y lm
+
+```{r}
+wilcox.test(x = regr.train$out_train_lm, y = regr.train$out_train_kknn)
+wilcox.test(x = regr.test$out_test_lm, y = regr.test$out_test_kknn)
+```
+
+Los resultados tanto de los datos de test como de los datos de entrenamiento 
+nos indican que no podemos descartar la hipótesis
+de la igualdad de ambos métodos.
+
+### Comparación de los tres métodos
+
+
+```{r}
+friedman.test(as.matrix(regr.train[ , -1]))
+friedman.test(as.matrix(regr.test[ , -1]))
+```
+
+   Debido a que el $p$-valor es menor que 0.05 rechazamos la hipótesis nula
+y descartamos la equivalencia de los tres algoritmos tanto para los datos de entrenamiento
+como para los de test.
+
+```{r}
+tam <- dim(regr.train[ ,-1])
+groups <- rep(1:tam[2], each=tam[1])
+pairwise.wilcox.test(as.matrix(regr.train[ ,-1]), groups, 
+                     p.adjust = "holm", paired = TRUE)
+pairwise.wilcox.test(as.matrix(regr.test[ ,-1]),  groups, 
+                     p.adjust = "holm", paired = TRUE)
+```
+
+   En los datos de entrenamiento se encuentran diferencias entre todos los métodos, 
+obteniendo un p-valor menor que 0.05. En cambio, para los datos de test
+no se puede descartar la hipótesis de la equivalencia entre el modelo lineal y el modelo
+$k$-NN. En los datos de test sin embargo no podemos descartar la equivalencia 
+entre ninguna pareja de algoritmos, por lo que quizá debamos buscar algún test con mayor
+potencia. 
+
+
+```{r include=FALSE, eval=T}
+detach(forestFires)
+```
+
+\newpage
+# Clasificación
+
+
+```{r include=FALSE, eval=T}
+attach(contraceptive)
+```
+
+
+   Comenzamos leyendo los datos e incluyendo en los datos de clasificación 
+   la variable creada.
+
+```{r}
+contraceptive.partition <- load_KEEL_CV_files("contraceptive/contraceptive", 10,
+                                              names.contraceptive)
+
+transf.contraceptive <- function(x){ 
+   new.names.contraceptive <- c(names.contraceptive[-10],"Children_cat", "Method")
+   x$Children_cat <- cut(x$Children, c(0,1,3,5,16), include.lowest = T,
+                         labels =  c("No", "Few", "Some", "Many"),
+                         right = F)
+   x <- x[ , new.names.contraceptive]
+   colnames(x) <- new.names.contraceptive
+   return(x)
+}
+
+contraceptive.partition$tra <- lapply(contraceptive.partition$tra, transf.contraceptive)
+contraceptive.partition$tst <- lapply(contraceptive.partition$tst, transf.contraceptive)
+```
+
+
+## $k$-NN
+
+```{r eval=T, include=F}
+#' @name Run KNN model in a fold
+#' 
+#' @description Run KNN in a fold and get Accuracy and Kappa
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @param k k for KNN
+#' @return list with train and test Acc and Kappa
+run_knn_class_fold <- function(i, part.dataset, model = "Y ~ .", k = 7){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   x_tra[ ,n_att] <- as.factor(x_tra[ ,n_att])
+   fitMulti <- kknn(model, x_tra, x_tra, k = k)
+   predict.train <- fitted(fitMulti)
+   fitMulti <- kknn(model, x_tra, x_tst, k = k)
+   predict.test <-fitted(fitMulti)
+   
+   # Accuracy
+   acc.tra <- mean(predict.train == x_tra[ ,n_att])
+   acc.tst <- mean(predict.test == x_tst[ ,n_att]) 
+   
+   # Kappa
+   kappa.tra <- (acc.tra - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   kappa.tst <- (acc.tst - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   
+   return(c("Acc train" = acc.tra,
+            "Kappa train" = kappa.tra,
+            "Acc test" = acc.tst,
+            "Kappa test" = kappa.tst))
+}
+
+run_knn_clas_CV <- function(part.dataset, model, k = 7){
+   apply(sapply(1:10, run_knn_class_fold, part.dataset, model, k), 1, mean)
+}
+```
+
+
+   Para aplicar $k$-NN modificaremos el conjunto de datos para generar variables que 
+   suplan a la variable
+   categórica a la que no podemos dotar de orden, que en este caso es `H_Occupation`.
+
+```{r}
+transf.contraceptive.knn <- function(ds){
+   occ <- ds[ ,"H_Occupation"]
+   
+   # Creación variables dummy
+   dummy.occ <- sapply(1:4, function(i) return(i == occ))
+   
+   #Acoplamiento de variables dummy
+   ds <- cbind(ds,  dummy.occ)
+   colnames(ds)[12:15] <- paste("H_Occupation_dummy",1:4,sep = "_")
+   
+   # Reordenamiento de columnas
+   ds <- ds[ ,c(1:6, 8,9,12:15,11)]
+   return(ds)
+}
+
+numeric.contraceptive.partition <-list()
+numeric.contraceptive.partition$tra <- lapply(contraceptive.partition$tra, 
+                                              transf.contraceptive.knn)
+numeric.contraceptive.partition$tst <- lapply(contraceptive.partition$tst, 
+                                              transf.contraceptive.knn)
+```
+
+   Una vez que hemos realizado la transformación numérica, escalamos las variables
+numéricas.
+ 
+```{r}
+scaled.contraceptive <- numeric.contraceptive.partition
+ncol.contraceptive <- ncol(numeric.contraceptive.partition$tra[[1]])
+
+for(i in 1:10){
+   scale.factor <- scale(numeric.contraceptive.partition$tra[[i]][ ,c(1:4,7)])
+   scaled.contraceptive$tra[[i]][ ,c(1:4,7)] <- as.data.frame(scale.factor)
+   scaled.contraceptive$tst[[i]][ ,c(1:4,7)] <- 
+      as.data.frame(scale(contraceptive.partition$tst[[i]][ ,c(1:4,7)],
+                          center = attr(scale.factor,"scaled:center"),
+                          scale = attr(scale.factor,"scaled:scale")))
+}
+```
+
+
+```{r}
+knn.results <- as.data.frame(t(sapply(1:35, function(k){
+   run_knn_clas_CV(scaled.contraceptive, Method ~ ., k)
+})))
+```
+
+```{r}
+ggplot(data.frame(k=1:35,knn.results), aes(k)) + 
+   geom_line(aes(y=knn.results$`Acc train`,colour = "Train"))+
+   geom_line(aes(y=knn.results$`Acc test`, colour = "Test")) +
+   labs(y = "Accuracy") +
+   scale_x_continuous(breaks = seq(1,35, by = 2)) +
+   scale_y_continuous(breaks = seq(0.5, 1, by = 0.05)) 
+```
+
+   Fijaremos $k=13$ puesto que a partir de entonces no mejoran los resultados de
+   test significativamente.
+   
+## LDA
+
+   Para aplicar el modelo `LDA` debemos comprobar la normalidad de las variables. 
+En las gráficas obtenidas en la exploración de datos se observa que la normalidad
+no se da en ninguna de las variables salvo quizá en el número de hijos. 
+
+```{r}
+numeric.contraceptive <- as.matrix(as.data.frame(
+   contraceptive[ ,c("Age", "Children", "W_Education", 
+                     "H_Education", "SoL", "Method")]
+))
+class(numeric.contraceptive) <- "numeric"
+
+
+apply(numeric.contraceptive, 2, function(x) shapiro.test(x)$p.value)
+```
+
+Puesto que para todas las variables obtenemos un $p$-valor menor que 0.05 podemos 
+rechazar la hipótesis de normalidad. No haremos este test para las variables binarias
+o categóricas sin orden. Aplicaremos igualmente el método `LDA`.
+
+```{r eval=T, include=F}
+#' @name Run LDA model in a fold
+#' 
+#' @description Run KNN in a fold and get Accuracy and Kappa
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @return list with train and test Acc and Kappa
+run_lda_fold <- function(i, part.dataset, model = "Y ~ ."){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   x_tra[ ,n_att] <- as.factor(x_tra[ ,n_att])
+   fitMulti <- lda(model, data = x_tra)
+   
+   predict.train <- predict(fitMulti, x_tra)$class
+   predict.test <- predict(fitMulti, x_tst)$class
+   
+   # Accuracy
+   acc.tra <- mean(predict.train == x_tra[ ,n_att])
+   acc.tst <- mean(predict.test == x_tst[ ,n_att]) 
+   
+   # Kappa
+   kappa.tra <- (acc.tra - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   kappa.tst <- (acc.tst - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   
+   return(c("Acc train" = acc.tra,
+            "Kappa train" = kappa.tra,
+            "Acc test" = acc.tst,
+            "Kappa test" = kappa.tst))
+}
+
+run_lda_CV <- function(part.dataset, model){
+   apply(sapply(1:10, run_lda_fold, part.dataset, model), 1, mean)
+}
+```
+
+```{r}
+lda.results <- run_lda_CV(contraceptive.partition, Method ~ .)
+lda.results
+```
+
+## QDA
+
+   Para cerciorarnos de que estamos en condiciones de aplicar `QDA` comprobamos la
+   correlación de las variables:
+   
+   
+```{r}
+cor(numeric.contraceptive)
+```
+
+
+   Puesto que ningún par de variables está cercano a uno (los pares más correlados
+son el número de hijos y la edad y los niveles de la educación de la pareja),
+comprobamos si para todas las variables hay al menos un elemento de cada categoría:
+
+```{r}
+qda.condition <- sapply(numeric.contraceptive.partition$tra,
+    function(x){
+       num_att <- ncol(x)
+       output <- x[ ,num_att]
+       cond.partition <- apply(x[ ,-num_att], 2,
+          # Para cada columna y
+          function(y){
+             # Comprobamos si es una variable factor
+             niveles <- unique(y)
+             num_niveles <- length(niveles)
+             
+             if(num_niveles > 4)
+                return(T)
+             # Si es un factor, comprobamos que en la salida haya tres clases
+             else{
+                cond <- sapply(niveles, 
+                   function(i){
+                     return(length(unique(output[y == i])) == 3) 
+                   })
+                return(all(cond)) 
+             }
+          })
+       return(all(cond.partition))
+    })
+all(qda.condition)
+```
+
+
+```{r eval=T, include=F}
+#' @name Run QDA model in a fold
+#' 
+#' @description Run KNN in a fold and get Accuracy and Kappa
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @return list with train and test Acc and Kappa
+run_qda_fold <- function(i, part.dataset, model = "Y ~ ."){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   x_tra[ ,n_att] <- as.factor(x_tra[ ,n_att])
+   fitMulti <- qda(model, data = x_tra)
+   
+   predict.train <- predict(fitMulti, x_tra)$class
+   predict.test <- predict(fitMulti, x_tst)$class
+   
+   # Accuracy
+   acc.tra <- mean(predict.train == x_tra[ ,n_att])
+   acc.tst <- mean(predict.test == x_tst[ ,n_att]) 
+   
+   # Kappa
+   kappa.tra <- (acc.tra - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   kappa.tst <- (acc.tst - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   
+   return(c("Acc train" = acc.tra,
+            "Kappa train" = kappa.tra,
+            "Acc test" = acc.tst,
+            "Kappa test" = kappa.tst))
+}
+
+run_qda_CV <- function(part.dataset, model){
+   apply(sapply(1:10, run_qda_fold, part.dataset, model), 1, mean)
+}
+```
+
+   Sin embargo, si incluimos la variable `H_Occupation` obtenemos un error
+que nos indica que tenemos un ``déficit de ránquin'' 
+
+```{r}
+transf.contraceptive.qda <- function(ds){
+   # Transformación del tipo de dato
+   ds <- ds[ ,-c(7,10)]
+   ds[-11] <- apply(ds[-11], 2, as.numeric)
+   return(ds)
+}
+
+numeric.contraceptive.partition <-list()
+numeric.contraceptive.partition$tra <- lapply(contraceptive.partition$tra, 
+                                              transf.contraceptive.qda)
+numeric.contraceptive.partition$tst <- lapply(contraceptive.partition$tst, 
+                                              transf.contraceptive.qda)
+
+qda.results <- run_qda_CV(numeric.contraceptive.partition, Method ~ .)
+qda.results
+```
+## Comparación
+
+```{r include=FALSE, eval=T}
+detach(contraceptive)
+```
+
+   Sustituimos los valores obtenidos en las tablas de resultados.
+
+```{r}
+clas.train <- read.csv("clasif_train_alumnos.csv")
+print(clas.train[5, c("out_train_knn", "out_train_lda", "out_train_qda")])
+print(c(knn.results[13, "Acc train"],lda.results["Acc train"],qda.results["Acc train"]))
+clas.train[5, "out_train_knn"] <- knn.results[13, "Acc train"]
+clas.train[5, "out_train_lda"] <- lda.results["Acc train"]
+clas.train[5, "out_train_qda"] <- qda.results["Acc train"] 
+   
+clas.test <- read.csv("clasif_test_alumos.csv")
+print(clas.test[5, c("out_test_knn", "out_test_lda", "out_test_qda")])
+print(c(knn.results[13, "Acc test"],lda.results["Acc test"],qda.results["Acc test"]))
+clas.test[5, "out_test_knn"] <- knn.results[13, "Acc test"]
+clas.test[5, "out_test_lda"] <- lda.results["Acc test"]
+clas.test[5, "out_test_qda"] <- qda.results["Acc test"]
+```
+
+   Los resultados obtenidos son ligeramente superiores a los resultados originales, a excepción de
+la precisión de KNN en test, que es inferior.
+
+#### Comparación de los tres métodos
+
+```{r}
+friedman.test(as.matrix(clas.train[ , -1]))
+friedman.test(as.matrix(clas.test[ , -1]))
+```
+
+   Debido a que ambos $p$-valores son mayor que $0.05$, no podemos descartar
+la hipótesis nula, es decir, la equivalencia de los tres métodos, 
+ni para los datos de entrenamiento ni los de test. 
+
+```{r}
+tam <- dim(clas.train[ ,-1])
+groups <- rep(1:tam[2], each=tam[1])
+pairwise.wilcox.test(as.matrix(clas.train[ ,-1]), groups, 
+                     p.adjust = "holm", paired = TRUE)
+pairwise.wilcox.test(as.matrix(clas.test[ ,-1]),  groups, 
+                     p.adjust = "holm", paired = TRUE)
+```
+
+   Aún no habiendo encontrado diferencias significativas entre los tres métodos, 
+las buscamos entre las distintas parejas usando el método de Holm. Como era de
+esperar, tampoco podemos descartar la hipótesis nula para ninguna de las tres parejas
+ni para los datos de entrenamiento ni para los datos de test.
+
+\newpage
+# Apéndice
+
+### Medidas de calidad
+
+```{r}
+#' @description Get the associated MSE for predicted values
+#' 
+#' @name MSE MSE for data
+#' @param values Original values
+#' @param fitted.values Fitted values of data
+#' @return MSE 
+MSE <- function(values, fitted.values){  
+   return(mean((values - fitted.values)^2))
+} 
+
+#' @description Get the associated RMSE for predicted values
+#' 
+#' @name RMSE RMSE for data
+#' @param values Original values
+#' @param fitted.values Fitted values of data
+#' @return RMSE 
+RMSE <- function(values, fitted.values){  
+   return(sqrt(MSE(values,fitted.values)))
+} 
+
+#' @description Get the adjusted R squared measure of error 
+#' 
+#' @name R.squared R squared
+#' @param values Original values
+#' @param fitted.values Fitted values of data
+#' @return R squared
+R.squared <- function(values, fitted.values){
+   return(1 - sum((values - fitted.values)^2) / sum((values - mean(values))^2) )
+}
+```
+
+## Lectura y modificación de los datos de entrada.
+
+Puesto que añadiremos al modelo las variables propuestas en la primera parte del 
+trabajo, comenzamos leyendo, cargando y modificando las particiones del repositorio 
+KEEL:
+
+```{r}
+#' @description Read KEEL partitions 
+#' 
+#' @name file.name Name file
+#' @param num.CV Number of partitions
+#' @param colnames Column names
+#' @return List with training partitions in a list and test partitions in 
+#'         another list.
+load_KEEL_CV_files <- function(file.name, num.CV, colnames){
+   partition <- list()
+   partition$tra <- list()
+   partition$tst <- list()
+   
+   for(i in 1:num.CV){
+      # Read train file
+      file <- paste(file.name, "-", num.CV, "-", i, "tra.dat", sep="")
+      partition$tra[[i]] <- read.csv(file, comment.char="@", header = F,
+                                     col.names = colnames)
+      
+      # Read test file
+      file <- paste(file.name, "-", num.CV, "-", i, "tst.dat", sep="")
+      partition$tst[[i]] <- read.csv(file, comment.char="@", header = F, 
+                                     col.names = colnames)
+   }
+   
+   return(partition)
+}
+```
+
+
+### Funciones para aplicar CV - Regresión
+```{r}
+#' @name Run KNN model in a fold
+#' 
+#' @description Run KNN in a fold and get MSE error and R^2
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @param k k for KNN
+#' @return list with train and test MSE and R squared
+run_knn_fold <- function(i, part.dataset, model = "Y ~ .", k = 7){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   fitMulti <- kknn(model, x_tra, x_tra, k = k)
+   predict.train <- fitMulti$fitted.value
+   fitMulti <- kknn(model, x_tra, x_tst, k = k)
+   predict.test <-fitMulti$fitted.value
+   
+   # MSE train
+
+   return(c("MSE train" = MSE(x_tra[ ,n_att], predict.train),
+            "R.squared train" = R.squared(x_tra[ ,n_att], predict.train),
+            "MSE test" = MSE(x_tst[ ,n_att], predict.test),
+            "R.squared test" = R.squared(x_tst[ ,n_att], predict.test)))
+}
+
+run_knn_CV <- function(part.dataset, model, k = 7){
+   apply(sapply(1:5, run_knn_fold, part.dataset, model, k), 1, mean)
+}
+```
+
+
+
+```{r}
+
+#' @name Run linear model in a fold
+#' 
+#' @description Run linear model in a fold and get MSE error and R^2
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @return list with train and test MSE and R squared
+run_lm_fold <- function(i, part.dataset, model = "Y ~ ."){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   # Train linear model
+   fitMulti <- lm(model, data = x_tra)
+   predict.train <- predict(fitMulti,x_tra)
+   predict.test <- predict(fitMulti, x_tst)
+
+   # MSE train
+
+   return(c("MSE train" = MSE(x_tra[ ,n_att], predict.train),
+            "R.squared train" = R.squared(x_tra[ ,n_att], predict.train),
+            "MSE test" = MSE(x_tst[ ,n_att], predict.test),
+            "R.squared test" = R.squared(x_tst[ ,n_att], predict.test)))
+}
+
+run_lm_CV <- function(part.dataset, model){
+   apply(sapply(1:5, run_lm_fold, part.dataset, model), 1, mean)
+}
+
+```
+
+### Funciones para aplicar CV - Clasificación 
+
+```{r}
+#' @name Run KNN model in a fold
+#' 
+#' @description Run KNN in a fold and get Accuracy and Kappa
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @param k k for KNN
+#' @return list with train and test Acc and Kappa
+run_knn_class_fold <- function(i, part.dataset, model = "Y ~ .", k = 7){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   x_tra[ ,n_att] <- as.factor(x_tra[ ,n_att])
+   fitMulti <- kknn(model, x_tra, x_tra, k = k)
+   predict.train <- fitted(fitMulti)
+   fitMulti <- kknn(model, x_tra, x_tst, k = k)
+   predict.test <-fitted(fitMulti)
+   
+   # Accuracy
+   acc.tra <- mean(predict.train == x_tra[ ,n_att])
+   acc.tst <- mean(predict.test == x_tst[ ,n_att]) 
+   
+   # Kappa
+   kappa.tra <- (acc.tra - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   kappa.tst <- (acc.tst - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   
+   return(c("Acc train" = acc.tra,
+            "Kappa train" = kappa.tra,
+            "Acc test" = acc.tst,
+            "Kappa test" = kappa.tst))
+}
+
+run_knn_clas_CV <- function(part.dataset, model, k = 7){
+   apply(sapply(1:10, run_knn_class_fold, part.dataset, model, k), 1, mean)
+}
+```
+
+### Funciones para aplicar CV - LDA
+
+```{r}
+#' @name Run LDA model in a fold
+#' 
+#' @description Run KNN in a fold and get Accuracy and Kappa
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @return list with train and test Acc and Kappa
+run_lda_fold <- function(i, part.dataset, model = "Y ~ ."){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   x_tra[ ,n_att] <- as.factor(x_tra[ ,n_att])
+   fitMulti <- lda(model, data = x_tra)
+   
+   predict.train <- predict(fitMulti, x_tra)$class
+   predict.test <- predict(fitMulti, x_tst)$class
+   
+   # Accuracy
+   acc.tra <- mean(predict.train == x_tra[ ,n_att])
+   acc.tst <- mean(predict.test == x_tst[ ,n_att]) 
+   
+   # Kappa
+   kappa.tra <- (acc.tra - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   kappa.tst <- (acc.tst - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   
+   return(c("Acc train" = acc.tra,
+            "Kappa train" = kappa.tra,
+            "Acc test" = acc.tst,
+            "Kappa test" = kappa.tst))
+}
+
+run_lda_CV <- function(part.dataset, model){
+   apply(sapply(1:10, run_lda_fold, part.dataset, model), 1, mean)
+}
+```
+
+### Funciones para aplicar CV - QDA
+
+```{r}
+#' @name Run QDA model in a fold
+#' 
+#' @description Run KNN in a fold and get Accuracy and Kappa
+#' @param i Fold number
+#' @param part.dataset Partitioned dataset
+#' @param model Model to be applied
+#' @return list with train and test Acc and Kappa
+run_qda_fold <- function(i, part.dataset, model = "Y ~ ."){
+   x_tra <- part.dataset$tra[[i]]
+   x_tst <- part.dataset$tst[[i]]
+   
+   # Number of attributes
+   n_att <- ncol(x_tra)
+   
+   x_tra[ ,n_att] <- as.factor(x_tra[ ,n_att])
+   fitMulti <- qda(model, data = x_tra)
+   
+   predict.train <- predict(fitMulti, x_tra)$class
+   predict.test <- predict(fitMulti, x_tst)$class
+   
+   # Accuracy
+   acc.tra <- mean(predict.train == x_tra[ ,n_att])
+   acc.tst <- mean(predict.test == x_tst[ ,n_att]) 
+   
+   # Kappa
+   kappa.tra <- (acc.tra - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   kappa.tst <- (acc.tst - 1/length(levels(x_tra[ ,n_att]))) / 
+      (1 - 1/length(levels(x_tra[ ,n_att])))
+   
+   return(c("Acc train" = acc.tra,
+            "Kappa train" = kappa.tra,
+            "Acc test" = acc.tst,
+            "Kappa test" = kappa.tst))
+}
+
+run_qda_CV <- function(part.dataset, model){
+   apply(sapply(1:10, run_qda_fold, part.dataset, model), 1, mean)
+}
+```
+

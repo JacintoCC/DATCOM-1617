@@ -1,0 +1,191 @@
+---
+title: "Classification Methods II"
+author: "Jacinto Carrasco Castillo"
+date: "29 de noviembre de 2016"
+output: pdf_document
+---
+
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+setwd("~/Documentos/DATCOM-1617/Introducción-Ciencia-Datos/Clasificación")
+require(MASS)
+require(ISLR)
+require(klaR)
+require(caret)
+require(gridExtra)
+require(moments)
+library(MASS)
+```
+
+# Exercise 1 (Smarket data)
+
+```{r}
+attach(Smarket)
+```
+
+* Try `lda` with all `Lag` variables.
+
+   Definimos la fórmula que seguirá nuestro modelo y el subconjunto que usaremos como test.
+   
+```{r}
+all.lag.form <- Direction ~ Lag1 + Lag2 + Lag3 + Lag4 + Lag5 
+Smarket.2005 <- subset(Smarket, Year==2005)
+```
+
+   Comprobamos la normalidad de las variables
+   
+```{r}
+plots1 <- ggplot(Smarket, aes(x = Lag1)) + geom_histogram(bins = 20)
+plots2 <- ggplot(Smarket, aes(x = Lag2)) + geom_histogram(bins = 20)
+plots3 <- ggplot(Smarket, aes(x = Lag3)) + geom_histogram(bins = 20)
+plots4 <- ggplot(Smarket, aes(x = Lag4)) + geom_histogram(bins = 20)
+plots5 <- ggplot(Smarket, aes(x = Lag5)) + geom_histogram(bins = 20)
+grid.arrange(plots1, plots2, plots3, plots4, plots5)
+
+kurtosis <- sapply(list(Lag1, Lag2, Lag3, Lag4, Lag5), kurtosis)
+```
+
+   Aunque las gráficas presentan una forma similar a una normal, 
+   si observamos la kurtosis de las variables, son mayor que 3 (que sería la kurtosis
+   de una distribución normal), con lo que será difícil que tengamos una distribución normal.
+   Aplicamos el test de Shapiro-Wilks: 
+
+   
+```{r}
+sapply(list(Lag1, Lag2, Lag3, Lag4, Lag5), function(x) shapiro.test(x)$p.value)
+```
+
+   Los $p$-valores obtenidos para cada una de las variables `Lag` nos invita a rechazar 
+   las hipótesis de que estén distribuidas de forma normal.  
+   Comprobamos ahora la varianza de cada variable: 
+   
+```{r}
+sapply(list(Lag1, Lag2, Lag3, Lag4, Lag5), var)
+```
+   
+   De todos modos, aplicamos el método `lda`.
+
+```{r}
+lda.fit <- lda(all.lag.form,
+               data = Smarket,
+               subset = Year < 2005)
+lda.fit
+plot(lda.fit)
+```
+
+   Predecimos la clase para el conjunto de test.
+
+```{r}
+lda.pred <- predict(lda.fit, Smarket.2005)
+data.frame(lda.pred)[1:5, ]
+table(lda.pred$class, Smarket.2005$Direction)
+acc.lda <- mean(lda.pred$class == Smarket.2005$Direction)
+partimat(all.lag.form, data=Smarket, method="lda")
+acc.lda
+```
+
+* Make a quick comparison between logistic regression and `lda`. 
+
+```{r}
+train <- Year < 2005
+
+glmFit <- train(Smarket[train, 1:5], y = Smarket[train, 9],
+                method = "glm",
+                preProcess = c("center", "scale"))
+
+pred <- predict(glmFit, newdata = Smarket[!train, 1:5])
+acc.glm <- mean(pred == Smarket[!train, 9])
+acc.glm
+```
+
+Obtenemos un mejor resultado usando `lda`.
+
+Try with `qda` and compare all three methods. Plot the results.
+
+   Comprobamos que el número de variables sea menor que el número de casos para
+cada clase: 
+
+```{r}
+all(5 < sapply(c("Up", "Down"), function(x) sum(x == Smarket$Direction)))
+cor(Smarket[ ,2:6])
+```
+
+   Hay más elementos que predictores y no hay ningún par de variables que tenga una 
+   correlación cercana a 1 en valor absoluto, luego estamos en condiciones de 
+   aplicar QDA.
+
+```{r}
+qda.fit <- qda(all.lag.form, data = Smarket, 
+               subset = Year < 2005)
+qda.fit
+qda.fit$scaling
+
+qda.pred <- predict(qda.fit, Smarket.2005)
+class(qda.pred)
+data.frame(qda.pred)[1:5, ]
+table(qda.pred$class, Smarket.2005$Direction)
+acc.qda <-  mean(qda.pred$class == Smarket.2005$Direction)
+partimat(all.lag.form, data=Smarket, method="qda")
+```
+
+
+```{r}
+df <- data.frame(Method = c("LDA", "GLM", "QDA"),
+                 Accuracy = c(acc.lda, acc.glm, acc.qda))
+ggplot(df, aes(x = Method, y = Accuracy, fill = Method)) +  
+   geom_bar(position = "dodge" , stat = "identity")
+```
+
+   Se observa que `lda` es ligeramente superior, aunque deberíamos realizar un test estadístico.
+   
+# Exercise 2 
+
+Using only the information in file `clasif_train_alumnos.csv`:
+
+```{r}
+train.alumnos <- read.csv("clasif_train_alumnos.csv")
+rownames(train.alumnos) <- train.alumnos[ ,1]
+train.alumnos <- train.alumnos[ ,-1]
+```
+
+
+* Compare `lda` and `qda` using Wilcoxon.
+
+```{r}
+wilcox.test(train.alumnos[ ,"out_train_lda"],
+            train.alumnos[ ,"out_train_qda"])
+```
+
+   El estadístico de Wilcoxon es $W = 172$ y el $p$-valor asociado es $0.4612$, 
+   mayor que $0.05$, con lo que no estamos en condiciones de descartar la
+   hipótesis nula consistente en la equivalencia de las medias de los algoritmos.   
+
+* Perform a multiple comparison using Friedman.
+
+```{r}
+friedman.test(as.matrix(train.alumnos))
+```
+
+   El $p$-valor asociado es $0.522$ luego no podemos descartar la hipótesis
+   nula consistente en la igualdad de las medias de los algoritmos.
+
+* Using Holm see if there is a winning algorithm (even if Friedman
+says there is no chance...).
+
+   Aunque el test de Friedman no ha detectado diferencias entre los algoritmos,
+   usamos el test de Holm:
+   
+```{r}
+tam <- dim(train.alumnos)
+groups <- rep(1:tam[2], each=tam[1])
+
+pairwise.wilcox.test(as.matrix(train.alumnos), groups, p.adjust = "holm", 
+                     paired = TRUE)
+```
+
+
+   Ninguno de los $p$-valores son siquiera cercanos a $0.05$ con lo que no podemos
+   decir que hay diferencias significativas en ninguna de las comparaciones dos a dos.
+
+
