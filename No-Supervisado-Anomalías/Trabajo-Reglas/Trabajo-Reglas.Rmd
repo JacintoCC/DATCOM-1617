@@ -1,0 +1,442 @@
+---
+title: "Aprendizaje no supervisado y detección de anomalías - Reglas de asociación"
+author: "Jacinto Carrasco Castillo"
+date: "8 de febrero de 2017"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, fig.align = 'center', fig.width = 5, fig.height = 4)
+
+#  NO MÁS DE 10-15 PÁGINAS
+
+library(arules)
+library(arulesViz)
+library(RKEEL)
+``` 
+
+
+   La base de datos que usaremos para este trabajo será `Income`. Aunque está disponible en el paquete `arules` ya en forma de transacciones, partiremos del `data.frame` `IncomeESL`.
+   
+## Exploración de datos y negación de variables
+   
+   Cargamos el conjunto de datos y observamos la estructura:
+   
+```{r}
+data("IncomeESL")
+str(IncomeESL)
+```
+
+
+   El conjunto de datos `Income` es un extracto de una encuesta sobre cuestiones demográficas. En este conjunto de datos las variables son de tipo `factor`, algunas de ellas están ordenadas y agrupadas por intervalos. Consideraremos que estos intervalos han sido definidos por un experto y que mantienen la información semántica del conjunto de datos original, evitando así tener que realizar los cortes. Las variables que usaremos para el estudio con las variables negadas son `language in home` y `householder status`. 
+
+```{r}
+IncomeESL$lang.english <- as.factor(IncomeESL$`language in home` == "english")
+IncomeESL$lang.spanish <- as.factor(IncomeESL$`language in home` == "spanish")
+IncomeESL$lang.other <- as.factor(IncomeESL$`language in home` == "other")
+IncomeESL$`language in home` <- NULL
+
+IncomeESL$house.owner <- as.factor(IncomeESL$`householder status` == "own")
+IncomeESL$house.renter <- as.factor(IncomeESL$`householder status` == "rent")
+IncomeESL$house.w.family <- as.factor(IncomeESL$`householder status` == 
+                                         "live with parents/family")
+IncomeESL$`householder status` <- NULL
+```  
+ 
+   En primer lugar mostraremos las transacciones obtenidas con los soportes de los itemsets, así veremos qué zonas del espacio pueden ser más interesantes.
+
+```{r}
+Income <- as(IncomeESL, "transactions")
+summary(Income)
+```
+
+   Al partir de un conjunto de datos relacional, realizamos la interpretación común e indicamos los items con mayor soporte:  
+1. Los itemsets `{lang.other , False}`, `{lang.spanish, False}` y `{lang.english, True}` son los que tienen mayor soporte, mencionamos aquí otros dos que tratan aspectos distintos.  
+2. `{Número de hijos, 0}`  
+3. `{Clasificación étnica, blanca}`
+
+```{r fig.width=9, fig.height=7}
+itemFrequencyPlot(Income, support = 0.1, cex.names = 0.8)
+```
+
+ Observamos que aunque hay items con un soporte alto, estaríamos excluyendo muchos posibles valores de varias variables si no los tuviésemos en cuenta, con lo que el análisis resultante sería insuficiente.
+
+## Obtención de reglas
+
+   Ahora estudiaremos las reglas que obtenemos para conjuntos concretos de datos. Comenzaremos por comparar las reglas que obtenemos para las personas sin hijos con respecto a las que tienen al menos un hijo:
+   
+### División por hijos
+
+#### Padres
+
+```{r warning=F}
+Income.parents <- as(IncomeESL[IncomeESL$`number of children` > 0, ], "transactions")
+ap.parents <- apriori(Income.parents, parameter = list(support = 0.1, target = "frequent"),
+                      control = list(verbose = F))
+ap.parents <- sort(ap.parents, by="support")
+inspect(head(ap.parents,8))
+```
+
+   Por ahora los itemsets mostrados no aportan información al no tratarse de reglas y contener los itemsets más frecuentes también antes de la partición. La principal diferencia es la subida en el soporte de los itemsets `{type of home=house}` y `{house.renter=F}`. 
+   
+##### Estudio de reglas
+
+```{r warning=F}
+rules.parents <- apriori(Income.parents, 
+                         parameter = list(support = 0.1, confidence = 0.8, 
+                                          minlen = 2), 
+                         control = list(verbose = F))
+```
+
+   Quitaremos las reglas del tipo `{house.~ = T} => {house.~ = F}` o `{lang.~ = T} => {lang.~ = F}` introducidas por la creación de variables. Creamos la función `obvious.TF.rules` incluida en el apéndice para devolver un vector lógico que diga qué reglas podemos quitar.
+
+```{r include=F}
+obvious.TF.rules <- function(rules){
+   rules.df <- data.frame(lhs = labels(lhs(rules)),
+                          rhs = labels(rhs(rules)))
+   
+   # Reglas Tipo.A = T => Tipo.B = F
+   obvious <- grepl("house\\.(\\w|\\.)*=T", rules.df$lhs) & 
+      grepl("house\\.(\\w|\\.)*=F", rules.df$rhs)
+   obvious  <- obvious | 
+      (grepl("lang\\.\\w*=T", rules.df$lhs) & grepl("lang\\.\\w*=F", rules.df$rhs))
+   
+   # Reglas Tipo.A = F & ... & Tipo.Y = F  => Tipo.Z = T
+   obvious <- obvious | 
+      grepl("house\\.(\\w|\\.)*=F.*house\\.(\\w|\\.)*=F", rules.df$lhs) & 
+      grepl("house\\.(\\w|\\.)*=T", rules.df$rhs)
+
+   obvious <- obvious | 
+      grepl("lang\\.\\w*=F.*lang\\.\\w*=F", rules.df$lhs) & 
+      grepl("lang\\.\\w*=T", rules.df$rhs)
+   
+   return(obvious)
+}
+```
+   
+```{r}
+rules.parents <- rules.parents[!obvious.TF.rules(rules.parents)]
+inspect(head(sort(rules.parents,by="lift"), 3))
+```
+
+   Estas reglas que mostramos nos vienen a decir que los progenitores estudiantes con ingresos bajos y que no están casados tienen entre 14 y 17 años, lo que teniendo en cuenta el soporte y el número de items en el antecedente no tiene mucho interés. 
+   Como tenemos aún numerosas reglas, eliminaremos aquellas que sean redundantes o para las que haya relación de independencia entre el antecedente y el consecuente según las medidas vistas en clase. En la función `is.independent` incluida en el apéndice se incluye el cálculo de estas medidas y la comparación con los valores para los que se da la independencia:
+   
+```{r include=F,eval=T}
+is.independent <- function(rules,transactions){
+   # Valores para la independencia
+   indep.values <- c("lift" = 1, "conviction" = 0, "confirmedConfidence" = 0, 
+                     "addedValue" = 0, "yuleQ" = 1, "kappa" = 0,
+                     "leverage" = 0, "phi" = 0, "oddsRatio" = 1,
+                     "mutualInformation" = 0, "certainty" = 0, 
+                     "gini" = 0, "hyperLift" = 1,
+                     "implicationIndex" = 0, "jMeasure" = 0)
+   # Cálculo de medidas
+   int.measures   <- interestMeasure(rules, 
+                                     measure=c("lift", "conviction",
+                                               "confirmedConfidence", "addedValue",
+                                               "yuleQ", "kappa",
+                                               "leverage", "phi", "oddsRatio",
+                                               "mutualInformation",
+                                               "certainty", "gini", "hyperLift",
+                                               "implicationIndex", "jaccard"),
+                                     transactions = transactions)
+   
+   # Cálculo independencia
+   indep.rules <- apply(int.measures, 1, 
+                        function(x) any(abs(x-indep.values) < 0.05))
+   indep.rules[is.na(indep.rules) | is.nan(indep.rules)] <- F
+   
+   obvious.conviction <- int.measures[ ,"conviction"] > 5
+   obvious.conviction[is.na(obvious.conviction) | is.nan(obvious.conviction)] <- F
+   return(indep.rules | obvious.conviction)
+}
+```
+
+```{r}
+rules.parents <- rules.parents[!is.redundant(rules.parents)]
+rules.parents <- rules.parents[!is.independent(rules.parents, Income.parents)]
+```
+
+   Tras este filtrado que podemos hacer automáticamente tenemos un conjunto de 660 reglas sobre las personas que son padres. 
+   
+   
+```{r}
+plot(rules.parents)
+inspect(head(sort(rules.parents,by="confidence"), 5))
+```
+
+
+   Las reglas que hemos obtenido con una confianza 1 son, por el contexto, esperables e indican que los progenitores solteros, menores y estudiantes tienen ingresos bajos o viven con su familia.
+
+\newpage
+### Sin hijos
+
+   Si repetimos el estudio ahora para los que no tienen hijos podremos comparar las reglas del apartado anterior con éstas: 
+   
+```{r warning=F}
+Income.no.parents <- as(IncomeESL[IncomeESL$`number of children` == 0, -10],
+                        "transactions")
+rules.no.parents <- apriori(Income.no.parents, 
+                            parameter  = list(support = 0.1, confidence = 0.8, 
+                                              minlen = 2), 
+                            control = list(verbose = F))
+rules.no.parents <- rules.no.parents[!obvious.TF.rules(rules.no.parents)]
+inspect(head(sort(rules.no.parents,by="lift"), 3))
+```
+
+   Como el item `dual incomes=not married` está determinado por `marital status=single`, nos interesa saber qué lleva a que la variable `dual incomes` tenga un valor afirmativo o negativo. Debemos tener en cuenta que si no tenemos `marital status = single`, entonces la mayoría de instancias tomarán el valor `married`, dado que las otras categorías como `cohabitation` tienen un soporte muy bajo.
+   Frente a la visualización de estas reglas y sin más información, no podemos decir si tiene relación la posesión de una casa (como indicarían la segunda y la tercera regla) o realmente son independientes. Por eso, realizamos el mismo proceso que para el conjunto anterior de reglas y quitamos reglas redundantes o para las que el consecuente sea independiente del antecedente.
+
+```{r warning=F}
+rules.no.parents <- rules.no.parents[!is.redundant(rules.no.parents)]
+rules.no.parents <- rules.no.parents[!is.independent(rules.no.parents,
+                                                     Income.no.parents)]
+plot(rules.no.parents)
+inspect(head(sort(rules.no.parents,by="lift"), 3))
+``` 
+
+   Como vemos, las reglas mencionadas anteriormente no se encuentran entre las primeras según la ordenación por `lift`, lo que nos indica que el estado civil de la persona es independiente de la combinación del lenguaje, el tipo de casa y la obtención de ingresos. Sin embargo vemos que una vez filtradas las reglas sí que tenemos que se determina si una persona está casada por la propiedad de la vivienda y el número de personas que vivan. La regla `{sex=female, marital status=married, ethnic classification=white,house.renter=FALSE}=> {house.owner=TRUE}` aún teniendo confianza 1, podría parecer que no aporta información novedosa, ya que significa que una mujer blanca casada sin hijos y que no vive de alquiler entonces es propietaria de la casa. Sin embargo, la ausencia de la misma regla para `sex=male` nos indica que si una pareja sin hijos no vive de alquiler ni poseen una casa, entonces viven con la familia del hombre. 
+
+
+
+ 
+### División por género
+
+#### Mujeres
+
+```{r warning=F}
+Income.fem <- as(IncomeESL[IncomeESL$sex == "female", -2], "transactions")
+ap.fem <- apriori(Income.fem, parameter = list(support = 0.1, target = "frequent"),
+                  control = list(verbose = F))
+ap.fem <- sort(ap.fem, by="support")
+inspect(head(ap.fem, 3))
+```
+
+   Los itemsets más frecuentes son los mismos que sin realizar esta segmentación. Buscaremos mayor especificidad a partir de las reglas. 
+
+```{r warning=F}
+rules.fem <- apriori(Income.fem, 
+                         parameter = list(support = 0.1, confidence = 0.8,
+                                          minlen = 2), 
+                         control = list(verbose = F))
+rules.fem <- rules.fem[!obvious.TF.rules(rules.fem)]
+rules.fem <- rules.fem[!is.redundant(rules.fem)]
+rules.fem <- rules.fem[!is.independent(rules.fem, Income.fem)]
+``` 
+
+```{r}
+plot(rules.fem)
+```
+
+   Al dibujar esta gráfica vemos que no hay reglas con valores altos simultáneamente en confianza, soporte y *lift*. Inspeccionamos por separado las reglas obtenidas.
+
+```{r}
+inspect(head(sort(rules.fem,by="lift"), 3))
+```
+
+
+```{r}
+inspect(sort(rules.fem,by="confidence")[c(2,3,7,8,12,13)])
+```
+
+```{r}
+inspect(head(sort(rules.fem,by="support"), 3))
+```
+   
+   Al igual que pasa sin la segmentación, se obtienen reglas esperables, así que habrá que esperar a la comparación de las medidas con las reglas obtenidas para el género masculino para obtener conclusiones.
+
+
+
+#### Hombres
+
+```{r warning=F}
+Income.masc <- as(IncomeESL[IncomeESL$sex == "male", -2], "transactions")
+ap.masc <- apriori(Income.masc, parameter = list(support = 0.1, target = "frequent"),
+                  control = list(verbose = F))
+ap.masc <- sort(ap.masc, by="support")
+inspect(head(ap.masc))
+```
+
+```{r warning=F}
+rules.masc <- apriori(Income.masc, 
+                         parameter = list(support = 0.1, confidence = 0.8,
+                                          minlen = 2), 
+                         control = list(verbose = F))
+rules.masc <- rules.masc[!obvious.TF.rules(rules.masc)]
+rules.masc <- rules.masc[!is.redundant(rules.masc)]
+rules.masc <- rules.masc[!is.independent(rules.masc, Income.masc)]
+``` 
+
+```{r}
+plot(rules.masc)
+```
+
+   Se observa cómo el *lift* es en general más bajo para estas reglas en comparación, además sólo hay dos reglas con una confianza superior a $0.9$.
+
+```{r}
+inspect(head(sort(rules.masc,by="lift"), 3))
+```
+
+
+```{r}
+inspect(head(sort(rules.masc,by="confidence"), 5))
+```
+
+   Como veíamos en la gráfica, sólo hay dos reglas con confianza superior a $0.9$ que además son las ya conocidas `{marital status=single} => {dual incomes=not married}` y `{lang.other=FALSE} => {lang.english=TRUE}`, con lo que podemos determinar que hay una diferencia relevante por géneros para reglas. Por ejemplo, entre las reglas que para las mujeres tenía una confianza alta se encuentra `{income=[0,10)} => {house.owner=FALSE}`. No encontrar esta regla por tanto significa que un mayor porcentaje de hombres con ingresos bajos posee una casa que mujeres que se encuentran en este intervalo de ingresos. Semejantes conclusiones se pueden obtener con las reglas obtenidas.
+
+```{r}
+inspect(head(sort(rules.masc,by="support"), 3))
+```
+
+
+
+### Análisis general
+
+Haremos ahora un estudio general sobre las reglas sin centrarnos en ningún subconjunto de la población.
+    
+#### Obtención de itemsets frecuentes, maximales y cerrados
+   
+```{r warning=F}
+apriori.Income <- apriori(Income, parameter = list(support = 0.1, target = "frequent"),
+                          control = list(verbose = F))
+apriori.Income <- sort(apriori.Income, by="support")
+inspect(head(apriori.Income, n = 7))
+```
+
+   
+   Los conjuntos con mayor soporte son principalmente de longitud 1 y aquellos que tienen longitud dos involucran el item con mayor soporte ({Idioma.Inglés , True}). 
+   
+```{r}
+inspect(head(apriori.Income[size(apriori.Income) == 2], n = 10))
+```
+ 
+#### Obtención de reglas
+
+Extraemos inicialmente las reglas con un soporte mínimo de $0.05$ y confianza $0.7$ usando el método apriori:
+
+```{r}
+rules <- apriori(Income, parameter  = list(support = 0.1, confidence = 0.8, minlen = 2), 
+                     control = list(verbose = F))
+rules <- rules[!is.redundant(rules) & !obvious.TF.rules(rules)]
+inspect(head(sort(rules, by="support"), 3))
+inspect(head(sort(rules, by="confidence"), 3))
+inspect(head(sort(rules, by="lift"), 3))
+```
+
+   En una primera inspección de las reglas obtenidas observamos según la medida que usemos para ordenar:
+   * Soporte: Las reglas que obtenemos son aquellas que implican al item `{lang.english}`. Estas reglas son poco útiles ya que podemos considerarlas como esperables.
+   * Confianza: Las reglas con mayor confianza que nos encontramos son muy esperables y tienen confianza 1. Implican los itemsets `{marital status= single}` y `{dual incomes = not married}` , algo que podríamos deducir antes de formar las reglas. 
+   * Las reglas con mayor *lift* se corrresponden con aquellas que relacionan los itemsets `{occupation = student}`, `{house.w.family}`, `{marital status=single}`, algo que también podíamos preveer. 
+
+   Ahora filtraremos para descartar aquellas reglas para las que alguna medida objetiva de las vistas en clase nos indique la falta de calidad:
+
+```{r}
+rules <- rules[!is.independent(rules,Income)]
+plot(rules)
+```
+
+   De esta manera hemos pasado de a  `length(rules.pruned) = 194` reglas, lo que supone una importante reducción y ya prácticamente podríamos revisar todas las reglas.
+
+#### Análisis de reglas de interés
+
+   Ordenaremos las reglas por el tamaño del precedente para ir considerando reglas de las más generales a las más específicas.
+
+```{r orden, results='hide'}
+order.lhs.size <- order(size(lhs(rules)), -quality(rules)[ ,"confidence"])
+inspect(rules[order.lhs.size])
+```
+
+   En este primer conjunto de reglas podemos destacar como interesantes las reglas que relacionan al tipo de casa con la propiedad de la vivienda:
+
+```
+{type of home=apartment} => {house.w.family=FALSE}; conf = 0.8988622
+{house.owner=TRUE} => {type of home=house}; conf = 0.8172604 
+{type of home=house} => {house.renter=FALSE}; conf = 0.8042578
+```
+
+   Con estas reglas podemos ver como es poco habitual que una familia viva en un piso y que mientras que si el individuo es propietario de la vivienda, ésta sea una casa, es poco probable que si vive en una casa esté de alquiler. Otra regla a mencionar, aunque más por la novedad o la sorpresa por la información que aporta y es la de `{age=25-34} => {house.w.family=FALSE}; conf = 0.9101823`, una regla que no tendría esa confianza actualmente en España, por ejemplo.
+Si vamos aumentando el número de itemsets en el antecedente y bajando la confianza, obtenemos las siguientes reglas:
+
+```
+{age=25-34, lang.english=TRUE}  => {house.w.family=FALSE}; conf = 0.9202423
+{age=25-34, lang.spanish=FALSE} => {house.w.family=FALSE}; conf = 0.9186275 
+{age=25-34, lang.other=FALSE}   => {house.w.family=FALSE}; conf = 0.9148534
+{age=25-34, lang.spanish=FALSE, lang.other=FALSE}  => {house.w.family=FALSE} 0.2027132  0.9202423 
+```
+
+   Aunque la medida de confianza es semejante para estas reglas, vemos que estar independizarse entre los 25 y los 34 es más frecuente entre angloparlantes que entre personas que no usan el español en sus hogares (que incluye al primer grupo) y a su vez es más frecuente que entre personas que usan el español o el inglés. 
+
+
+\newpage
+# Apéndice
+
+```{r eval=F}
+#' @function Determine obvious rules from logic characteristics
+#' 
+#' @description Determine obvious rules from logic characteristics for Income dataset.
+#' @param rules Set of rules
+#' @return Logic vector with True if the rule is obvious, False if it is not
+obvious.TF.rules <- function(rules){
+   rules.df <- data.frame(lhs = labels(lhs(rules)),
+                          rhs = labels(rhs(rules)))
+   
+   # Reglas Tipo.A = T => Tipo.B = F
+   obvious <- grepl("house\\.(\\w|\\.)*=T", rules.df$lhs) & 
+      grepl("house\\.(\\w|\\.)*=F", rules.df$rhs)
+   obvious  <- obvious | 
+      (grepl("lang\\.\\w*=T", rules.df$lhs) & grepl("lang\\.\\w*=F", rules.df$rhs))
+   
+   # Reglas Tipo.A = F & ... & Tipo.Y = F  => Tipo.Z = T
+   obvious <- obvious | 
+      grepl("house\\.(\\w|\\.)*=F.*house\\.(\\w|\\.)*=F", rules.df$lhs) & 
+      grepl("house\\.(\\w|\\.)*=T", rules.df$rhs)
+
+   obvious <- obvious | 
+      grepl("lang\\.\\w*=F.*lang\\.\\w*=F", rules.df$lhs) & 
+      grepl("lang\\.\\w*=T", rules.df$rhs)
+   
+   return(obvious)
+}
+```
+
+\newpage
+```{r eval=F}
+#' @function Determine rules with an independency relationship
+#' 
+#' @description Making use of interest measures, determine the independency 
+#'             between lhs and rhs in a set of rules
+#' @param rules Set of rules
+#' @param transactions Set of transactions of the rules
+#' @return Logic vector with True if rhs is independent from lhs, False if it is not
+is.independent <- function(rules,transactions){
+   # Valores para la independencia
+   indep.values <- c("lift" = 1, "conviction" = 0, "confirmedConfidence" = 0, 
+                     "addedValue" = 0, "yuleQ" = 1, "kappa" = 0,
+                     "leverage" = 0, "phi" = 0, "oddsRatio" = 1,
+                     "mutualInformation" = 0, "varyingLiaison" = 0, 
+                     "certainty" = 0, "gini" = 0, "hyperLift" = 1,
+                     "implicationIndex" = 0, "jaccard" = 0, "jMeasure" = 0)
+   # Cálculo de medidas
+   int.measures   <- interestMeasure(rules, 
+                                     measure=c("lift", "conviction",
+                                               "confirmedConfidence", "addedValue",
+                                               "yuleQ", "kappa",
+                                               "leverage", "phi", "oddsRatio",
+                                               "mutualInformation",
+                                               "varyingLiaison", 
+                                               "certainty", "gini", "hyperLift",
+                                               "implicationIndex", "jaccard", 
+                                               "jMeasure"),
+                                     transactions = transactions)
+   
+   # Cálculo independencia
+   indep.rules <- apply(int.measures, 1, 
+                        function(x) any(abs(x-indep.values) < 0.05))
+   indep.rules[is.na(indep.rules)] <- F
+   
+   obvious.conviction <- int.measures[ ,"conviction"] > 5
+   obvious.conviction[is.na(obvious.conviction)] <- F
+   return(indep.rules | obvious.conviction)
+}
+```

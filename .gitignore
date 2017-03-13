@@ -1,4 +1,7 @@
 *.pdf
-.RData
-.Rhistory
+*.RData
+*.Rhistory
+*.Rproj
+*.bak
+*/build/*
 .Rproj.user

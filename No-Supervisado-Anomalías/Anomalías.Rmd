@@ -1,0 +1,16 @@
+---
+title: "Anomalías"
+author: "Jacinto Carrasco Castillo"
+date: "5 de diciembre de 2016"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r}
+
+```
+

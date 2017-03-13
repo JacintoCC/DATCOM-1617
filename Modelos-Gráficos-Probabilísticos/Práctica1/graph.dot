@@ -1,0 +1,28 @@
+
+digraph DAG {
+
+  # Intialization of graph attributes
+  graph [overlap = false,
+         layout = dot,
+         rankdir = TD]
+
+  # Initialization of node attributes
+  node [shape = ellipse,
+        fontname = Helvetica,
+        fixedsize = false]
+
+  # Initialization of edge attributes
+  edge [color = black,
+        rel = yields,
+        fontname = Helvetica]
+
+   Abono -> Cosecha
+   Terreno -> Abono
+   Clima -> Abono
+   Clima -> Cosecha
+   Variedad -> Plaga
+   Plaga -> Cosecha
+   Plaguicida -> Plaga
+   Variedad -> Cosecha
+}
+
