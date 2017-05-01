@@ -7,13 +7,10 @@ require(xgboost)
 model.xgb <- function(data,
                       labels,
                       params){
-   
-   num_class <- length(levels(labels))
-   labels <- factor(labels, 1:num_class -1)
 
    matrix.xgb <- xgb.DMatrix(data = as.matrix(data),
-                             label = as.numeric(labels)-1)
-
+                             label = labels)
+   num_class <- length(unique(labels))
    nrounds <- params["nrounds"]
    params <- append(params[-which(names(params)=="nrounds")],
                     list(objective = "multi:softmax"))
