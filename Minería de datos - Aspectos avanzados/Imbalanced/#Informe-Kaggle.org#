@@ -1,0 +1,166 @@
+#+MACRO: NEWLINE @@latex:\\@@ @@html:<br>@@
+
+#+TITLE: Informe Kaggle - Imbalanced
+#+SUBTITLE: Minería de datos: Aspectos avanzados
+#+AUTHOR: Jacinto Carrasco Castillo {{{NEWLINE}}}  Usuario Kaggle: *JacintoCC* 
+#+LATEX_HEADER: \usepackage[spanish,es-tabla]{babel}
+#+LANGUAGE: es 
+
+#+begin_src emacs-lisp :results silent
+  (org-babel-do-load-languages 
+   'org-babel-load-languages
+   '((R . t) 
+     (latex . t)))
+
+(defun shk-fix-inline-images () 
+  (when org-inline-image-overlays 
+    (org-redisplay-inline-images))) 
+#+end_src 
+
+* Consideraciones iniciales
+
+- Se incluye la tabla con los resultados únicamente después de
+  advertir que la medida para la competición debía calcularse subiendo
+  las probabilidades de pertenencia a la clase positiva y no las
+  etiquetas predichas.
+- Antes de este hecho, el área bajo la curva tanto en validación
+  cruzada como en las subidas a Kaggle estaban en torno a $0.73$.
+ 
+* Bitácora
+
+** Exploración inicial
+
+En un primer momento se optó por ver los resultados obtenidos por
+diferentes modelos de clasificación y los métodos para el balanceo de
+la biblioteca =unbalanced=. Para reducir la incertidumbre asociada a
+la semilla y al conjunto de test de Kaggle, y así obtener una
+puntuación final en la parte oculta del test, se ha programado una
+función de validación cruzada a la que le pasamos los métodos de
+clasificación y preprocesamiento. 
+
+Los algoritmos considerados han sido =randomForest=, =xgboost=, =SVM=
+y =bagging=. Los preprocesamientos para el balanceo de clases que
+ofrece el paquete =unbalanced= son: Tomek links, SMOTE, sobremuestreo,
+bajomuestreo, CNN y OSS. El mejor resultado obtenido con la
+combinación de estos algoritmos calculando las clases de las
+instancias fue de 0.73886 para la combinación SVM (con base radial) y
+CNN como algoritmo para balancear las clases. Para realizar la
+agregación de varios métodos, se realizó una votación entre las
+predicciones de varios modelos (SMOTE, OSS, CNN) llegando así hasta
+0.7647.
+
+Si nos fijamos en los datos disponibles, la mayoría de los atributos
+son de tipo numérico y en cambio otros, son representados únicamente
+por enteros, con lo que podríamos pensar que son de tipo
+categórico. Sin embargo, los resultados obtenidos al pasar estas
+variables a tipo binario han sido peores, con lo que consideraremos
+que hay una relación de orden entre las variables y las mantendremos
+en formato numérico.
+
+** Paso a cálculo con probabilidades.
+
+Una vez que se detectó que había que subir probabilidades en lugar de
+las etiquetas, el AUC en Kaggle subió a 0.7887 con el modelo =xgboost=
+y =SMOTE= como preprocesamiento. Tras esta primera subida, se
+repitieron los experimentos programados previamente para obtener una
+medida realista de la situación en la que nos encontrábamos. El AUC
+obtenido en validación cruzada en este momento era de 0.84, mientras
+que en Kaggle era de 0.82, siendo el mejor método de aprendizaje =SVM=
+con base radial. Como vemos en la tabla, no hay claramente un
+algoritmo para balancear las clases que funcione mejor tanto en Kaggle
+como en validación cruzada.
+
+** Filtro de ruido.
+
+Debido a que el cociente entre el número de instancias de cada clase
+no es muy elevado, se considera también la posibilidad de que el
+balanceamiento no sea necesario, en cuyo caso se pretende reducir el
+ruido de las instancias, lo que lleva a alcanzar de manera más
+frecuente el 0.83 en validación cruzada y en Kaggle, con lo que se
+considera una buena opción. 
+
+
+
+
+* Tabla de resultados 
+#+LaTeX: \captionof{table}{Tabla de resultados}
+#+LaTeX: \noindent\makebox[\textwidth]{%
+#+TBLNAME: exp
+#+ATTR_LATEX: :environment tabular
+| Fecha   | Algoritmo | Comentarios                   |    AUC CV | AUC (Pública) | AUC (Privada) |
+|---------+-----------+-------------------------------+-----------+---------------+---------------|
+| 28/03   | XGB       | SMOTE-Probabilidades          |           |       0.78873 |       0.78874 |
+| 29/03   | Varios    | Tomek-Links                   |       0.6 |               |               |
+| 29/03   | RF        | NCL                           |     0.841 |       0.81093 |       0.81617 |
+| 29/03   | SVM       | NCL                           |     0.842 |       0.81051 |       0.81586 |
+| 29/03   | Poll      | NCL                           |           |       0.81119 |       0.81648 |
+| 29/03   | SVM       | Sin preproc, radial           |     0.840 |       0.82293 |       0.81435 |
+| 29/03   | Poll      | Sin preproc                   |           |       0.82619 |       0.81983 |
+| 01/04   | SVM       | NCL. Cat. como dummy          |      0.83 |               |               |
+| 01/04   | SVM       |                               |     0.839 |       0.82293 |       0.81434 |
+| *01/04* | *SVM*     | *Radial. Filtro*              | 0.8363870 |       0.83015 |       0.81875 |
+| 01/04   | SVM       | Filtro Oversampling           |           |       0.82583 |       0.81548 |
+| 01/04   | SVM       | Filtro NCL                    |  0.837498 |       0.82904 |       0.82012 |
+| 01/04   | SVM       | Filtro SMOTE                  | 0.8298271 |               |               |
+| 01/04   | Poll      | Predicciones                  |           |       0.83015 |        0.8175 |
+| 02/04   | Poll      | Predicciones                  |           |       0.82730 |       0.82115 |
+| 02/04   | SVM       | Filtro Undersampling          | 0.8254918 |               |               |
+| 02/04   | SVM       | Filtro Tomek                  | 0.8285871 |               |               |
+| 02/04   | SVM       | Filtr consenso. NCL.          |           |       0.46317 |       0.46518 |
+| 03/04   | SVM       | Filtro consenso. OSS          |      0.84 |       0.82214 |       0.82546 |
+| 03/04   | SVM       | OSS. Filtro consenso.         | 0.8387642 |       0.81645 |       0.81651 |
+| 03/04   | SVM       | Oversampling Filtro           | 0.8395812 |       0.80114 |       0.80472 |
+| 03/04   | SVM       | SMOTE Filtro                  | 0.8317622 |               |               |
+| 03/04   | SVM       | Overs. Filtro (consenso = F)  | 0.8339775 |               |               |
+| 04/04   | SVM       | SMOTE programado. Filtro.     | 0.8387611 |       0.81587 |       0.80336 |
+| 04/04   | Poll      |                               |           |       0.83151 |       0.82122 |
+| 05/04   | SVM       | SMOTE + Filtro                |           |       0.81558 |       0.83165 |
+| 05/04   | SVM       | Filtro + Unbalanced + Pesos   | 0.8423428 |       0.81741 |       0.82427 |
+| 05/04   | SVM       | Unbalanced + Filtro + Pesos   | 0.8408175 |       0.81913 |       0.82172 |
+| 06/04   | SVM       | CNN + Filtro                  |     0.832 |       0.82930 |       0.82395 |
+| 06/04   | Poll      |                               |           |       0.82738 |       0.82788 |
+| 06/04   | SVM       | NCL + Filtro                  |     0.836 |               |               |
+| *06/04* | *SVM*     | *Filtro + NCL*                |     0.837 |       0.83176 |       0.82266 |
+| 06/04   | SVM       | Filtro + NCL                  |      0.84 |       0.82337 |       0.82039 |
+| 07/04   | SVM       | Filtro + NCL consenso + Pesos |           |       0.81349 |       0.81725 |
+| 07/04   | SVM       | Filtro + NCL consenso + Pesos |           |       0.81595 |       0.81819 |
+#+LaTeX: }
+
+
+
+#+NAME: grafico
+#+BEGIN_SRC R :var data=exp  :exports results :results output graphics :file grafico.pdf
+library(reshape2)
+library(ggplot2)
+library(dplyr)
+
+data <- data.frame(CV = data[ ,4],
+                   public = data[ ,5],
+		   private = data[ ,6],
+		   selected = c(rep(F,9),T,rep(F,21),T,rep(F,3)))
+
+
+sd.data <- sd(c(data$CV,data$public, data$private), na.rm = T)
+p
+data <- data %>%
+        subset(apply(select(data, CV, public, private),1, function(x) any(x>0.8, na.rm=T))) 
+mean.data <-  apply(select(data, CV, public, private),1, function(x) mean(x, na.rm=T))
+
+data <- data %>%
+	mutate(mean.data = mean.data,
+	       id = seq(nrow(data)))
+
+data <- melt(data, id.vars = c("id", "selected", "mean.data"))
+print(data$min.rib)
+grafico <- ggplot(data) + 
+ geom_point(aes(x = id, y = value, color = variable, stroke = selected)) +
+ geom_line(aes(x = id, y = mean.data))
+
+print(grafico)
+#+END_SRC
+
+#+CAPTION: AUC de experimentos con AUC>0.8
+#+RESULTS: grafico
+[[file:grafico.pdf]]
+
+

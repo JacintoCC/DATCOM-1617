@@ -25,9 +25,7 @@ cross.validation <- function(data,
                              folds,
                              params,
                              measure = accuracy){
-   
-   labels <- as.numeric(labels) - 1
-   params <- as.data.frame(params)
+   params <- as.data.frame(params) 
    
    # Aplicamos la función por las particiones del modelo 
    results <- apply(params, 1, function(param.combination){

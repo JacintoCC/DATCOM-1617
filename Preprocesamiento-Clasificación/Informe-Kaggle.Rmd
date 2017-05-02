@@ -2,19 +2,13 @@
 title: "Informe de competición en Kaggle"
 subtitle: "Minería de datos: preprocesamiento y clasificación"
 author: "Jacinto Carrasco Castillo"
-date: "16 de febrero de 2017"
-output: html_document
+date: "14 de abril de 2017"
+output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, fig.align = "center")
 library(ggplot2)
-library(Hmisc)
-library(mice)
-library(robCompositions)
-library(VIM)
-library(caret)
-library(randomForest)
 ```
 
 # Preprocesamiento 

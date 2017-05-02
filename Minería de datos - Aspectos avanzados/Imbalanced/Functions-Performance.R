@@ -9,6 +9,7 @@ accuracy <- function(predictions,
    mean(predictions == labels)
 }
 
+require(pROC)
 #' @function AUC
 #' 
 #' @param predictions
@@ -17,8 +18,5 @@ accuracy <- function(predictions,
 #' @return AUC
 AUC <- function(predictions, 
                      labels){
-   t <- table(predictions, labels)
-   AUC <- (1+t[1,1]-t[1,2])
-   
-   return(AUC)
+   auc(roc(labels,predictions))
 }

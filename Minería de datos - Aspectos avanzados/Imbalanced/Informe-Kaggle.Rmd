@@ -97,6 +97,5 @@ for(i in 1:length(data.tra.wo.imp)){
 
 
 ```{r}
-levels(data.tst$HORA) <- sub(",",".",levels(data.tst$HORA))
-
+ggplot(data.tra, aes(x=ATSCHL, y = ANXMAT, color =PV1MATH)) + geom_point()
 ```

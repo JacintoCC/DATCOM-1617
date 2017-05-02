@@ -1,24 +1,19 @@
 # MODELO 1
 
-# Sin columnas CARRETERA y ACOND_CALZADA
-# Imputación de valores perdidos. 
 # Random Forest
 
-library(xgboost)
-source("Functions-Models.R")
+library(randomForest)
 
 data.tra <- read.csv("Data/pv1math-tra.csv")
 data.tst <- read.csv("Data/pv1math-tst.csv")
 
 data.tra$PV1MATH <- as.factor(data.tra$PV1MATH)
 
-model <- model.xgb(data.tra[ ,-ncol(data.tra)],
-                   data.tra[ , ncol(data.tra)],
-                   params = c(nrounds = 50))
+model.rf <- randomForest(PV1MATH ~ ., data = data.tra)
 
-predicted.xgb <- predict(model, as.matrix(data.tst))
-predicted.xgb <- data.frame(id = 1:length(predicted.xgb), prediction = predicted.xgb)
-write.csv(predicted.xgb, file = "Predictions/predictions.xgb.csv",
+predicted.rf <- predict(model.rf, data.tst)
+predicted.rf <- data.frame(id = 1:length(predicted.rf), prediction = predicted.rf)
+write.csv(predicted.rf, file = "Predictions/predictions.rf.csv",
           quote = F, row.names = F)
 
 

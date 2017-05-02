@@ -1,0 +1,365 @@
+#+TITLE: Trabajo autónomo II: Minería de flujo de datos
+#+SUBTITLE: Máster en Ciencia de Datos e Ingeniería de Computadores - Minería de flujo de datos y series temporales
+#+AUTHOR: Jacinto Carrasco Castillo - jacintocc@correo.ugr.es
+#+DATE: 5 de mayo de 2017
+
+#+begin_src emacs-lisp :results silent :exports none
+(require 'ob-sh)
+(org-babel-do-load-languages 'org-babel-load-languages 
+'((shell . t)
+  (R . t) 
+  (latex . t)))
+#+end_src 
+
+
+* Parte teórica
+
+** Pregunta 1
+
+Descripción del problema de clasificación, los clasificadores
+utilizados en los experimentos de la sección 2, y en qué consisten los
+diferentes modos de evaluación/validación en flujos de datos.
+
+** Pregunta 2 
+
+Explicar en qué consiste el problema de **concept drift**
+y qué técnicas conoce para resolverlo en clasificación.
+
+
+
+* Parte práctica
+
+** Entrenamiento offline y evaluación posterior
+- Entrenar un clasificador HoeffdingTree offline (aprender modelo
+  únicamente),sobre un total de 1.000.000 de instancias procedentes de
+  un flujo obtenido por el generador WaveFormGenerator con semilla
+  aleatoria igual a 2. Evaluar posteriormente (sólo evaluación) con
+  1.000.000 de instancias generadas por el mismo tipo de generador,
+  con semilla aleatoria igual a 4. Repita el proceso varias veces con
+  la misma semilla en evaluación y diferentes semillas en
+  entrenamiento. Anotar los valores de porcentajes de aciertos en la
+  clasificación y estadístico Kappa.
+
+#+NAME: Learn Model HoeffdingTree
+#+CAPTION: "Aprendizaje HoeffdingTree offline"
+#+BEGIN_SRC bash
+java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+  "LearnModel -l trees.HoeffdingTree -s (generators.WaveformGenerator -i 2) \
+  -m 1000000 -O model1.moa"
+#+END_SRC
+
+
+#+NAME: Evaluate Model HoeffdingTRee 
+#+CAPTION: "Aprendizaje y evaluación HoeffdingTree"
+#+BEGIN_SRC  bash
+for i in 2 10 15 20 25
+do
+   java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+      "EvaluateModel \
+         -m (LearnModel -l trees.HoeffdingTree \
+	    -s (generators.WaveformGenerator -i $i) -m 1000000) \
+	 -s (generators.WaveformGenerator -i 4) -i 1000000"
+done
+#+END_SRC
+
+#+TBLNAME: hoefftree
+#+RESULTS: Evaluate Model HoeffdingTRee
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,512    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 76,77     |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 76,778    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,707    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 1.910.496 |            |
+| tree            | size       | (nodes)   | =         | 309       |           |            |
+| tree            | size       | (leaves)  | =         | 155       |           |            |
+| active          | learning   | leaves    | =         | 155       |           |            |
+| tree            | depth      | =         | 12        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.191,123 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,011     |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,578    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 76,869    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 76,877    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,807    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 2.055.712 |            |
+| tree            | size       | (nodes)   | =         | 335       |           |            |
+| tree            | size       | (leaves)  | =         | 168       |           |            |
+| active          | learning   | leaves    | =         | 168       |           |            |
+| tree            | depth      | =         | 13        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.102,048 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,011     |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,648    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 76,974    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 76,982    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,912    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 1.917.504 |            |
+| tree            | size       | (nodes)   | =         | 313       |           |            |
+| tree            | size       | (leaves)  | =         | 157       |           |            |
+| active          | learning   | leaves    | =         | 157       |           |            |
+| tree            | depth      | =         | 11        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.078,268 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,011     |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,568    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 76,853    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 76,862    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,791    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 1.953.480 |            |
+| tree            | size       | (nodes)   | =         | 319       |           |            |
+| tree            | size       | (leaves)  | =         | 160       |           |            |
+| active          | learning   | leaves    | =         | 160       |           |            |
+| tree            | depth      | =         | 13        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         |  12.074,85 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,011     |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,646    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 76,971    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 76,979    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,909    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 1.880.568 |            |
+| tree            | size       | (nodes)   | =         | 309       |           |            |
+| tree            | size       | (leaves)  | =         | 155       |           |            |
+| active          | learning   | leaves    | =         | 155       |           |            |
+| tree            | depth      | =         | 12        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 11.997,987 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,011     |            |
+|                 |            |           |           |           |           |            |
+
+#+NAME: output hoefftre
+#+BEGIN_SRC R :var data=hoefftree :exports results :results output latex 
+library(xtable)
+seeds <- c(2,10,15,20,25)
+acc <- data[seq(2, by = 14, length.out = 5), 5]
+acc <- as.numeric(gsub(",",".",acc))
+kappa <- data[seq(3, by = 14, length.out = 5), 5]
+kappa <- as.numeric(gsub(",",".",kappa))
+
+df <- data.frame("Seed" = c(seeds,"media"), 
+                 "Acc" = c(acc,mean(acc)),
+                 "Kappa" = c(kappa,mean(kappa)))
+xtable(df)
+#+END_SRC
+
+#+RESULTS: output hoefftre
+#+BEGIN_EXPORT latex
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Tue May  2 18:02:47 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+ & Seed & Acc & Kappa \\ 
+  \hline
+1 & 2 & 84.51 & 76.77 \\ 
+  2 & 10 & 84.58 & 76.87 \\ 
+  3 & 15 & 84.65 & 76.97 \\ 
+  4 & 20 & 84.57 & 76.85 \\ 
+  5 & 25 & 84.65 & 76.97 \\ 
+  6 & - & 84.59 & 76.89 \\ 
+   \hline
+\end{tabular}
+\end{table}
+#+END_EXPORT
+
+- Repetir el paso anterior, sustituyendo el clasificador por
+  HoeffdingTree adaptativo.
+
+#+NAME: Evaluate Model Tree Adaptativo
+#+CAPTION: "Aprendizaje y evaluación HoeffdingTree Adaptativo"
+#+BEGIN_SRC  bash
+for i in 2 10 15 20 25
+do
+   java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+      "EvaluateModel \
+         -m (LearnModel -l trees.AdaHoeffdingOptionTree  \
+	    -s (generators.WaveformGenerator -i $i) -m 1000000) \
+	 -s (generators.WaveformGenerator -i 4) -i 1000000"
+done
+#+END_SRC
+
+#+TBLNAME: adaphoefftree
+#+RESULTS: Evaluate Model Tree Adaptativo
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,734    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 77,102    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 77,111    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 77,041    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 6.458.616 |            |
+| tree            | size       | (nodes)   | =         | 1.036     |           |            |
+| tree            | size       | (leaves)  | =         | 520       |           |            |
+| active          | learning   | leaves    | =         | 520       |           |            |
+| tree            | depth      | =         | 12        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.269,708 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,012     |            |
+| maximum         | prediction | paths     | used      | =         | 5         |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,766    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 77,15     |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 77,158    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 77,089    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 7.967.792 |            |
+| tree            | size       | (nodes)   | =         | 1.294     |           |            |
+| tree            | size       | (leaves)  | =         | 649       |           |            |
+| active          | learning   | leaves    | =         | 649       |           |            |
+| tree            | depth      | =         | 13        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.127,088 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,012     |            |
+| maximum         | prediction | paths     | used      | =         | 5         |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,696    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 77,045    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 77,054    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,984    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 7.566.496 |            |
+| tree            | size       | (nodes)   | =         | 1.226     |           |            |
+| tree            | size       | (leaves)  | =         | 615       |           |            |
+| active          | learning   | leaves    | =         | 615       |           |            |
+| tree            | depth      | =         | 11        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.152,898 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,012     |            |
+| maximum         | prediction | paths     | used      | =         | 4         |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,558    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 76,839    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 76,848    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 76,777    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 6.809.480 |            |
+| tree            | size       | (nodes)   | =         | 1.108     |           |            |
+| tree            | size       | (leaves)  | =         | 556       |           |            |
+| active          | learning   | leaves    | =         | 556       |           |            |
+| tree            | depth      | =         | 13        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.097,252 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,012     |            |
+| maximum         | prediction | paths     | used      | =         | 4         |            |
+| classified      | instances  | =         | 1.000.000 |           |           |            |
+| classifications | correct    | (percent) | =         | 84,728    |           |            |
+| Kappa           | Statistic  | (percent) | =         | 77,094    |           |            |
+| Kappa           | Temporal   | Statistic | (percent) | =         | 77,102    |            |
+| Kappa           | M          | Statistic | (percent) | =         | 77,032    |            |
+| model           | training   | instances | =         | 1.000.000 |           |            |
+| model           | serialized | size      | (bytes)   | =         | 6.520.240 |            |
+| tree            | size       | (nodes)   | =         | 1.048     |           |            |
+| tree            | size       | (leaves)  | =         | 526       |           |            |
+| active          | learning   | leaves    | =         | 526       |           |            |
+| tree            | depth      | =         | 12        |           |           |            |
+| active          | leaf       | byte      | size      | estimate  | =         | 12.245,171 |
+| inactive        | leaf       | byte      | size      | estimate  | =         |        0.0 |
+| byte            | size       | estimate  | overhead  | =         | 1,012     |            |
+| maximum         | prediction | paths     | used      | =         | 5         |            |
+
+
+#+NAME: output adaphoefftree
+#+BEGIN_SRC R :var data=adaphoefftree :exports results :results output latex 
+library(xtable)
+seeds <- c(2,10,15,20,25)
+acc <- data[seq(2, by = 15, length.out = 5), 5]
+acc <- as.numeric(gsub(",",".",acc))
+kappa <- data[seq(3, by = 15, length.out = 5), 5]
+kappa <- as.numeric(gsub(",",".",kappa))
+
+df <- data.frame("Seed" = c(seeds,"media"), 
+                 "Acc" = c(acc,mean(acc)),
+                 "Kappa" = c(kappa,mean(kappa)))
+xtable(df)
+#+END_SRC
+
+#+RESULTS: output adaphoefftree
+#+BEGIN_EXPORT latex
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Tue May  2 18:12:24 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+ & Seed & Acc & Kappa \\ 
+  \hline
+1 & 2 & 84.73 & 77.10 \\ 
+  2 & 10 & 84.77 & 77.15 \\ 
+  3 & 15 & 84.70 & 77.05 \\ 
+  4 & 20 & 84.56 & 76.84 \\ 
+  5 & 25 & 84.73 & 77.09 \\ 
+  6 & media & 84.70 & 77.05 \\ 
+   \hline
+\end{tabular}
+\end{table}
+#+END_EXPORT
+
+- Responda a la pregunta: ¿Cree que algún clasificador es
+  significativamente mejor que el otro en este tipo de problemas?
+  Razone su respuesta.
+
+Nope. 
+
+** Entrenamiento online 
+
+- Entrenar un clasificador HoeffdingTree online, mediante el método Interleaved
+Test-Then-Train, sobre un total de 1.000.000 de instancias procedentes
+de un flujo obtenido por el generador WaveFormGenerator con semilla
+aleatoria igual a 2, con una frecuencia de muestreo igual a
+10.000. Pruebe con otras semillas aleatorias. Anotar los valores de
+porcentajes de aciertos en la clasificación y estadístico Kappa.
+
+#+NAME: HoeffdingTree online
+#+BEGIN_SRC  bash
+for i in 2 10 15 20 25
+do
+   java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+      "EvaluateModel \
+         -m (LearnModel -l trees.AdaHoeffdingOptionTree  \
+	    -s (generators.WaveformGenerator -i $i) -m 1000000) \
+	 -s (generators.WaveformGenerator -i 4) -i 1000000"
+done
+#+END_SRC
+
+-  Repetir el paso anterior, sustituyendo el clasificador por HoeffdingTree
+adaptativo.
+
+- Responda a la pregunta: ¿Cree que algún clasificador es mejor que el otro en
+este tipo de problemas? Razone su respuesta.
+
+
+** Entrenamiento online en datos con /concept drift/, incluyendo mecanismos para olvidar instancias pasadas.
+
+1.  Repita la experimentación del apartado anterior, cambiando el método de
+evaluación “Interleaved Test-Then-Train” por el método de evaluación
+“Prequential”, con una ventana deslizante de tamaño 1.000.
+
+2.  ¿Qué efecto se nota en ambos clasificadores? ¿A qué es debido? Justifique los
+cambios relevantes en los resultados de los clasificadores
+
+** Entrenamiento online en datos con concept drift, incluyendo mecanismos para reinicializar modelos tras la detección de cambios de concepto.
+
+1. Repita la experimentación del apartado 2.3, cambiando el modelo (learner) a un
+clasificador simple basado en reemplazar el clasificador actual cuando se detecta
+un cambio de concepto (SingleClassifierDrift). Como detector de cambio de
+concepto, usar el método DDM con sus parámetros por defecto. Como modelo a
+aprender, usar un clasificador HoeffdingTree.
+
+2.  Repita el paso anterior cambiando el clasificador HoeffdingTree por un
+clasificador HoeffdingTree adaptativo.
+
+3. Responda a la siguiente pregunta: ¿Qué diferencias se producen entre los
+métodos de los apartados 2.3, 2.4 y 2.5? Explique similitudes y diferencias entre
+las diferentes metodologías, y discuta los resultados obtenidos por cada una de
+ellas en el flujo de datos propuesto.
+
+* Trabajo guiado

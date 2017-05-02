@@ -1,0 +1,264 @@
+#+TITLE: Preprocesamiento y clasificación
+#+SUBTITLE: Informe competición de tráfico
+#+AUTHOR: Jacinto Carrasco Castillo
+
+#+begin_src emacs-lisp :exports none
+  (org-babel-do-load-languages 
+   'org-babel-load-languages
+   '((R . t) 
+     (latex . t)))
+
+(defun shk-fix-inline-images () 
+  (when org-inline-image-overlays 
+    (org-redisplay-inline-images))) 
+
+(after-loading 'org 
+  (add-hook 'org-babel-after-execute-hook 'shk-fix-inline-images)) 
+#+end_src 
+
+* Cuestiones iniciales
+
+- El usuario de Kaggle utilizado para la competición es *JacintoCC*.
+- Antes de las operaciones que involucran procesos aleatorios, como
+  algoritmos que incuyan pasos aleatorios o la creación de
+  particiones, fijaremos la semilla a utilizar, utilizando
+  =set.seed(3141592)=. Así reducimos la influencia de la semilla en
+  los resultados y la comparación entre métodos se basa únicamente en
+  los algoritmos o preprocesamientos utilizados.
+- Aunque a la luz de las puntuaciones obtenidas en la parte privada
+  del conjunto de test de Kaggle, ninguno de los procesos y enfoques
+  ha resultado efectivo o siquiera significativo, las decisiones se
+  han ido basando en el /accuracy/ obtenido en validación cruzada y
+  según la puntuación de la parte pública del test de Kaggle. 
+
+El proceso general realizado ha consistido en la experimentación
+realizada en primer lugar con los datos de entrada, de los que
+obtenemos el error de validación cruzada para el modelo. Este error
+será obtenido para todos los modelos con las mismas particiones que se
+han generado haciendo uso del paquete =caret= con la función
+=createDataPartition=, a la que le indicamos que generaremos 5
+particiones debido al tamaño del conjunto de datos. En una segunda
+fase, una vez que hemos realizado algún ajuste sobre los parámetros o
+encontramos una transformación que aporte algo a la resolución del
+problema, se entrenará el algoritmo con todos los datos de
+entrenamilento y se harán las predicciones sobre los datos de test, y
+obtendremos el error en la plataforma Kaggle.
+
+** Preprocesamiento común a los experimentos
+
+Se incluye aquí una serie de preprocesamientos comunes a la mayoría de
+los experimentos realizados durante el tiempo de la práctica:
+- Debido a que el algoritmo que más se ha aplicado al problema ha sido
+  =XGB= y se trata de un problema de clasificación multiclase, se ha
+  cambiado la variable de salida por un entero entre el 0 y el 6, para
+  adecuarnos al formato requerido por este método. Antes de subir las
+  predicciones a la plataforma, se ha realizado la transformación
+  inversa. 
+- Para la variable HORA sustituiremos en la cadena de texto que
+  significa la hora la coma por el punto, así podremos pasar a
+  variables numéricas cuando sea necesario.
+- Debido a que obtenemos un error en la aplicación de algunos métodos
+  porque hay clases de los datos de test que no están en los datos de
+  entrenamiento, consideraremos de forma general que teníamos un
+  conocimiento previo sobre las variables y realizamos la modificación
+  de estos datos (únicamente indicando que también existen
+  los niveles que no se dan). Las variables con conflicto son 
+  - *ISLA*: En los datos de entrenamiento no hay ninguna instancia que
+    contenga en la variable *ISLA* la entrada de HIERRO, aunque si
+    tenemos una variable que se llame *ISLA* podemos considerar que
+    HIERRO es un valor válido incluso antes de observar los valores de
+    test.
+  - *MEDIDAS ESPECIALES*: En los datos de test no hay ninguna instancia
+    que contenga como valor para la variable *MEDIDAS ESPECIALES* la
+    entrada de *HABILITACIÓN ARCÉN* y sin embargo, puesto que sí se daba
+    en los datos de entrenamiento, consideraremos válido agregar este
+    valor a las propiedades de esta variable.
+- La variable *Carretera* ha sido descartada de todos los experimentos
+  por su alto número de valores perdidos y el elevado número de
+  posibles valores. Esto hace pensar que tratar de imputar los valores
+  de esta variable conllevaría un elevado esfuerzo y que sin embargo
+  la mejora sería pequeña, dado que habrá pocas instancias con cada
+  una de las carreteras.
+
+* Proceso llevado a cabo
+
+
+Para ver cuál es la situación de la que partimos, observamos el error
+antes de realizar ningún preprocesamiento.  Como sabemos que los
+métodos basados en árboles son robustos a los datos con poco
+preprocesamiento ya que solucionan problemas como el desbalanceamiento
+o la selección de características, nos planteamos usar los métodos
+=randomForest= y =xgboost=. Cada uno de estos métodos requiere para su
+utilización un formato concreto:
+
+- Para el primero de los métodos, es necesario que el conjunto de
+  datos no contenga valores perdidos, lo que realizamos usando el
+  paquete =mice=.
+- Además de la mencionada transformación de la variable de salida,
+  para usar =xgboost= necesitamos que las variables sean numéricas con
+  lo que convertimos cada variable categórica en tantas variables
+  binarias /dummy/ como posibles valores categóricos, donde
+  encontramos un 1 si el valor de la instancia para esa variable
+  coincide con el valor de la nueva variable, y 0 si no.
+
+
+** Imputación de valores
+
+*** Paquete =mice=
+
+En los experimentos iniciales se realizó la imputación de manera
+incorrecta pues se realizó en primer lugar para los datos de
+entrenamiento, y posteriormente para los de test, pero el paquete
+=mice= no ofrece la posibilidad de guardar la información de la
+imputación para el primer conjunto y usarla en la imputación de los
+datos de test, con lo que la imputación puede resultar sesgada en
+favor de la distribución de los datos de test. Por lo tanto, la forma
+correcta de realizarla sería realizar primero la imputación para los
+valores de entrenamiento (así no estaríamos introduciendo información
+de los datos de test en los de entrenamiento), y una vez hecho esto,
+agregar los datos de test a los datos ya completos, e imputar los
+datos de test, tras lo cual volvemos a separar los datos. 
+
+Además, por el elevado número de valores perdidos, se descartó la
+variable *Acondicionamiento de calzada*, que puede sin embargo aportar
+información como vemos en el siguiente apartado.
+Sin embargo, los resultados obtenidos sin la imputación de valores con
+=xgboost= han sido mejores, con lo que no se ha considerado que la
+imputación realizada por =mice= fuera la mejor posible.
+
+*** Imputaciones generalizadas.
+
+Si observamos los posibles valores de las variables, para la mayoría
+de variables hay un posible valor que hace referencia a que no se
+dispone de la suficiente información: /Otro tipo/, /Nada especial/,
+/Otro/... También se ha realizado la imputación de todos los valores
+perdidos a las categorías "/Otro/", aunque no se han obtenido mejoras,
+lo que nos conduce a que quizá haya muchos valores perdidos que no es
+que se correspondan con esta categoría, sino que, por las
+circunstancias, no se aplique la variable recogida. 
+
+*** Imputación por la distribución de valores perdidos.
+
+Como la imputación con =mice= ha resultado infructífera, nos fijamos
+en la distribución de los valores perdidos y se intuye que puede
+resultar significativa. 
+
+Por ejemplo, observamos como la variable *Acondicionamiento de
+calzada* tiene una importante tasa de estos valores. Si nos fijamos en
+la distribución de estos valores por *Tipo de Vía*, vemos que en las
+instancias que pertenecen a las clases de /Autovía/ y /Autopista/
+tienen un mayor porcentaje de valores perdidos que otras de las
+categorías. Esto es algo llamativo, ya que en cuanto a los posibles
+valores de la variable *Acondicionamiento de calzada*, no se ve
+ninguno que sea aplicable a las vías de alta velocidad, a excepción de
+/Otro tipo/ o el de /Nada especial/. Por tanto realizamos una
+imputación manual exclusivamente para los valores con estos valores en
+la variable de *Tipo de Vía*. Según los resultados que tenemos tanto
+en validación cruzada como en el test que obtenemos en la plataforma
+Kaggle son los mejores obtenidos hasta el momento, con lo que
+consideramos que la distribución de los NAs tiene una información
+relevante. En la observación de las instancias con *Tipo de vía* de
+alta velocidad existen instancias que muestran que el accidente ha
+sido en un paso de peatones o un cruce, algo que sabemos que no existe
+en estas vías, aunque mantendremos aún estas instancias que podrían
+contener ruido.
+
+Mediante la observación de la distribución de los valores perdidos
+realizamos algunas imputaciones más mediante el siguiente
+razonamiento.
+- Según el número de valores perdidos, hay un tipo de accidente que
+  aumenta su proporción en mayor medida, así como una mayor proporción
+  de valores perdidos en una de las variables. 
+  - Para las instancias con un único valor perdido, el mayor
+    incremento se da en el *Tipo Accidente* /Salida Vía/.
+  
+- Condicionando al tipo de accidente que más aumenta su proporción,
+  miramos el atributo y valor que más aumenta en proporción con
+  respecto a la distribución general.  
+  - Una vez que filtramos las instancias que son salidas de vía, el
+    mayor incremento porcentual se da en los *Tipos de vía* /Autopista/,
+    /Autovía/ y /Vía convencional/, para los que el tipo de
+    *Acondicionamiento de calzada* que más aumenta es /Otro tipo/.
+- Por tanto, la imputación que realizamos será para la variable
+  *Acondicionamiento de calzada* para estos *Tipo de vía* a /Otro
+  tipo/.
+
+De manera análoga, para la variable *Acond Calzada* se imputa el valor
+/Nada especial/ para el *Tipo de vía* /Otro tipo/. 
+
+** Agregación de métodos
+
+Aunque a posteriori podemos comprobar que no ha sido muy eficaz debido
+al gran parecido de todas las subidas, se han realizado varias
+/submissions/ donde para cada instancia se ha comparado el valor
+predicho por varios métodos, decantándose por el método con mejor
+puntuación en Kaggle siempre que los otros dos métodos agregados no
+predijesen el mismo valor de salida. 
+
+Debido a que se ha considerado mejores aquellas predicciones con mayor
+puntuación en Kaggle, era de esperar que la mejora no se
+correspondiese con una mejora en la misma proporción en el /accuracy/
+en la parte privada.
+
+* Subidas seleccionadas
+
+Comentaremos aquí las predicciones subidas a Kaggle. 
+
+- 25/03 Votación RF
+
+Se realiza una votación entre varios modelos de =xgboost= y
+=randomForest=.
+
+- 29/03 Filtro Ruido
+
+Se realiza una imputación sobre *Acondicionamiento de calzada*, una
+imputación con =mice= y un filtro de instancias ruidosas mediante
+=IPF=.
+
+- 30/03 Número NA
+
+Se incluye el número de variables con NAs.
+
+- 31/03 Imputación Acondicionamiento Aceras
+
+Se realiza una imputación más exhaustiva sobre el *Acondicionamiento
+de aceras*.
+
+- 31/03 Votación
+
+Se realiza una votación entre varias de las imputaciones.
+
+* Tabla de resultados
+
+#+CAPTION: Tabla con experimentos
+| Fecha | Alg. | Comentarios         | Acc CV | Acc Kaggle | Sel.       | Acc Privada |
+|-------+------+---------------------+--------+------------+------------+-------------|
+| 19/02 | RF   | Imp. Mice           |        |    0.82958 |            |     0.82716 |
+| 09/03 | XGB  | Imp. Mice           |        |    0.81911 |            |     0.81642 |
+| 09/03 | XGB  | Imp. Mice. 100 r    |        |    0.82731 |            |     0.82442 |
+| 11/03 | XGB  | Imp. Mice. 75 r     |        |    0.83106 |            |     0.82716 |
+| 13/03 | KNN  | K = 7               |        |    0.58546 |            |     0.58374 |
+| 13/03 | -    | Votación KNN.XGB,RF |        |    0.83126 |            |     0.82716 |
+| 21/03 | XGB  | Sin preproc.        | 0.8693 |    0.83205 |            |     0.82827 |
+| 23/03 | XGB  | Imp. Mice.          | 0.8695 |    0.83116 |            |     0.82645 |
+| 23/03 | XGB  | Imp. Manual ACOND.  | 0.8699 |    0.83264 |            |     0.82655 |
+| 24/03 | XGB  | Imp. a cat. "Otros" | 0.8685 |    0.82938 |            |     0.82533 |
+| 24/03 | XGB  | Imp. a cat. "Otros" | 0.8685 |    0.82938 |            |     0.82533 |
+| 25/03 | XGB  | Imp. ACOND + Mice.  | 0.8711 |    0.82849 |            |     0.82746 |
+| 25/03 | XGB  | NAs a False         |        |    0.82849 |            |     0.82746 |
+| 25/03 | -    | Votación RF+Imp     |        |    0.83225 | \checkmark |     0.82706 |
+| 29/03 | XGB  | Imp. a "Otros"      |        |    0.82909 |            |     0.82422 |
+| 29/03 | XGB  | Filtro ruido        |        |    0.83215 | \checkmark |     0.82776 |
+| 29/03 | -    | Votación            |        |    0.83254 |            |     0.82776 |
+| 30/03 | XGB  | Imp. Número NA      | 0.8317 |    0.83254 | \checkmark |     0.82726 |
+| 30/03 | -    | Votación            |        |    0.83333 |            |     0.82756 |
+| 31/03 | XGB  | Imp. Acond.         |  0.832 |    0.83402 | \checkmark |     0.82787 |
+| 31/03 | XGB  | Imp. Aceras         |  0.832 |            |            |             |
+| 31/03 | XGB  | Imp. + mice         |   0.83 |    0.83284 |            |             |
+| 31/03 | XGB  | RF+ Imp+Mice        |        |    0.64207 |            |     0.63092 |
+| 31/03 | XGB  | Mejor con filtrado  |        |    0.83126 |            |     0.82625 |
+| 31/03 | -    | Votación            |        |  *0.83422* | \checkmark |    *0.8287* |
+
+
+
+

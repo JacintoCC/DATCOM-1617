@@ -25,13 +25,12 @@ cross.validation(data   = data.tra.cat[ ,-ncol(data.tra.cat)],
 
 
 results <- cross.validation(data   = data.tra.cat[ ,-ncol(data.tra.cat)],
-                 labels = data.tra.cat[ ,ncol(data.tra.cat)],
-                 model.function = model.xgb,
-                 folds = folds,
-                 params = expand.grid(nrounds = seq(50,100, by = 10), 
-                                      eta = seq(0.1, 0.5, by= 0.1),
-                                      gamma = seq(0, 0.01, by = 0.005),
-                                      max_depth = c(4,6)))
+                            labels = data.tra.cat[ ,ncol(data.tra.cat)],
+                            model.function = model.xgb,
+                            folds = folds,
+                            params = expand.grid(nrounds = seq(50, 70, by = 10), 
+                                                 eta = seq(0.1, 0.3, by= 0.1),
+                                                 gamma = seq(0, 0.01, by = 0.005)))
 
 model.3 <- model.xgb(data   = data.tra.cat[ ,-ncol(data.tra.cat)],
                      labels = as.numeric(data.tra.cat[ ,ncol(data.tra.cat)])-1,
