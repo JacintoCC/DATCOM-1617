@@ -1,0 +1,106 @@
+#+TITLE: Algoritmos de Inteligencia Computacional para abordar problemas de detección de outliers.
+#+SUBTITLE: Propuesta de proyecto de investigación
+#+AUTHOR: Jacinto Carrasco Castillo
+#+OPTIONS: toc:nil
+#+OPTIONS: date:nil
+#+LATEX_HEADER: \bibliographystyle{plain}
+#+LATEX_HEADER: \usepackage[margin=2cm]{geometry}
+
+* Descripción del problema
+
+
+Las nuevas tecnologías y su implantación en
+el sector de la comunicación o los negocios, un flujo creciente de
+datos precisa ser analizado para la extracción de esta información.
+
+En algunas situaciones la generación de un modelo común de
+comportamiento no es suficiente para la resolución de un problema sino
+que necesitamos detectar y obtener conocimiento de los datos que son
+considerados anómalos, es decir, observaciones que se desvían tanto de
+las demás muestras que hacen pensar que han sido generadas por
+otro mecanismo diferente (cite:Hawkins80identification).  Debido a la
+naturaleza del problema, no se pueden aplicar las habituales técnicas
+de minería de datos (cite:Souiden16survey).
+
+Posibles aplicaciones reales de este problema son la monitorización de
+sistemas, la detección de fraude en transacciones bancarias, la
+seguridad en las telecomunicaciones o sistemas de vigilancia
+(cite:Forestiero16self).  Como se puede ver, hay una importante
+cantidad de distintos problemas que se pueden abordar desde estas
+técnicas y requieren de distintas modelizaciones según la naturaleza y
+tipología de los datos disponibles, como por ejemplo datos temporales
+(cite:Gupta14outlier) o trayectorias anómalas (cite:Lee2008trajectory).
+
+De manera general podemos mencionar los distintos enfoques que se han
+aplicado a la detección de anomalías: 
+- Basados en distancias: Usan la distancia a sus vecinos detectar las
+  anomalías. Existen varios modelos que explotan este método
+  (cite:angiulli05outlier). 
+- Basados en densidad: Las técnicas anteriores tienen el problema de
+  la posibilidad de que se detecten como anomalías valores en regiones
+  poco densas y cuyos puntos están a distancias mayores a las
+  habituales y que sin embargo no constituyan valores extraños
+  (cite:Breunig00lof),
+-  Basados en clustering: Entre las técnicas no supervisadas,
+  podríamos considerar la construcción previa de clusters para agrupar
+  datos similares, y que los considerados anómalos sean aquellos que
+  no casen dentro de ninguno de los agrupamientos. 
+-  Basados en test estadísticos: Asumiendo ciertas propiedades de la
+  distribución de los datos, estimamos la probabilidad de
+  pertenencia de cada dato a la población para clasificar como
+  anomalías los valores que arrojen una probabilidad muy baja de
+  pertenencia a la distribución de los datos.
+- Basados en clasificación: En este método de detección supervisada de
+  anomalías, enfocamos el problema como uno de clasificación
+  muydesbalanceada y que necesitaría aplicar técnicas específicas para
+  esta situación.
+-  Basado en ángulos. Para reducir el problema de la alta
+  dimensionalidad de los datos existe la detección de anomalías
+  mediante los ángulos que forman las diferentes observaciones tomadas
+  como vectores (cite:Kriegel08angle).
+
+* Descripción del proyecto de investigación. 
+
+Como hemos visto, existen numerosos enfoques aplicados al problema
+  para problemas o tipos de datos específicos. Así pues, el objetivo
+  principal de este trabajo será la modelización de la generalización
+  de técnicas de detección de anomalías para distintos escenarios,
+  incluyendo la detección de anomalías en conjuntos de datos de gran
+  tamaño para lo que será necesaria la implementación distribuida de
+  estas técnicas. Debido a la reciente expansión a diferentes ámbitos de la
+  investigación este campo, existen pocos conjuntos de datos y métodos
+  de comparación de las diferentes técnicas (cite:Campos16evaluation),
+  por lo que se tendrá en cuenta la aplicación de técnicas
+  estadísticas para la evaluación de las técnicas de detección de
+  anomalías. Posteriormente se podrá realizar la aplicación de estas
+  técnicas para el preprocesamiento en problemas tradicionales
+  mediante la reducción de ruido (cite:Liu04line). En esta dirección
+  existe también propuestas que usan la detección de anomalías para la
+  reducción de incertidumbre en los datos.  
+
+* Planificación y metodología a seguir
+
+- En una primera fase pretendemos realizar una revisión de los
+  diferentes enfoques realizados para la detección de datos anómalos y
+  su eficacia conforme aumenta el volumen de datos.
+- La tarea fundamental consistirá en el diseño e implementación de
+  algoritmos de detección de anomalías para Big Data que sean
+  aplicables a distintos tipos de datos como series temporales o 
+- Para comprobar la eficacia de los algoritmos se aplicará estos
+  modelos en distintos escenarios y conjuntos de datos con anomalías y
+  obtención de los resultados. Se usará también para la
+  reducción de ruido en problemas de clasificación.
+- Se realizará una comparación de los resultados con otras técnicas
+  relevantes presentes en la literatura.
+- Según los resultados obtenidos se variarán los modelos diseñados
+  para ajustar su calidad. Este proceso se repetirá hasta la obtención
+  de unos resultados satisfactorios.
+
+* Conclusiones que se esperan obtener
+
+  Con la realización de este proyecto se espera obtener una serie de
+  algoritmos aplicables en distintos contextos que sean útiles en la
+  detección de anomalías para conjuntos de datos que requieran de
+  técnicas de Big Data.
+
+\bibliography{bibliography}
