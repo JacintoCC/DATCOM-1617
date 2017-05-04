@@ -1,0 +1,109 @@
+% Created 2017-04-16 dom 21:09
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jacinto Carrasco Castillo}
+\date{\today}
+\title{Práctica 4\\\medskip
+\large Modelos gráficos probabilísticos}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo},
+ pdftitle={Práctica 4},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.1.1 (Org mode 9.0.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+
+\section{Descripción del problema}
+\label{sec:orge8cd25a}
+
+El problema consiste en aprender clasificadores para el conjunto de
+datos \texttt{ledLXMn30.arff}.
+
+Este conjunto de datos representa una serie de instancias en las que
+cada una de ellas contiene siete características que se corresponden
+con el estado (binario) de siete segmentos de una pantalla LED y 17
+otros atributos binarios que son irrelevantes para el problema. La
+tarea consiste en predecir el dígito representado en la pantalla LED. 
+
+El conjunto de datos ocntiene ruido, de manera que cada segmento LED
+puede alternar su estado con un \(30\%\) de probabilidad. Si abrimos el
+fichero correspondiente en WEKA, observamos que el número de
+instancias para cada clase está en torno a 1000, siendo el más
+frecuente el \texttt{5} (1050 instancias) y el \texttt{0} el menos frecuente (913
+instancias).  Podemos considerar entonces que no hay un desbalanceo
+a tener en cuenta entre las clases y no hará falta preprocesar los
+datos para lograr una mayor paridad entre las clases.
+
+\section{Preprocesamiento de los datos}
+\label{sec:org7af9969}
+
+Como se comenta en el guion de la práctica, hay 17 atributos que no
+tienen una información relevante, algo que podemos comprobar con
+únicamente observar la distribución de las clases por atributos. De la
+variable 8 a la 24 vemos que prácticamente una mitad de las instancias
+de cada clase van a parar a cada valor del atributo, es decir \(P(C|A)
+= P(C|¬A)\), donde \(C\) es la clase y \(A\) uno de los atributos
+mencionados. 
+
+Probamos por tanto a utilizar algún método de selección de
+características, como por ejemplo usando la ganancia de información
+para ordenar los atributos. De esta manera obtenemos que los atributos
+del 8 al 24 son los que menos ganancia de información aporta y ésta es
+menor o igual que 0.001, con lo que consideramos descartar estas
+variables. 
+
+Eliminar estas variables hace que mejore muy ligeramente el acierto
+del clasificador Naïve Bayes usado como punto de partida, por lo que
+consideraremos que este paso es acertado, pues, como mínimo, tenemos
+menos variables y el modelo obtenido será más simple. 
+
+
+\section{Redes con mejores tasas}
+\label{sec:orga344477}
+
+\subsection{Resultado de partida}
+\label{sec:org0da8330}
+
+Antes de realizar ningún preprocesamiento, probamos a ejecutar el
+modelo Naïve Bayes, el cual obtiene un acierto de 1/3 en la validación
+cruzada.
+
+\subsection{Naïve Bayes}
+\label{sec:orgefd7b04}
+
+Una vez que quitamos las variables artificialmente introducidas, el
+clasificador \texttt{Naïve Bayes} obtiene un acierto del \(33.41\%\) en
+validación cruzada.
+
+\subsection{Red Bayesiana}
+\label{sec:org5de9336}
+
+\subsubsection{ICS}
+\label{sec:org1d08823}
+
+Con el algoritmo de búsqueda ICS el acierto baja al \(33.37\%\). 
+
+\subsubsection{K2}
+\label{sec:org868aaa7}
+
+Con la búsqueda local K2 el resultado es \(33.36%\) en validación cruzada.
+\end{document}

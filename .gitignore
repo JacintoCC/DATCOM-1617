@@ -1,8 +1,4 @@
-*.pdf
-*.RData
-*.Rhistory
-*.Rproj
-*.bak
-*/build/*
-.Rproj.user
-*.Rda
+*
+!*/
+!.gitignore
+!*.tex

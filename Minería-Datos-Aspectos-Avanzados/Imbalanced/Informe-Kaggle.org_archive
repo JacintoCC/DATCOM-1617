@@ -1,0 +1,63 @@
+#    -*- mode: org -*-
+
+
+Archived entries from file /home/jacinto/Documentos/DATCOM-1617/Minería de datos - Aspectos avanzados/Imbalanced/Informe-Kaggle.org
+
+
+* Tabla de resultados 
+  :PROPERTIES:
+  :ARCHIVE_TIME: 2017-04-19 mié 13:25
+  :ARCHIVE_FILE: ~/Documentos/DATCOM-1617/Minería de datos - Aspectos avanzados/Imbalanced/Informe-Kaggle.org
+  :ARCHIVE_CATEGORY: Informe-Kaggle
+  :END:
+
+#+BEGIN_LaTeX
+  \hspace{-10cm}
+#+END_LaTeX
+#+CAPTION: Tabla con experimentos
+#+TBLNAME: exp
+#+ATTR_LATEX: :environment longtable :align rlp{5cm}rrr
+| Fecha   | Algoritmo | Comentarios                   |     AUC CV | AUC (Pública) | AUC (Privada) |
+|---------+-----------+-------------------------------+------------+---------------+---------------|
+| 28/03   | XGB       | SMOTE-Probabilidades          |            |       0.78873 |       0.78874 |
+| 28/03   | RF        | Sin preproc                   |     0.8393 |               |               |
+| 29/03   | Varios    | Tomek-Links                   | \eqsim 0.6 |               |               |
+| 29/03   | RF        | NCL                           |      0.841 |       0.81093 |       0.81617 |
+| 29/03   | SVM       | NCL                           |      0.842 |       0.81051 |       0.81586 |
+| 29/03   | Poll      | NCL                           |            |       0.81119 |       0.81648 |
+| 29/03   | SVM       | Sin preproc, radial           |      0.840 |       0.82293 |       0.81435 |
+| 29/03   | Poll      | Sin preproc                   |            |       0.82619 |       0.81983 |
+| 01/04   | SVM       | NCL. Cat. como dummy          |       0.83 |               |               |
+| 01/04   | SVM       |                               |      0.839 |       0.82293 |       0.81434 |
+| *01/04* | *SVM*     | *Radial. Filtro*              |            |     *0.83015* |     *0.81875* |
+| 01/04   | SVM       | Filtro Oversampling           |            |       0.82583 |       0.81548 |
+| 01/04   | SVM       | Filtro NCL                    |   0.837498 |       0.82904 |       0.82012 |
+| 01/04   | SVM       | Filtro SMOTE                  |  0.8298271 |               |               |
+| 01/04   | Poll      | Predicciones                  |            |       0.83015 |        0.8175 |
+| 02/04   | Poll      | Predicciones                  |            |       0.82730 |       0.82115 |
+| 02/04   | SVM       | Filtro Undersampling          |  0.8254918 |               |               |
+| 02/04   | SVM       | Filtro Tomek                  |  0.8285871 |               |               |
+| 02/04   | SVM       | Filtr consenso. NCL.          |            |       0.46317 |       0.46518 |
+| 03/04   | SVM       | Filtro consenso. OSS          |       0.84 |       0.82214 |       0.82546 |
+| 03/04   | SVM       | OSS. Filtro consenso.         |  0.8387642 |       0.81645 |       0.81651 |
+| 03/04   | SVM       | Oversampling Filtro           |  0.8395812 |       0.80114 |       0.80472 |
+| 03/04   | SVM       | SMOTE Filtro                  |  0.8317622 |               |               |
+| 03/04   | SVM       | Overs. Filtro (consenso = F)  |  0.8339775 |               |               |
+| 04/04   | SVM       | SMOTE programado. Filtro.     |  0.8387611 |       0.81587 |       0.80336 |
+| 04/04   | Poll      |                               |            |       0.83151 |       0.82122 |
+| 05/04   | SVM       | SMOTE + Filtro                |            |       0.81558 |       0.83165 |
+| 05/04   | SVM       | Filtro + Unbalanced + Pesos   |  0.8423428 |       0.81741 |       0.82427 |
+| 05/04   | SVM       | Unbalanced + Filtro + Pesos   |  0.8408175 |       0.81913 |       0.82172 |
+| 06/04   | SVM       | CNN + Filtro                  |      0.832 |       0.82930 |       0.82395 |
+| 06/04   | Poll      |                               |            |       0.82738 |       0.82788 |
+| 06/04   | SVM       | NCL + Filtro                  |      0.836 |               |               |
+| *06/04* | *SVM*     | *Filtro + NCL*                |    *0.837* |     *0.83176* |     *0.82266* |
+| 06/04   | SVM       | Filtro + NCL                  |       0.84 |       0.82337 |       0.82039 |
+| 07/04   | SVM       | Filtro + NCL consenso + Pesos |            |       0.81349 |       0.81725 |
+| 07/04   | SVM       | Filtro + NCL consenso + Pesos |            |       0.81595 |       0.81819 |
+
+#+NAME: grafico
+#+BEGIN_SRC R :var data=exp :exports both :results output :file grafico.pdf
+
+#+END_SRC
+

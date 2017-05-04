@@ -1,0 +1,340 @@
+% Created 2017-05-03 mié 15:30
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jacinto Carrasco Castillo - jacintocc@correo.ugr.es}
+\date{5 de mayo de 2017}
+\title{Trabajo autónomo II: Minería de flujo de datos\\\medskip
+\large Máster en Ciencia de Datos e Ingeniería de Computadores - Minería de flujo de datos y series temporales}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo - jacintocc@correo.ugr.es},
+ pdftitle={Trabajo autónomo II: Minería de flujo de datos},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.1.1 (Org mode 9.0.5)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+
+\section{Parte teórica}
+\label{sec:org78b2585}
+
+\subsection{Pregunta 1}
+\label{sec:org9fb51c3}
+
+Descripción del problema de clasificación, los clasificadores
+utilizados en los experimentos de la sección 2, y en qué consisten los
+diferentes modos de evaluación/validación en flujos de datos.
+
+\subsection{Pregunta 2}
+\label{sec:orgd52cc5f}
+
+Explicar en qué consiste el problema de \textbf{\textbf{concept drift}}
+y qué técnicas conoce para resolverlo en clasificación.
+
+
+
+
+\section{Parte práctica}
+\label{sec:org048e30d}
+
+\subsection{Entrenamiento offline y evaluación posterior}
+\label{sec:orgf531c4d}
+\subsubsection{Hoeffding Tree}
+\label{sec:orgf0410a7}
+\begin{itemize}
+\item Entrenar un clasificador \texttt{HoeffdingTree} \emph{offline} (aprender modelo
+únicamente),sobre un total de 1.000.000 de instancias procedentes de
+un flujo obtenido por el generador \texttt{WaveFormGenerator} con semilla
+aleatoria igual a 2. Evaluar posteriormente (sólo evaluación) con
+1.000.000 de instancias generadas por el mismo tipo de generador,
+con semilla aleatoria igual a 4. Repita el proceso varias veces con
+la misma semilla en evaluación y diferentes semillas en
+entrenamiento. Anotar los valores de porcentajes de aciertos en la
+clasificación y estadístico Kappa.
+\end{itemize}
+
+
+Realizamos el aprendizaje del clasificador \texttt{HoeffdingTree} con un flujo
+generado con semilla \(2\).
+
+\begin{verbatim}
+java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+  "LearnModel -l trees.HoeffdingTree \
+     -s (generators.WaveformGenerator -i 2) \
+     -m 1000000 -O model1.moa"
+\end{verbatim}
+\captionof{figure}{\label{orgbeedfa4}
+"Aprendizaje HoeffdingTree offline"}
+
+
+
+Una vez mostrado el ejemplo de lo que sería el código, realizaremos la
+evaluación de los modelos generados con las semillas
+\(\{2,10,15,20,25\}\) sobre un flujo de datos creado con la semilla \(4\).
+
+\begin{verbatim}
+for seed in 2 10 15 20 25
+do
+   java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+      "EvaluateModel \
+	 -m (LearnModel -l trees.HoeffdingTree \
+	    -s (generators.WaveformGenerator -i $seed) -m 1000000) \
+	 -s (generators.WaveformGenerator -i 4) -i 1000000"
+done
+\end{verbatim}
+\captionof{figure}{\label{orgbfbdfc9}
+"Aprendizaje y evaluación HoeffdingTree"}
+
+Mostramos a continuación el porcentaje de acierto en clasificación
+obtenido para cada una de las semillas y la media de éstos.
+\subsubsection{Hoeffding Tree Adaptativo}
+\label{sec:orgbae41d9}
+\begin{itemize}
+\item Repetir el paso anterior, sustituyendo el clasificador por
+HoeffdingTree adaptativo.
+\end{itemize}
+
+Realizamos directamente el aprendizaje para las semillas anteriores y
+la evaluación sobre el flujo generado con semilla 2.
+
+\begin{verbatim}
+for seed in 2 10 15 20 25
+do
+   java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+      "EvaluateModel \
+	 -m (LearnModel -l ntrees.HoeffdingAdaptiveTree
+	    -s (generators.WaveformGenerator -i $seed) -m 1000000) \
+	 -s (generators.WaveformGenerator -i 4) -i 1000000"
+done
+\end{verbatim}
+\captionof{figure}{\label{org15830e8}
+"Aprendizaje y evaluación HoeffdingTree Adaptativo"}
+
+Mostramos la tabla con las medidas obtenidas por este clasificador. 
+
+\begin{itemize}
+\item Responda a la pregunta: ¿Cree que algún clasificador es
+significativamente mejor que el otro en este tipo de problemas?
+Razone su respuesta.
+\end{itemize}
+
+Nope. 
+
+\subsection{Entrenamiento online}
+\label{sec:org7505d75}
+
+\subsubsection{Hoeffding Tree}
+\label{sec:org69bb4cb}
+\begin{itemize}
+\item Entrenar un clasificador HoeffdingTree online, mediante el método
+Interleaved Test-Then-Train, sobre un total de 1.000.000 de
+instancias procedentes de un flujo obtenido por el generador
+WaveFormGenerator con semilla aleatoria igual a 2, con una
+frecuencia de muestreo igual a 10.000. Pruebe con otras semillas
+aleatorias. Anotar los valores de porcentajes de aciertos en la
+clasificación y estadístico Kappa.
+\end{itemize}
+
+Para usar el método \texttt{EvaluateInterleavedTestThenTrain} incluimos el
+número de instancias pasándole el argumento \texttt{-i} y la frecuencia de
+muestreo con \texttt{-f}.
+
+\begin{verbatim}
+for seed in 2 10 15 20 25 
+do 
+ java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask "EvaluateInterleavedTestThenTrain \
+    -l moa.classifiers.trees.HoeffdingTree \
+    -s (generators.WaveformGenerator -i $seed) -i 1000000 -f 10000"
+done
+\end{verbatim}
+
+Mostramos la tabla con los resultados obtenidos por el clasificador
+Hoeffding Tree en línea. 
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Wed May  3 09:58:35 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+ & Seed & Acc & Kappa \\ 
+  \hline
+1 & 2 & 83.79 & 75.68 \\ 
+  2 & 10 & 83.85 & 75.77 \\ 
+  3 & 15 & 83.97 & 75.95 \\ 
+  4 & 20 & 83.79 & 75.69 \\ 
+  5 & 25 & 83.93 & 75.89 \\ 
+  6 & media & 83.86 & 75.80 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Hoeffding Tree Adaptativo}
+\label{sec:orgce49934}
+\begin{itemize}
+\item Repetir el paso anterior, sustituyendo el clasificador por
+HoeffdingTree adaptativo.
+\end{itemize}
+
+
+\begin{verbatim}
+for seed in 2 10 15 20 25 
+do 
+ java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluateInterleavedTestThenTrain \
+      -l moa.classifiers.trees.HoeffdingAdaptiveTree \
+	-s (generators.WaveformGenerator -i $seed) \
+	-i 1000000 -f 10000"
+done
+\end{verbatim}
+\captionof{figure}{\label{orgd2370f0}
+"Aprendizaje Online Hoeffding Tree Adaptativo"}
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Wed May  3 12:48:05 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+ & Seed & Acc & Kappa \\ 
+  \hline
+1 & 2 & 83.73 & 75.60 \\ 
+  2 & 10 & 83.90 & 75.85 \\ 
+  3 & 15 & 83.87 & 75.80 \\ 
+  4 & 20 & 83.81 & 75.72 \\ 
+  5 & 25 & 83.83 & 75.74 \\ 
+  6 & media & 83.83 & 75.74 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Comparación}
+\label{sec:orga197d12}
+\begin{itemize}
+\item Responda a la pregunta: ¿Cree que algún clasificador es mejor que el
+otro en este tipo de problemas? Razone su respuesta.
+\end{itemize}
+
+Nope.
+
+\subsection{Entrenamiento online en datos con \emph{concept drift}.}
+\label{sec:org854545b}
+
+\subsubsection{Hoeffding Tree}
+\label{sec:orgeccf6ec}
+\begin{itemize}
+\item Entrenar un clasificador HoeffdingTree online, mediante el método
+Interleaved Test-Then-Train, sobre un total de 2.000.000 de
+instancias muestreadas con una frecuencia de 100.000, sobre datos
+procedentes de un generador de flujos RandomRBFGeneratorDrift, con
+semilla aleatorio igual a 1 para generación de modelos y de
+instancias, generando 2 clases, 7 atributos, 3 centroides en el
+modelo, drift en todos los centroides y velocidad de cambio igual a
+0.001. Pruebe con otras semillas aleatorias. Anotar los valores de
+porcentajes de aciertos en la clasificación y estadístico
+Kappa. Compruebe la evolución de la curva de aciertos en la GUI de
+MOA.
+\end{itemize}
+
+\begin{verbatim}
+for seed in 1 8 10 53 61
+do 
+ java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluateInterleavedTestThenTrain \
+      -l moa.classifiers.trees.HoeffdingTree \
+	-s (generators.RandomRBFGeneratorDrift \
+	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
+	-i 2000000 -f 100000"
+done
+\end{verbatim}
+\captionof{figure}{\label{org450ca75}
+"Aprendizaje Online Hoeffding Tree - Concept Drift"}
+
+\subsubsection{Adaptativo}
+\label{sec:org1b9c2e4}
+
+\begin{verbatim}
+for seed in 1 8 10 53 61
+do 
+ java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluateInterleavedTestThenTrain \
+      -l moa.classifiers.trees.HoeffdingAdaptiveTree \
+	-s (generators.RandomRBFGeneratorDrift \
+	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
+	-i 2000000 -f 100000"
+done
+\end{verbatim}
+\captionof{figure}{\label{org22efcf8}
+"Aprendizaje Online Hoeffding Tree Adaptativo - Concept Drift"}
+
+\subsubsection{Comparación}
+\label{sec:orgf5606ea}
+
+Aquí claro que sí
+
+
+\subsection{Entrenamiento online en datos con \emph{concept drift}, incluyendo mecanismos para olvidar instancias pasadas.}
+\label{sec:org8896302}
+
+\subsubsection{Ventana deslizante}
+\label{sec:org16f8ba5}
+\begin{itemize}
+\item Repita la experimentación del apartado anterior, cambiando el método
+de evaluación “Interleaved Test-Then-Train” por el método de
+evaluación “Prequential”, con una ventana deslizante de tamaño 1.000.
+\end{itemize}
+
+\begin{enumerate}
+\item Hoeffding
+\label{sec:orgecbe67c}
+
+\item Hoeffding Adaptativo
+\label{sec:orgb638d5d}
+\end{enumerate}
+
+\subsubsection{Comparación}
+\label{sec:org78c3044}
+\begin{itemize}
+\item ¿Qué efecto se nota en ambos clasificadores? ¿A qué es debido?
+Justifique los cambios relevantes en los resultados de los
+clasificadores
+\end{itemize}
+
+\subsection{Entrenamiento online en datos con concept drift, incluyendo mecanismos para reinicializar modelos tras la detección de cambios de concepto.}
+\label{sec:org98e764e}
+
+\begin{itemize}
+\item Repita la experimentación del apartado 2.3, cambiando el modelo
+(learner) a un clasificador simple basado en reemplazar el
+clasificador actual cuando se detecta un cambio de concepto
+(SingleClassifierDrift). Como detector de cambio de concepto, usar
+el método DDM con sus parámetros por defecto. Como modelo a
+aprender, usar un clasificador HoeffdingTree.
+
+\item Repita el paso anterior cambiando el clasificador HoeffdingTree por
+un clasificador HoeffdingTree adaptativo.
+
+\item Responda a la siguiente pregunta: ¿Qué diferencias se producen entre
+los métodos de los apartados 2.3, 2.4 y 2.5? Explique similitudes y
+diferencias entre las diferentes metodologías, y discuta los
+resultados obtenidos por cada una de ellas en el flujo de datos
+propuesto.
+\end{itemize}
+\end{document}

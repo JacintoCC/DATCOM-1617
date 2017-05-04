@@ -1,0 +1,230 @@
+% Created 2017-04-21 vie 23:53
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage[spanish, es-tabla]{babel}
+\author{Jacinto Carrasco Castillo \\   Usuario Kaggle: \textbf{JacintoCC}}
+\date{\today}
+\title{Informe Kaggle - Imbalanced\\\medskip
+\large Minería de datos: Aspectos avanzados}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo \\   Usuario Kaggle: \textbf{JacintoCC}},
+ pdftitle={Informe Kaggle - Imbalanced},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.1.1 (Org mode 9.0.5)}, 
+ pdflang={Spanish}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{Consideraciones iniciales}
+\label{sec:org29836c9}
+
+\begin{itemize}
+\item Se incluye la tabla con los resultados únicamente después de
+advertir que la medida para la competición debía calcularse subiendo
+las probabilidades de pertenencia a la clase positiva y no las
+etiquetas predichas.
+\item Antes de este hecho, el área bajo la curva tanto en validación
+cruzada como en las subidas a Kaggle estaban en torno a \(0.73\).
+\end{itemize}
+
+\section{Bitácora}
+\label{sec:org4f38474}
+
+\subsection{Exploración inicial}
+\label{sec:org4dc3ea9}
+
+En un primer momento se optó por ver los resultados obtenidos por
+diferentes modelos de clasificación y los métodos para el balanceo de
+la biblioteca \texttt{unbalanced}. Para reducir la incertidumbre asociada a
+la semilla y al conjunto de test de Kaggle, y así obtener una
+puntuación final en la parte oculta del test, se ha programado una
+función de validación cruzada a la que le pasamos los métodos de
+clasificación y preprocesamiento. 
+
+Los algoritmos considerados han sido \texttt{randomForest}, \texttt{xgboost}, \texttt{SVM}
+y \texttt{bagging}. Los preprocesamientos para el balanceo de clases que
+ofrece el paquete \texttt{unbalanced} son: Tomek links, SMOTE, sobremuestreo,
+bajomuestreo, CNN y OSS. El mejor resultado obtenido con la
+combinación de estos algoritmos calculando las clases de las
+instancias fue de 0.73886 para la combinación SVM (con base radial) y
+CNN como algoritmo para balancear las clases. Para realizar la
+agregación de varios métodos, se realizó una votación entre las
+predicciones de varios modelos (SMOTE, OSS, CNN) llegando así hasta
+0.7647.
+
+Si nos fijamos en los datos disponibles, la mayoría de los atributos
+son de tipo numérico y en cambio otros, son representados únicamente
+por enteros, con lo que podríamos pensar que son de tipo
+categórico. Sin embargo, los resultados obtenidos al pasar estas
+variables a tipo binario han sido peores, con lo que consideraremos
+que hay una relación de orden entre las variables y las mantendremos
+en formato numérico.
+
+\subsection{Paso a cálculo con probabilidades.}
+\label{sec:org0aabce5}
+
+Una vez que se detectó que había que subir probabilidades en lugar de
+las etiquetas, el AUC en Kaggle subió a 0.7887 con el modelo \texttt{xgboost}
+y \texttt{SMOTE} como preprocesamiento. Tras esta primera subida, se
+repitieron los experimentos programados previamente para obtener una
+medida realista de la situación en la que nos encontrábamos. El AUC
+obtenido en validación cruzada en este momento era de 0.84, mientras
+que en Kaggle era de 0.82, siendo el mejor método de aprendizaje \texttt{SVM}
+con base radial. Como vemos en la tabla, no hay claramente un
+algoritmo para balancear las clases que funcione mejor tanto en Kaggle
+como en validación cruzada.
+
+\subsection{Filtro de ruido.}
+\label{sec:org9f0e3ed}
+
+Debido a que el cociente entre el número de instancias de cada clase
+no es muy elevado, se considera también la posibilidad de que el
+balanceamiento no sea necesario, en cuyo caso se pretende reducir el
+ruido de las instancias, lo que lleva a alcanzar de manera más
+frecuente el 0.83 en validación cruzada y en Kaggle, con lo que se
+considera una buena opción. 
+
+Para esta tarea, se realiza una combinación de los métodos de
+\texttt{unbalanced} con el filtro de instancias IPF. La medida de validación
+cruzada ha sido obtenida realizando el preprocesamiento
+correspondiente a cada partición y posteriormente aplicando modelo de
+aprendizaje, que ha sido SVM ya siempre para estos experimentos.
+
+El orden de realización del preprocesamiento ha sido en primer lugar
+el filtro de instancias ruidosas, para posteriormente realizar el
+balanceo de las clases, sin embargo también se ha probado realizando
+antes el balanceo de las clases, para comprobar si un mayor balanceo
+de las clases hacía que menos instancias de la clase minoritaria
+fueran eliminadas al ser consideradas como ruido. Sin embargo, como
+era de esperar, los resultados han sido por lo general peores. El
+orden en el que se han realizado las operaciones se ha indicado en la
+Tabla \ref{Tabla} en la columna de comentarios.
+
+Con la intención de filtrar menos instancias y con ello obtener
+predicciones más robusta, se han ido modificando los parámetros de la
+función \texttt{IPF}, por ejemplo con el parámetro \texttt{consensus}. Sin embargo
+los resultados eran ligeramente inferiores. 
+
+
+\subsection{Pesos}
+\label{sec:orga75bfc5}
+
+Con la intención de, si no sirve el preprocesamiento para darle mayor
+relevancia a la clase minoritaria, y teniendo en cuenta que SVM ha
+sido el método que desde un principio daba mejores resultados, también
+se intentó modificar los pesos considerados por el método. Aunque los
+resultados en validación cruzada para algunas combinaciones de
+preprocesamientos eran positivos, llegando incluso a 0.84, en Kaggle
+los resultados eran peores, con lo que no se hizo una búsqueda
+exhaustiva de los mejores pesos.
+
+
+\subsection{Subidas seleccionadas}
+\label{sec:orgb3ce95c}
+
+\begin{itemize}
+\item SVM con filtro IPF: Como se ha comentado previamente, no estaba
+claro la necesidad de realizar un preprocesamiento para balancear
+las clases, luego cabía esperar una menor variación entre las
+medidas de validación cruzada y de Kaggle para un modelo sin ruido y
+sin ningún preprocesamiento. Luego esta instancia ha sido
+seleccionada para estar seguros de que no bajaba demasiado la
+puntuación en Kaggle, aunque a posteriori no haya sido efectivo pues
+el descenso en la clasificación y el AUC privado ha sido bastante
+grande en relación a las puntuaciones que se han ido obteniendo.
+
+\item SVM con filtro IPF y NCL como preprocesamiento: Como resultado más
+prometedor, se ha seleccionado la subida con IPF y NCL como métodos
+de preprocesamiento para filtrar instancias ruidosas el primero y
+para balancear las clases el segundo. Sin embargo, también ha bajado
+mucho la puntuación privada, con lo que el puesto final ha sido el
+vigésimo.
+\end{itemize}
+
+
+\section{Tabla de resultados}
+\label{sec:orgfa50634}
+
+Se incluye a continuación la tabla con los resultados obtenidos,
+incluyendo un pequeño comentario sobre cada subida. Se muestran en
+negrita las dos subidas seleccionadas como soluciones finales para
+
+\captionof{table}{Tabla de resultados}
+\noindent\makebox[\textwidth]{%
+\label{Tabla}
+\begin{center}
+\label{tab:orgb809569}
+\begin{tabular}{lllrrr}
+Fecha & Algoritmo & Comentarios & AUC CV & AUC (Pública) & AUC (Privada)\\
+\hline
+28/03 & XGB & SMOTE-Probabilidades &  & 0.78873 & 0.78874\\
+29/03 & Varios & Tomek-Links & 0.6 &  & \\
+29/03 & RF & NCL & 0.841 & 0.81093 & 0.81617\\
+29/03 & SVM & NCL & 0.842 & 0.81051 & 0.81586\\
+29/03 & Poll & NCL &  & 0.81119 & 0.81648\\
+29/03 & SVM & Sin preproc, radial & 0.840 & 0.82293 & 0.81435\\
+29/03 & Poll & Sin preproc &  & 0.82619 & 0.81983\\
+01/04 & SVM & NCL. Cat. como dummy & 0.83 &  & \\
+01/04 & SVM &  & 0.839 & 0.82293 & 0.81434\\
+\textbf{01/04} & \textbf{SVM} & \textbf{Radial. Filtro} & 0.8363870 & 0.83015 & 0.81875\\
+01/04 & SVM & Filtro Oversampling &  & 0.82583 & 0.81548\\
+01/04 & SVM & Filtro NCL & 0.837498 & 0.82904 & 0.82012\\
+01/04 & SVM & Filtro SMOTE & 0.8298271 &  & \\
+01/04 & Poll & Predicciones &  & 0.83015 & 0.8175\\
+02/04 & Poll & Predicciones &  & 0.82730 & 0.82115\\
+02/04 & SVM & Filtro Undersampling & 0.8254918 &  & \\
+02/04 & SVM & Filtro Tomek & 0.8285871 &  & \\
+02/04 & SVM & Filtr consenso. NCL. &  & 0.46317 & 0.46518\\
+03/04 & SVM & Filtro consenso. OSS & 0.84 & 0.82214 & 0.82546\\
+03/04 & SVM & OSS. Filtro consenso. & 0.8387642 & 0.81645 & 0.81651\\
+03/04 & SVM & Oversampling Filtro & 0.8395812 & 0.80114 & 0.80472\\
+03/04 & SVM & SMOTE Filtro & 0.8317622 &  & \\
+03/04 & SVM & Overs. Filtro (consenso = F) & 0.8339775 &  & \\
+04/04 & SVM & SMOTE programado. Filtro. & 0.8387611 & 0.81587 & 0.80336\\
+04/04 & Poll &  &  & 0.83151 & 0.82122\\
+05/04 & SVM & SMOTE + Filtro &  & 0.81558 & 0.83165\\
+05/04 & SVM & Filtro + Unbalanced + Pesos & 0.8423428 & 0.81741 & 0.82427\\
+05/04 & SVM & Unbalanced + Filtro + Pesos & 0.8408175 & 0.81913 & 0.82172\\
+06/04 & SVM & CNN + Filtro & 0.832 & 0.82930 & 0.82395\\
+06/04 & Poll &  &  & 0.82738 & 0.82788\\
+06/04 & SVM & NCL + Filtro & 0.836 &  & \\
+\textbf{06/04} & \textbf{SVM} & \textbf{Filtro + NCL} & 0.837 & 0.83176 & 0.82266\\
+06/04 & SVM & Filtro + NCL & 0.84 & 0.82337 & 0.82039\\
+07/04 & SVM & Filtro + NCL consenso + Pesos &  & 0.81349 & 0.81725\\
+07/04 & SVM & Filtro + NCL consenso + Pesos &  & 0.81595 & 0.81819\\
+\end{tabular}
+\end{center}
+}
+
+\newpage
+
+En la Figura 1 se muestran los resultados obtenidos, mostrando las
+subidas en Kaggle y el AUC obtenido también en validación cruzada. Las
+instancias seleccionadas han sido pintadas con un tamaño mayor y se
+incluye una línea con la media para cada subida de la puntuación en
+validación cruzada y la puntuación pública de test, que es la que se
+conocía en el momento y en base a la que se han seleccionado las
+instancias.
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{grafico.pdf}
+\caption{AUC de experimentos}
+\end{figure}
+\end{document}
