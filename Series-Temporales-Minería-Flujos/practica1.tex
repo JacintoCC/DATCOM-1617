@@ -1,4 +1,4 @@
-% Created 2017-05-03 mié 15:30
+% Created 2017-05-05 vie 15:24
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -28,38 +28,62 @@
 \begin{document}
 
 \maketitle
+\setcounter{tocdepth}{2}
 \tableofcontents
 
 
-
 \section{Parte teórica}
-\label{sec:org78b2585}
+\label{sec:orgfdc5129}
 
 \subsection{Pregunta 1}
-\label{sec:org9fb51c3}
+\label{sec:org86efbe3}
 
-Descripción del problema de clasificación, los clasificadores
-utilizados en los experimentos de la sección 2, y en qué consisten los
-diferentes modos de evaluación/validación en flujos de datos.
+Explicar el problema de clasificación, los clasificadores utilizados
+ en los experimentos de la sección 2, y en qué consisten los
+ diferentes modos de evaluación/validación en  flujos de datos.
+
+Los clasificadores utilizados han sido el \texttt{Hoeffding Tree} y el
+\texttt{Hoeffding Tree Adaptativo}. El clasificador \texttt{Hoeffding Tree} se basa
+en la idea de que una pequeña muestra puede ser suficiente para
+escoger un atributo que nos permita escoger la clase de la instancia,
+para lo que se asume que la distribución de datos generados durante el
+flujo no varía en el tiempo. La versión adaptativa de este
+clasificador usa \texttt{ADWIN} para comprobar el rendimiento de las rámas
+del árbol para irlas modificando con nuevas ramas cuando su porcentaje
+de acierto disminuye si las nuevas ramas son más precisas.
+
+Los modos de evaluación en flujo de datos son:
+\begin{itemize}
+\item Test-Then-Train, donde se usa cada nuevo dato para evaluar
+el modelo e inmediatamente después es usado para
+entenamiento;
+\item Prequential evaluation, que incluye un mecanismo de ventana
+deslizante para olvidar los datos antiguos.
+\item Heldout: Se reserva un número de datos para test y se
+entrena con el resto.
+\end{itemize}
 
 \subsection{Pregunta 2}
-\label{sec:orgd52cc5f}
+\label{sec:org34b12da}
 
-Explicar en qué consiste el problema de \textbf{\textbf{concept drift}}
-y qué técnicas conoce para resolverlo en clasificación.
+Explicar en qué consiste el problema de \emph{concept drift} y qué
+ técnicas conoce para resolverlo en clasificación.
 
 
-
+Nos referimos con \emph{Concept drift} a las situaciones en las que el
+fenómeno estudiado sufre variaciones en sus propiedades estadísticas a
+lo largo del tiempo, por lo que debemos ser capaces de detectar estas
+variaciones y reaprender un modelo para ajustarnos a estas nuevas
+circunstancias. 
 
 \section{Parte práctica}
-\label{sec:org048e30d}
+\label{sec:org6b7d2d7}
 
 \subsection{Entrenamiento offline y evaluación posterior}
-\label{sec:orgf531c4d}
+\label{sec:org4c77238}
 \subsubsection{Hoeffding Tree}
-\label{sec:orgf0410a7}
-\begin{itemize}
-\item Entrenar un clasificador \texttt{HoeffdingTree} \emph{offline} (aprender modelo
+\label{sec:org7abd73d}
+Entrenar un clasificador \texttt{HoeffdingTree} \emph{offline} (aprender modelo
 únicamente),sobre un total de 1.000.000 de instancias procedentes de
 un flujo obtenido por el generador \texttt{WaveFormGenerator} con semilla
 aleatoria igual a 2. Evaluar posteriormente (sólo evaluación) con
@@ -68,7 +92,6 @@ con semilla aleatoria igual a 4. Repita el proceso varias veces con
 la misma semilla en evaluación y diferentes semillas en
 entrenamiento. Anotar los valores de porcentajes de aciertos en la
 clasificación y estadístico Kappa.
-\end{itemize}
 
 
 Realizamos el aprendizaje del clasificador \texttt{HoeffdingTree} con un flujo
@@ -80,9 +103,8 @@ java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
      -s (generators.WaveformGenerator -i 2) \
      -m 1000000 -O model1.moa"
 \end{verbatim}
-\captionof{figure}{\label{orgbeedfa4}
-"Aprendizaje HoeffdingTree offline"}
-
+\captionof{figure}{\label{orge32ec9a}
+"Aprendizaje HoeffdingTree"}
 
 
 Una vez mostrado el ejemplo de lo que sería el código, realizaremos la
@@ -99,13 +121,31 @@ do
 	 -s (generators.WaveformGenerator -i 4) -i 1000000"
 done
 \end{verbatim}
-\captionof{figure}{\label{orgbfbdfc9}
-"Aprendizaje y evaluación HoeffdingTree"}
+\captionof{figure}{\label{org3cdcdb0}
+"Aprendizaje y evaluación HoeffdingTree con varias semillas"}
 
 Mostramos a continuación el porcentaje de acierto en clasificación
 obtenido para cada una de las semillas y la media de éstos.
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Thu May  4 16:07:07 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rlrr}
+  \hline
+ & Seed & Acc & Kappa \\ 
+  \hline
+1 & 2 & 84.51 & 76.77 \\ 
+  2 & 10 & 84.58 & 76.87 \\ 
+  3 & 15 & 84.65 & 76.97 \\ 
+  4 & 20 & 84.57 & 76.85 \\ 
+  5 & 25 & 84.65 & 76.97 \\ 
+  6 & media & 84.59 & 76.89 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
 \subsubsection{Hoeffding Tree Adaptativo}
-\label{sec:orgbae41d9}
+\label{sec:org49f8971}
 \begin{itemize}
 \item Repetir el paso anterior, sustituyendo el clasificador por
 HoeffdingTree adaptativo.
@@ -124,24 +164,101 @@ do
 	 -s (generators.WaveformGenerator -i 4) -i 1000000"
 done
 \end{verbatim}
-\captionof{figure}{\label{org15830e8}
+\captionof{figure}{\label{org8efeee8}
 "Aprendizaje y evaluación HoeffdingTree Adaptativo"}
+
+\begin{verbatim}
+library(xtable)
+seeds <- c(2,10,15,20,25)
+acc <- x[seq(2, by = 14, length.out = 5), 5]
+acc <- as.numeric(gsub(",",".",acc))
+kappa <- x[seq(3, by = 14, length.out = 5), 5]
+kappa <- as.numeric(gsub(",",".",kappa))
+
+df <- data.frame("Seed" = c(seeds,"media"), 
+		 "Acc" = c(acc,mean(acc)),
+		 "Kappa" = c(kappa,mean(kappa)))
+xtable(df)
+\end{verbatim}
 
 Mostramos la tabla con las medidas obtenidas por este clasificador. 
 
+\subsubsection{Comparación}
+\label{sec:orgfaa1a81}
 \begin{itemize}
 \item Responda a la pregunta: ¿Cree que algún clasificador es
 significativamente mejor que el otro en este tipo de problemas?
 Razone su respuesta.
 \end{itemize}
 
-Nope. 
+Para realizar la comparación de los dos métodos realizaremos un test
+estadístico sobre las cinco muestras obtenidas. El resultado que
+esperamos obtener es que no haya una diferencia significativa entre
+los algoritmos, ya que el aprendizaje se realiza \emph{off line} a partir
+del conjunto total de datos. 
+
+Como vemos, los resultados son muy similares, y según un test de
+Wilcoxon aplicado sobre estos valores no podemos descartar que el
+rendimiento sea equivalente.
+
+
+	\underline{Wilcoxon rank sum test}\\
+
+data:  $x$ and $y$ \\
+W = 22, p-value = 0.05556 \\
+alternative hypothesis: true location shift is not equal to $0$ \\
+
 
 \subsection{Entrenamiento online}
-\label{sec:org7505d75}
+\label{sec:org79a301f}
+
+Los experimentos de los siguientes apartados se harán en línea de
+comandos y volcaremos los resultados en ficheros \texttt{.csv} para realizar
+posteriormente las gráficas y test estadísticos para las comparaciones
+en \texttt{R}. Para ello definimos una función que nos recupere la
+información relevante de los archivos \texttt{.csv}. Las variables en las que
+nos fijaremos serán en el número de instancias, el porcentaje de
+acierto, el estadístico Kappa, el número de nodos y la profundidad del
+árbol. Para la comparación de cada apartado entre el modelo de
+\texttt{HoeffdingTree} y el modelo que incluye adaptación, nos fijaremos en
+la última iteración y en la media por iteraciones, para promediar
+finalmente por la semilla. 
+
+\begin{verbatim}
+readMoaOutput <- function(dir){
+   files <- list.files(dir, full.names = T)
+   lapply(files, function(f){
+      info <- read.csv(f)[ ,c(1,5,6,11,14)]
+      colnames(info) <- c("Instances", "Acc", "Kappa", "Nodes", "Depth")
+      return(info)
+   })
+}
+
+summaryMoaSeeds <- function(list.results){
+   summary <- t(sapply(list.results,
+	  function(seed.results){
+	  return(t(matrix(c(seed.results[nrow(seed.results),-1], 
+			apply(seed.results[ ,-1], 2, mean)), ncol = 2)))
+	  }))
+   summary <- matrix(unlist(summary), ncol = 8)
+   colnames(summary) <- paste(c("Last","Mean"),
+			      rep(c("Acc","Kappa","Nodes","Depth"),each=2),
+			      sep=".")
+   return(summary)
+}
+
+summaryMoa <- function(list.results){
+   summary <- summaryMoaSeeds(list.results)
+   summary <- matrix(apply(summary, 2, mean), ncol = 4)   
+   colnames(summary) <- c("Acc","Kappa","Nodes","Depth")
+   rownames(summary) <- c("Last", "Mean")
+   return(summary)
+}
+\end{verbatim}
+
 
 \subsubsection{Hoeffding Tree}
-\label{sec:org69bb4cb}
+\label{sec:orgcd9aaf0}
 \begin{itemize}
 \item Entrenar un clasificador HoeffdingTree online, mediante el método
 Interleaved Test-Then-Train, sobre un total de 1.000.000 de
@@ -159,35 +276,30 @@ muestreo con \texttt{-f}.
 \begin{verbatim}
 for seed in 2 10 15 20 25 
 do 
- java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask "EvaluateInterleavedTestThenTrain \
+ java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+   "EvaluateInterleavedTestThenTrain \
     -l moa.classifiers.trees.HoeffdingTree \
-    -s (generators.WaveformGenerator -i $seed) -i 1000000 -f 10000"
+    -s (generators.WaveformGenerator -i $seed) \
+   -i 1000000 -f 10000" > Resultados/Online/Hoeff/hoeff-$seed.csv
 done
 \end{verbatim}
 
-Mostramos la tabla con los resultados obtenidos por el clasificador
-Hoeffding Tree en línea. 
-
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
-% Wed May  3 09:58:35 2017
+% Fri May  5 15:24:20 2017
 \begin{table}[ht]
 \centering
-\begin{tabular}{rlrr}
+\begin{tabular}{rrrrr}
   \hline
- & Seed & Acc & Kappa \\ 
+ & Acc & Kappa & Nodes & Depth \\ 
   \hline
-1 & 2 & 83.79 & 75.68 \\ 
-  2 & 10 & 83.85 & 75.77 \\ 
-  3 & 15 & 83.97 & 75.95 \\ 
-  4 & 20 & 83.79 & 75.69 \\ 
-  5 & 25 & 83.93 & 75.89 \\ 
-  6 & media & 83.86 & 75.80 \\ 
+Last & 83.88 & 75.82 & 317.00 & 12.20 \\ 
+  Mean & 82.98 & 74.47 & 157.02 & 8.94 \\ 
    \hline
 \end{tabular}
 \end{table}
 
 \subsubsection{Hoeffding Tree Adaptativo}
-\label{sec:orgce49934}
+\label{sec:orge1a5bea}
 \begin{itemize}
 \item Repetir el paso anterior, sustituyendo el clasificador por
 HoeffdingTree adaptativo.
@@ -201,44 +313,51 @@ do
     "EvaluateInterleavedTestThenTrain \
       -l moa.classifiers.trees.HoeffdingAdaptiveTree \
 	-s (generators.WaveformGenerator -i $seed) \
-	-i 1000000 -f 10000"
+	-i 1000000 -f 10000" > Resultados/Online/Adap/adap-$seed.csv
 done
 \end{verbatim}
-\captionof{figure}{\label{orgd2370f0}
+\captionof{figure}{\label{org8d649f5}
 "Aprendizaje Online Hoeffding Tree Adaptativo"}
 
 % latex table generated in R 3.3.2 by xtable 1.8-2 package
-% Wed May  3 12:48:05 2017
+% Fri May  5 15:24:21 2017
 \begin{table}[ht]
 \centering
-\begin{tabular}{rlrr}
+\begin{tabular}{rrrrr}
   \hline
- & Seed & Acc & Kappa \\ 
+ & Acc & Kappa & Nodes & Depth \\ 
   \hline
-1 & 2 & 83.73 & 75.60 \\ 
-  2 & 10 & 83.90 & 75.85 \\ 
-  3 & 15 & 83.87 & 75.80 \\ 
-  4 & 20 & 83.81 & 75.72 \\ 
-  5 & 25 & 83.83 & 75.74 \\ 
-  6 & media & 83.83 & 75.74 \\ 
+Last & 83.84 & 75.76 & 432.60 & 13.80 \\ 
+  Mean & 83.06 & 74.59 & 214.65 & 10.18 \\ 
    \hline
 \end{tabular}
 \end{table}
 
 \subsubsection{Comparación}
-\label{sec:orga197d12}
+\label{sec:org21ad7a4}
 \begin{itemize}
 \item Responda a la pregunta: ¿Cree que algún clasificador es mejor que el
 otro en este tipo de problemas? Razone su respuesta.
+
+Podemos observar en los resultados medios que no hay diferencias
+significativas entre los dos métodos. Si aplicamos el test de
+Wilcoxon obtenemos un \$p\$-valor muy superior al nivel de
+significación, con lo que no podemos descartar que su acierto sea
+idéntico.
 \end{itemize}
 
-Nope.
+
+	underline{Wilcoxon rank sum test with continuity correction}\\
+
+data:  Accuracy in Online Hoeffding Tree and Accuracy in Online Adaptive\\
+W = 743, p-value = 0.5866\\
+alternative hypothesis: true location shift is not equal to 0\\
 
 \subsection{Entrenamiento online en datos con \emph{concept drift}.}
-\label{sec:org854545b}
+\label{sec:org377b52c}
 
 \subsubsection{Hoeffding Tree}
-\label{sec:orgeccf6ec}
+\label{sec:orgab33ef8}
 \begin{itemize}
 \item Entrenar un clasificador HoeffdingTree online, mediante el método
 Interleaved Test-Then-Train, sobre un total de 2.000.000 de
@@ -253,48 +372,97 @@ Kappa. Compruebe la evolución de la curva de aciertos en la GUI de
 MOA.
 \end{itemize}
 
+En estos experimentos la semilla también afectará a la generación del
+\emph{concept drift}. 
+
 \begin{verbatim}
-for seed in 1 8 10 53 61
-do 
- java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+for seed in 1 2 314 261 832
+do
+   java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
     "EvaluateInterleavedTestThenTrain \
       -l moa.classifiers.trees.HoeffdingTree \
 	-s (generators.RandomRBFGeneratorDrift \
 	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
-	-i 2000000 -f 100000"
+	-i 2000000 -f 100000" > Resultados/Drift/Hoeff/hoeff-$seed.csv
 done
 \end{verbatim}
-\captionof{figure}{\label{org450ca75}
+\captionof{figure}{\label{org177aa74}
 "Aprendizaje Online Hoeffding Tree - Concept Drift"}
 
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Fri May  5 15:24:22 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Acc & Kappa & Nodes & Depth \\ 
+  \hline
+Last & 77.47 & 36.73 & 1875.40 & 16.40 \\ 
+  Mean & 79.08 & 41.61 & 1023.70 & 14.36 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
 \subsubsection{Adaptativo}
-\label{sec:org1b9c2e4}
+\label{sec:org1ef858e}
 
 \begin{verbatim}
-for seed in 1 8 10 53 61
+for seed in 1 2 314 261 832
 do 
  java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
     "EvaluateInterleavedTestThenTrain \
       -l moa.classifiers.trees.HoeffdingAdaptiveTree \
 	-s (generators.RandomRBFGeneratorDrift \
 	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
-	-i 2000000 -f 100000"
+	-i 2000000 -f 100000" > Resultados/Drift/Adap/adap-$seed.csv
 done
 \end{verbatim}
-\captionof{figure}{\label{org22efcf8}
+\captionof{figure}{\label{org91aa6fb}
 "Aprendizaje Online Hoeffding Tree Adaptativo - Concept Drift"}
 
-\subsubsection{Comparación}
-\label{sec:orgf5606ea}
 
-Aquí claro que sí
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Fri May  5 15:24:22 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Acc & Kappa & Nodes & Depth \\ 
+  \hline
+Last & 92.93 & 81.17 & 2936.60 & 2.80 \\ 
+  Mean & 92.97 & 81.30 & 1558.87 & 2.37 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Comparación}
+\label{sec:orga7688d4}
+
+Podemos observar en los resultados medios que no hay diferencias
+significativas entre los dos métodos. Si aplicamos el test de
+Wilcoxon obtenemos un \$p\$-valor inferior a 0.01, con lo que podemos
+rechazar la hipótesis de que sean equivalentes. Si observamos las
+tablas de cada modelo, observamos que el \texttt{HoeffdingTree} tiene una
+profundidad mucho mayor, lo que significa que el modelo va
+aprendiendo pero no va olvidando lo ocurrido anteriormente que ya no
+funciona y por tanto sufre con los \emph{concept drifts}.
+
+
+	\underline{Wilcoxon rank sum test with continuity correction}\\
+
+data:  acc.drift.hoeff and acc.drift.adap\\
+W = 0, p-value = 0.01219\\
+alternative hypothesis: true location shift is not equal to 0
+
 
 
 \subsection{Entrenamiento online en datos con \emph{concept drift}, incluyendo mecanismos para olvidar instancias pasadas.}
-\label{sec:org8896302}
+\label{sec:org8db1e6b}
 
 \subsubsection{Ventana deslizante}
-\label{sec:org16f8ba5}
+\label{sec:org1f5439e}
 \begin{itemize}
 \item Repita la experimentación del apartado anterior, cambiando el método
 de evaluación “Interleaved Test-Then-Train” por el método de
@@ -303,22 +471,92 @@ evaluación “Prequential”, con una ventana deslizante de tamaño 1.000.
 
 \begin{enumerate}
 \item Hoeffding
-\label{sec:orgecbe67c}
+\label{sec:orgd34ad4e}
+
+\begin{verbatim}
+for seed in 1 2 314 261 832
+do
+  java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluatePrequential \
+       -l trees.HoeffdingTree \
+	  -s (generators.RandomRBFGeneratorDrift -s 0.001 \
+	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
+       -i 2000000" > Resultados/Window/Hoeff/hoeff-$seed.csv
+done
+\end{verbatim}
+\captionof{figure}{\label{org38a3dc1}
+"Aprendizaje Online Hoeffding Tree - Concept Drift - Ventana"}
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Fri May  5 15:24:23 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Acc & Kappa & Nodes & Depth \\ 
+  \hline
+Last & 75.04 & 31.35 & 1875.40 & 16.40 \\ 
+  Mean & 77.79 & 36.27 & 1023.70 & 14.36 \\ 
+   \hline
+\end{tabular}
+\end{table}
 
 \item Hoeffding Adaptativo
-\label{sec:orgb638d5d}
+\label{sec:org5f24b72}
+
+\begin{verbatim}
+for seed in 1 2 314 261 832
+do
+  java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluatePrequential \
+       -l trees.HoeffdingAdaptiveTree \
+	  -s (generators.RandomRBFGeneratorDrift -s 0.001 \
+	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
+       -i 2000000" > Resultados/Window/Adap/adap-$seed.csv
+done
+\end{verbatim}
+\captionof{figure}{\label{orgcef2b38}
+"Aprendizaje Online Hoeffding Tree Adaptativo - Concept Drift - Ventana"}
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Fri May  5 15:24:24 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Acc & Kappa & Nodes & Depth \\ 
+  \hline
+Last & 92.96 & 82.37 & 2936.60 & 2.80 \\ 
+  Mean & 92.88 & 81.00 & 1558.87 & 2.37 \\ 
+   \hline
+\end{tabular}
+\end{table}
 \end{enumerate}
 
 \subsubsection{Comparación}
-\label{sec:org78c3044}
+\label{sec:orgcc235ad}
 \begin{itemize}
 \item ¿Qué efecto se nota en ambos clasificadores? ¿A qué es debido?
 Justifique los cambios relevantes en los resultados de los
 clasificadores
 \end{itemize}
 
+
+	Wilcoxon rank sum test with continuity correction
+
+data:  acc.window.hoeff and acc.window.adap
+W = 0, p-value = 0.01219
+alternative hypothesis: true location shift is not equal to 0
+
+
+A pesar de incluir el mecanismo para olvidar instancias antiguas, el
+\texttt{HoeffdingTree} adaptativo sigue siendo mejor significativamente que
+el modelo no adaptativo. Esto se porduce debido a que al haber un
+cambio en el flujo de datos, el modelo adaptativo reacciona mejor,
+desechando la información aprendida antes de que las instancias de la
+situación anterior desaparezcan por antiguas.
 \subsection{Entrenamiento online en datos con concept drift, incluyendo mecanismos para reinicializar modelos tras la detección de cambios de concepto.}
-\label{sec:org98e764e}
+\label{sec:org05be011}
 
 \begin{itemize}
 \item Repita la experimentación del apartado 2.3, cambiando el modelo
@@ -327,14 +565,102 @@ clasificador actual cuando se detecta un cambio de concepto
 (SingleClassifierDrift). Como detector de cambio de concepto, usar
 el método DDM con sus parámetros por defecto. Como modelo a
 aprender, usar un clasificador HoeffdingTree.
+\end{itemize}
 
+\subsubsection{Hoeffding Tree}
+\label{sec:org9b293a1}
+\begin{verbatim}
+for seed in 1 2 314 261 832
+do
+  java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluatePrequential \
+      -l (drift.SingleClassifierDrift -l trees.HoeffdingTree) \
+	  -s (generators.RandomRBFGeneratorDrift -s 0.001 \
+	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
+       -i 2000000" > Resultados/Reboot/Hoeff/hoeff-$seed.csv
+done
+\end{verbatim}
+\captionof{figure}{\label{orgab3cb6b}
+"Aprendizaje Online - Concept Drift - Window - Reboot"}
+
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Fri May  5 15:24:25 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Acc & Kappa & Nodes & Depth \\ 
+  \hline
+Last & 90.36 & 68.49 & 41.60 & 69.80 \\ 
+  Mean & 92.20 & 75.82 & 52.68 & 24.58 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+
+\subsubsection{Hoeffding Tree Adaptativo}
+\label{sec:org5d37bcd}
+\begin{itemize}
 \item Repita el paso anterior cambiando el clasificador HoeffdingTree por
 un clasificador HoeffdingTree adaptativo.
+\end{itemize}
+\begin{verbatim}
+for seed in 1 2 314 261 832
+do
+  java -cp moa.jar -javaagent:sizeofag.jar moa.DoTask \
+    "EvaluatePrequential \
+      -l (drift.SingleClassifierDrift -l trees.HoeffdingAdaptiveTree) \
+	  -s (generators.RandomRBFGeneratorDrift -s 0.001 \
+	       -r $seed -i $seed -s 0.001 -k 3 -a 7 -n 3) \
+       -i 2000000" > Resultados/Reboot/Adap/adap-$seed.csv
+done
+\end{verbatim}
+\captionof{figure}{\label{org24c619b}
+"Aprendizaje Online Hoeffding Tree - Concept Drift - Ventana - Adaptive"}
 
+
+% latex table generated in R 3.3.2 by xtable 1.8-2 package
+% Fri May  5 15:24:26 2017
+\begin{table}[ht]
+\centering
+\begin{tabular}{rrrrr}
+  \hline
+ & Acc & Kappa & Nodes & Depth \\ 
+  \hline
+Last & 93.58 & 82.22 & 0.00 & 367.80 \\ 
+  Mean & 93.25 & 81.98 & 11.77 & 134.18 \\ 
+   \hline
+\end{tabular}
+\end{table}
+
+\subsubsection{Comparación}
+\label{sec:org49f0f09}
+
+
+	\underline{Wilcoxon rank sum test with continuity correction}\\
+
+data:  acc.reboot.hoeff and acc.reboot.adap\\
+W = 11, p-value = 0.8345\\
+alternative hypothesis: true location shift is not equal to 0\\
+
+\subsection{Comparación final}
+\label{sec:orgff9e531}
+
+\begin{itemize}
 \item Responda a la siguiente pregunta: ¿Qué diferencias se producen entre
 los métodos de los apartados 2.3, 2.4 y 2.5? Explique similitudes y
 diferencias entre las diferentes metodologías, y discuta los
 resultados obtenidos por cada una de ellas en el flujo de datos
 propuesto.
 \end{itemize}
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{grafico2.pdf}
+\end{center}
+
+
+En la gráfica vemos cómo el modelo adaptativo es en general mejor,
+aunque no hay diferencias significativas cuando reinicializa debido a
+que se convierte en adaptativo al reaprender el modelo. 
 \end{document}
