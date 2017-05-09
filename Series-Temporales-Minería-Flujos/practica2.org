@@ -1,0 +1,262 @@
+#+TITLE: Trabajo Autónomo I
+#+SUBTITLE: Series Temporales y Minería de Flujo de Datos - Máster DATCOM
+#+AUTHOR: Jacinto Carrasco Castillo - jacintocc@correo.ugr.es
+#+DATE: 20 de mayo de 2017
+#+OPTIONS: toc:nil
+#+STARTUP: inlineimages
+
+
+* Parte teórica:
+** Describir qué es una serie temporal.
+
+Llamamos serie temporal a un registro de una magnitud observada a lo
+largo del tiempo. Normalmente trabajaremos con series formadas por
+observaciones que han tenido lugar en intervalos regulares de
+tiempo. Estos datos son útiles cuando la magnitud medida varía a lo
+largo del tiempo, y más en concreto cuando hay posibilidad de realizar
+una predicción.
+
+** Describir la metodología Box-Jenkins para predicción de series temporales.
+
+La metodología Box-Jenkins se basa en la consideración de un modelo
+aditivo para el modelado de una serie temporal. Para ello, se
+determina en un primer paso si la serie es estacionaria, esto es,
+suponiendo que la posición viene dada por una distribución de
+probabilidad, que sus condiciones son constantes a lo largo del
+tiempo. En caso de que esto no se dé, debemos estudiar si hay una
+tendencia a largo plazo, si hay un patrón que se repita a lo largo del
+tiempo (estacionalidad), o ambas. Una vez que hemos sustraído del
+modelo la tendencia y la estacionalidad, volveríamos a comprobar si la
+serie es estacionaria, para posteriormente proceder a la
+identificación del modelo para identificar el orden de la estacionalidad.
+
+** Citar varias técnicas de modelado de tendencia. Describir con más detalle aquélla utilizada para resolver la práctica.
+** Citar varias técnicas de modelado de estacionalidad.  Describir con más detalle aquélla utilizada para resolver la práctica.
+** Describir el proceso para obtener los parámetros de un modelo ARIMA. 
+   
+
+* Parte práctica.
+:PROPERTIES: 
+:header-args: :tangle TrabajoAutonomo_SerieTemporal_32056356.R :exports both :session session_R :eval no-export
+:END:
+ 
+#+BEGIN_SRC R :exports none
+# Jacinto Carrasco Castillo 32056356Z
+# jacintocc@correo.ugr.es
+# Ejercicio de trabajo autónomo. Series temporales. Curso 2016-217
+#+END_SRC
+
+
+
+** Esquematizar los pasos seguidos para conseguir la predicción final ,(un pequeño resumen de los pasos + dibujo/esquema del proceso).
+
+
+Los pasos seguidos para la descripción final han sido:
+1. Observación de la serie temporal para deducir si requería de
+   preprocesamiento debido a que tuviese una varianza cambiante a lo
+   largo del tiempo.
+2. Debido a que la varianza se mantiene constante, comprobación para
+   saber si había alguna tendencia en la seria. 
+3. Al no haber tendencia, directamente se ha pasado a comprobar si
+   existe estacionalidad en la serie. Como se ha encontrado, se
+   ha procedido a eliminar la componente estacional de la
+   serie. Entonces, se han observado las gráficas de autocorrelación y
+   autocorrelación parcial para determinar qué modelo Arima era el que
+   mejor se ajustaba atendiendo a las 
+4. 
+
+#+BEGIN_SRC dot :file dot.png
+
+#+END_SRC
+
+** Describir y justificar si la serie ha necesitado preprocesamiento. Incluir código en =R= para realizar esta acción (en su caso).
+
+
+#+CAPTION: Figura inicial
+#+BEGIN_SRC R :results  graphics :file fig_inicial.png 
+  # Cargamos la biblioteca tseries
+  library(tseries)
+  library(ggplot2)
+
+  # Comenzamos por la lectura de los datos 
+  serie <- scan("SerieTrabajoPractico.dat")
+  df <- data.frame(index = seq(1, along.with = serie), serie)
+  ggplot(df,
+	 aes(x = index, y = serie)) +
+      geom_line()
+#+END_SRC
+
+#+RESULTS:
+[[file:fig_inicial.png]]
+
+Por la gráfica que obtenemos, podemos observar que podría haber una
+estacionalidad cada 6 observaciones de la temporalidad, por tanto
+consideramos la serie de manera inicial como objeto de la clase =ts=
+con estacionalidad 6.
+
+#+CAPTION: Descomposición estacionalidad 6
+#+NAME: decompose
+#+BEGIN_SRC R :results graphics :file fig_decompose.png
+  # Posible estacionalidad de 6
+  serie.ts <- ts(serie, frequency = 6)
+  # Visualizamos la descomposición
+  plot(decompose(serie.ts))
+#+END_SRC
+
+#+RESULTS: decompose
+[[file:fig_decompose.png]]
+
+En cuanto a la serie obtenida podemos comentar: 
+- La serie tiene una varianza constante, con lo que no será necesario
+  realizar ningún tipo de preprocesamiento en este sentido.
+
+
+** Describir y justificar si la serie ha necesitado eliminación de tendencia. Incluir código en =R= para realizar esta acción (en su caso).
+- La serie no presenta una tendencia muy significativa y la media en
+  distintos subintervalos del período considerado permanece estable,
+  con lo que no diremos que existe una tendencia a tener en cuenta.
+
+
+** Describir y justificar si la serie ha necesitado eliminación de estacionalidad. Incluir código en =R= para realizar esta acción (en su caso). 
+
+- En la Figura [[decompose]] observamos que hay una componente
+  estacional es muy marcada, con lo que será necesario eliminar esta
+  estacionalidad. Puesto que hemos considerado una periodicidad de 6
+  observaciones, consideraremos 6 meses de test, esto es, el segundo
+  semestre de 2015. 
+
+#+CAPTION: División en datos de entrenamiento y test
+#+BEGIN_SRC R :results graphics :file train-test.png
+  # Dividimos la serie en train y test.
+  n.test <- 6
+  index.tra <- seq(1, length(serie.ts) - n.test)
+  serie.tra <- serie.ts[index.tra]
+  serie.tst <- serie.ts[-index.tra]
+  df$tra <- c(rep("tra", length(serie.tra)), rep("tst", n.test))
+  ggplot(df, aes(x=index, y = serie, color = tra)) + geom_line()
+  # Trabajaremos en adelante con los datos de entrenamiento. 
+#+END_SRC
+
+#+RESULTS:
+[[file:train-test.png]]
+
+#+NAME: Estacionalidad
+#+BEGIN_SRC R :results silent
+# Asumimos estacionalidad 6
+matrix.tra <- matrix(serie.tra, ncol = 6, byrow=T)
+estacionalidad <- apply(matrix.tra, 2, mean)
+serie.tra.SinEst <- serie.tra - estacionalidad
+serie.tst.SinEst <- serie.tst - estacionalidad
+#+END_SRC
+
+#+BEGIN_SRC R :results graphics :file est.png
+  library(reshape2)
+  df.est <- data.frame(index.tra, serie.tra, estacionalidad)
+  df.est <- melt(df.est, id.vars = "index.tra")
+  ggplot(df.est, aes(x = index.tra, y = value, color = variable)) + geom_line()
+#+END_SRC
+
+#+CAPTION: Serie original y estacionalidad
+#+RESULTS:
+[[file:est.png]]
+
+
+** Describir y justificar si la serie ha necesitado algún proceso para hacerla estacionaria. Incluir código en =R= para realizar esta acción (en su caso). 
+
+
+#+NAME: fig_acf
+#+BEGIN_SRC R :results graphics :file ACF_est.png
+acf(serie.tra.SinEst)
+#+END_SRC
+
+#+CAPTION: ACF
+#+RESULTS: fig_acf
+[[file:ACF_est.png]]
+
+#+NAME: fig_pacf
+#+BEGIN_SRC R :results graphics :file PACF_est.png
+pacf(serie.tra.SinEst)
+#+END_SRC
+
+#+CAPTION: PACF
+#+RESULTS: fig_pacf
+[[file:PACF_est.png]]
+
+
+
+#+BEGIN_SRC R :results output
+adf.test(serie.tra.SinEst)
+#+END_SRC
+
+#+RESULTS:
+: 
+: 	Augmented Dickey-Fuller Test
+: 
+: data:  serie.tra.SinEst
+: Dickey-Fuller = -3.5495, Lag order = 4, p-value = 0.04451
+: alternative hypothesis: stationary
+
+ El test de ADF nos arroja un p-valor menor que 0.05 así que podemos
+ rechazar la hipótesis nula de la no estacionariedad de la
+ serie. Además, vemos que tanto la gráfica de la autocorrelación
+ como la de la autocorrelación parcial convergen a 0 rápidamente y
+ no hay una clara autocorrelación con valores más alejados.  Por lo
+ tanto, asumimos que la serie ya es estacionaria y por lo tanto no ha
+ sido necesaria ninguna diferenciación.
+
+#+BEGIN_SRC R :exports none
+  #' El test de ADF nos arroja un p-valor menor que 0.05 así que podemos
+  #' rechazar la hipótesis nula de la no estacionariedad de la
+  #' serie. Además, vemos que tanto la gráfica de la autocorrelación
+  #' como la de la autocorrelación parcial convergen a 0 rápidamente y
+  #' no hay una clara autocorrelación con valores más alejados. 
+#+END_SRC
+
+
+** Describir y justificar cómo se han obtenido los parámetros del modelo ARIMA. Incluir código en R para realizar esta acción.
+
+
+El modelo ARIMA obtenido es *ARIMA(1,0,0)*, puesto que a partir del
+valor 1 podemos considerar que los coeficientes de autocorrelación son
+0, a excepción del valor 13 que supera ligeramente el
+umbral como vemos en la Figura [[fig_acf]]. Igualmente, en la Figura
+[[fig_pacf]] observamos que salvo también el valor 13, el 1 es el único
+que supera el umbral. 
+
+
+** En el caso de existir más de un modelo inicial planteado, justificar cómo se ha llegado a la toma de decisiones para selección del mejor modelo. Incluir código en =R= para realizar esta acción (en su caso).
+** Describir cómo se han obtenido los valores predichos para la serie. Incluir código en =R= para realizar esta acción.
+#+BEGIN_SRC R :results silent
+modelo <- arima(serie.tra.SinEst, order = c(1,0,0))
+valores.ajustados <- estacionalidad + modelo$residuals
+#+END_SRC
+
+
+#+BEGIN_SRC R :results silent
+predicciones <- predict(modelo, n.ahead = n.test)$pred
+#+END_SRC
+
+#+BEGIN_SRC R :results output
+error.tra <- sum(modelo$residuals^2)
+print(error.tra)
+error.tst <- sum((predicciones-serie.tst.SinEst)^2)
+print(error.tst)
+#+END_SRC
+
+#+RESULTS:
+: [1] 1.058235
+: [1] 0.2921816
+
+#+NAME: Resultados
+#+BEGIN_SRC R :results graphics :file results.png
+  df.results <- data.frame(index=seq(1,length(serie.ts)),
+                           serie.ts,
+                           pred = c(valores.ajustados, predicciones + estacionalidad),
+                           type = c(rep("tra", length(serie.tra)),rep("tst",n.test)))
+  df.results <- melt(df.results, id.vars = c("index","type"))
+  ggplot(df.results, aes(y=value,x=index,color=variable,linetype=type))+geom_line()
+#+END_SRC
+
+#+RESULTS: Resultados
+[[file:results.png]]
+
