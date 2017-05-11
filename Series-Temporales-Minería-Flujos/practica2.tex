@@ -1,4 +1,4 @@
-% Created 2017-05-09 mar 15:03
+% Created 2017-05-11 jue 11:58
 % Intended LaTeX compiler: pdflatex
 \documentclass[11pt]{article}
 \usepackage[utf8]{inputenc}
@@ -23,7 +23,7 @@
  pdftitle={Trabajo Autónomo I},
  pdfkeywords={},
  pdfsubject={},
- pdfcreator={Emacs 25.1.1 (Org mode 9.0.5)}, 
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.6)}, 
  pdflang={English}}
 \begin{document}
 
@@ -31,9 +31,9 @@
 
 
 \section{Parte teórica:}
-\label{sec:org2513b54}
+\label{sec:orge924f52}
 \subsection{Describir qué es una serie temporal.}
-\label{sec:org2efa813}
+\label{sec:org4830123}
 
 Llamamos serie temporal a un registro de una magnitud observada a lo
 largo del tiempo. Normalmente trabajaremos con series formadas por
@@ -43,7 +43,7 @@ largo del tiempo, y más en concreto cuando hay posibilidad de realizar
 una predicción.
 
 \subsection{Describir la metodología Box-Jenkins para predicción de series temporales.}
-\label{sec:orge796cd7}
+\label{sec:orgba20c6a}
 
 La metodología Box-Jenkins se basa en la consideración de un modelo
 aditivo para el modelado de una serie temporal. Para ello, se
@@ -58,43 +58,111 @@ serie es estacionaria, para posteriormente proceder a la
 identificación del modelo para identificar el orden de la estacionalidad.
 
 \subsection{Citar varias técnicas de modelado de tendencia. Describir con más detalle aquélla utilizada para resolver la práctica.}
-\label{sec:org3aca7f3}
+\label{sec:org2792eba}
+
+Para modelar la tendencia existen distintos métodos:
+\begin{itemize}
+\item Estimación funcional: Con esta técnica pretendemos modelar la
+tendencia como una función. Para ello realizaríamos una hipótesis
+sobre el modelo que rige la tendencia, por ejemplo, una función
+lineal o cuadrática.
+\item Filtrado: Para modelar la tendencia podemos aplicar un filtro de
+medias móviles, donde transformamos cada dato en la media de \(k\)
+valores adyacentes.
+\item Diferenciación: En esta técnica se realiza una diferenciación de la
+señal, esto es, cada observación pasa a ser la diferencia entre el
+valor de esa observación y su anterior. Esta diferenciación se
+realiza hasta que desaparezca la tendencia.
+\end{itemize}
+
 \subsection{Citar varias técnicas de modelado de estacionalidad.  Describir con más detalle aquélla utilizada para resolver la práctica.}
-\label{sec:org69d0c09}
+\label{sec:org2b682e0}
+\begin{itemize}
+\item Estimación del período mediante la gráfica de ACF y cálculo de la
+media de los valores anteriores con igual módulo \(P\).
+\item FFT
+\item Alisado de Holts-Winter
+\end{itemize}
+
+En esta práctica se ha calculado la estacionalidad mediante el cálculo
+de las \(P\) medias para los \(P\) distintas observaciones del período. 
+
 \subsection{Describir el proceso para obtener los parámetros de un modelo ARIMA.}
-\label{sec:org4a90804}
+\label{sec:org7d91def}
+
+Una vez que obtenemos una serie estacionaria, estimamos los parámetros
+de un modelo ARIMA a través de la visualización de los ACF y PACF de
+la serie. Aunque no hay una regla concreta para la obtención de los
+parámetros, podemos mencionar la siguiente guía para considerar un
+modelo \(ARMA(p,0)\): El ACF decrece rápidamente hacia cero con valores
+positivos, negativos o con forma sinusoidal. El parámetro \(p\) se
+corresponde con la última posición del valor que supere el umbral
+establecido en el PACF.
+
+ De manera análoga, la guía para el modelo \(ARMA(0,q)\) es: El PACF
+decrece rápidamente hacia cero con valores positivos, negativos o con
+forma sinusoidal. El parámetro \(q\) se corresponde con la última
+posición del valor que supere el umbral establecido en el ACF.
 
 
 \section{Parte práctica.}
-\label{sec:orgb300e90}
+\label{sec:orge79cfdc}
 \subsection{Esquematizar los pasos seguidos para conseguir la predicción final (un pequeño resumen de los pasos + dibujo/esquema del proceso).}
-\label{sec:org2e86446}
+\label{sec:orgdadb203}
 
+
+Los pasos seguidos para la descripción final han sido:
+\begin{enumerate}
+\item Observación de la serie temporal para deducir si requería de
+preprocesamiento debido a que tuviese una varianza cambiante a lo
+largo del tiempo.
+\item Debido a que la varianza se mantiene constante, comprobación para
+saber si había alguna tendencia en la seria.
+\item Al no haber tendencia, directamente se ha pasado a comprobar si
+existe estacionalidad en la serie. Como se ha encontrado, se
+ha procedido a eliminar la componente estacional de la
+serie. Entonces, se han observado las gráficas de autocorrelación y
+autocorrelación parcial para determinar qué modelo Arima era el que
+mejor se ajustaba atendiendo a las indicaciones descrita en el seminario.
+\item Una vez se ha fijado el modelo, pasamos a realizar la predicción:
+\begin{enumerate}
+\item Se aprende el modelo con los datos sin la estacionalidad.
+\item Se realiza la predicción para las 6 siguientes observaciones.
+\item Se añade la estacionalidad calculada previamente y se obtiene el RMSE.
+\end{enumerate}
+\end{enumerate}
+
+En la Figura \ref{fig:org1ac4e00} se muestra el esquema de los pasos
+realizados. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./diagram-process.pdf}
+\caption{\label{fig:org1ac4e00}
+"Diagrama de pasos realizados"}
+\end{figure}
 
 
 \subsection{Describir y justificar si la serie ha necesitado preprocesamiento. Incluir código en \texttt{R} para realizar esta acción (en su caso).}
-\label{sec:org20fe0c6}
+\label{sec:org4ade365}
 
 
 \begin{verbatim}
 # Cargamos la biblioteca tseries
 library(tseries)
-library(ggplot2)
 
 # Comenzamos por la lectura de los datos 
 serie <- scan("SerieTrabajoPractico.dat")
-df <- data.frame(index = seq(1, along.with = serie), serie)
-ggplot(df,
-       aes(x = index, y = serie)) +
-    geom_line()
 \end{verbatim}
-\captionof{figure}{Figura inicial}
 
-\begin{center}
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=.9\linewidth]{fig_inicial.png}
-\end{center}
+\caption{\label{fig:orgf2a328e}
+Figura inicial}
+\end{figure}
 
-Por la gráfica que obtenemos, podemos observar que podría haber una
+Por la Figura \ref{fig:orgf2a328e} que obtenemos, podemos observar que podría haber una
 estacionalidad cada 6 observaciones de la temporalidad, por tanto
 consideramos la serie de manera inicial como objeto de la clase \texttt{ts}
 con estacionalidad 6.
@@ -105,16 +173,13 @@ serie.ts <- ts(serie, frequency = 6)
 # Visualizamos la descomposición
 plot(decompose(serie.ts))
 \end{verbatim}
-\captionof{figure}{\label{org3034064}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{fig_decompose.png}
+\caption{\label{fig:orgcb9a16e}
 Descomposición estacionalidad 6}
-
-\begin{center}
-\includegraphics[width=.9\linewidth]{fig_decompose.png}
-\end{center}
-
-\begin{center}
-\includegraphics[width=.9\linewidth]{fig_decompose.png}
-\end{center}
+\end{figure}
 
 En cuanto a la serie obtenida podemos comentar: 
 \begin{itemize}
@@ -124,24 +189,10 @@ realizar ningún tipo de preprocesamiento en este sentido.
 
 
 \subsection{Describir y justificar si la serie ha necesitado eliminación de tendencia. Incluir código en \texttt{R} para realizar esta acción (en su caso).}
-\label{sec:orgd7d1c35}
-\begin{itemize}
-\item La serie no presenta una tendencia muy significativa y la media en
-distintos subintervalos del período considerado permanece estable,
-con lo que no diremos que existe una tendencia a tener en cuenta.
-\end{itemize}
-
-
-\subsection{Describir y justificar si la serie ha necesitado eliminación de estacionalidad. Incluir código en \texttt{R} para realizar esta acción (en su caso).}
-\label{sec:org5649930}
-
-\begin{itemize}
-\item En la Figura \ref{org3034064} observamos que hay una componente
-estacional es muy marcada, con lo que será necesario eliminar esta
-estacionalidad. Puesto que hemos considerado una periodicidad de 6
-observaciones, consideraremos 6 meses de test, esto es, el segundo
-semestre de 2015.
-\end{itemize}
+\label{sec:orgeb09368}
+Puesto que hemos considerado una periodicidad de 6
+  observaciones, consideraremos 6 meses de test, esto es, el segundo
+  semestre de 2015. 
 
 \begin{verbatim}
 # Dividimos la serie en train y test.
@@ -149,15 +200,62 @@ n.test <- 6
 index.tra <- seq(1, length(serie.ts) - n.test)
 serie.tra <- serie.ts[index.tra]
 serie.tst <- serie.ts[-index.tra]
-df$tra <- c(rep("tra", length(serie.tra)), rep("tst", n.test))
-ggplot(df, aes(x=index, y = serie, color = tra)) + geom_line()
-# Trabajaremos en adelante con los datos de entrenamiento.
 \end{verbatim}
 \captionof{figure}{División en datos de entrenamiento y test}
+
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{train-test.png}
 \end{center}
+
+
+La serie no presenta una tendencia muy significativa y la media en
+distintos subintervalos del período considerado permanece estable,
+con lo que no diremos que existe una tendencia a tener en cuenta.
+
+Para corroborar esta sospecha, realizamos un test estadístico sobre un
+ajuste lineal 
+
+\begin{verbatim}
+time.serie <- seq(1, length(serie.tra))
+df.serie <- data.frame("Time"=time.serie,
+					   "Serie"=serie.tra)
+lm.model <- lm(Serie ~ ., df.serie)
+summary(lm.model)
+\end{verbatim}
+
+\begin{verbatim}
+
+Call:
+lm(formula = Serie ~ ., data = df.serie)
+
+Residuals:
+     Min       1Q   Median       3Q      Max 
+-0.55644 -0.18152 -0.06635  0.15954  0.65621 
+
+Coefficients:
+            Estimate Std. Error t value Pr(>|t|)    
+(Intercept) 0.601542   0.070514   8.531 3.75e-12 ***
+Time        0.000811   0.001830   0.443    0.659    
+---
+Signif. codes:  0 ‘***’ 0.001 ‘**’ 0.01 ‘*’ 0.05 ‘.’ 0.1 ‘ ’ 1
+
+Residual standard error: 0.2832 on 64 degrees of freedom
+Multiple R-squared:  0.00306,	Adjusted R-squared:  -0.01252 
+F-statistic: 0.1965 on 1 and 64 DF,  p-value: 0.6591
+\end{verbatim}
+
+Podemos observar que el \(p\)-valor asociado a la variable que indica el
+tiempo es muy superior a 0.05, con lo que no podemos rechazar que sea
+0, como vemos en el coeficiente estimado. Por tanto, no será necesario
+considerar la tendencia. 
+
+\subsection{Describir y justificar si la serie ha necesitado eliminación de estacionalidad. Incluir código en \texttt{R} para realizar esta acción (en su caso).}
+\label{sec:orgf9e8349}
+
+En la Figura \ref{fig:orgcb9a16e}  observamos que hay una componente
+ estacional es muy marcada, con lo que será necesario eliminar esta
+ estacionalidad. 
 
 \begin{verbatim}
 # Asumimos estacionalidad 6
@@ -167,40 +265,40 @@ serie.tra.SinEst <- serie.tra - estacionalidad
 serie.tst.SinEst <- serie.tst - estacionalidad
 \end{verbatim}
 
-\begin{verbatim}
-library(reshape2)
-df.est <- data.frame(index.tra, serie.tra, estacionalidad)
-df.est <- melt(df.est, id.vars = "index.tra")
-ggplot(df.est, aes(x = index.tra, y = value, color = variable)) + geom_line()
-\end{verbatim}
-
-\begin{center}
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=.9\linewidth]{est.png}
-\end{center}
+\caption{\label{fig:org3881015}
+Serie original y estacionalidad}
+\end{figure}
+
 
 
 \subsection{Describir y justificar si la serie ha necesitado algún proceso para hacerla estacionaria. Incluir código en \texttt{R} para realizar esta acción (en su caso).}
-\label{sec:org593f867}
+\label{sec:org6361bda}
 
 
 \begin{verbatim}
 acf(serie.tra.SinEst)
 \end{verbatim}
 
-\begin{center}
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=.9\linewidth]{ACF_est.png}
-\end{center}
-
+\caption{\label{fig:org0ecd06f}
+ACF}
+\end{figure}
 
 \begin{verbatim}
 pacf(serie.tra.SinEst)
 \end{verbatim}
 
-\begin{center}
+\begin{figure}[htbp]
+\centering
 \includegraphics[width=.9\linewidth]{PACF_est.png}
-\end{center}
-
-
+\caption{\label{fig:orgd7497f0}
+PACF}
+\end{figure}
 
 \begin{verbatim}
 adf.test(serie.tra.SinEst)
@@ -224,53 +322,83 @@ tanto, asumimos que la serie ya es estacionaria y por lo tanto no ha
 sido necesaria ninguna diferenciación.
 
 \subsection{Describir y justificar cómo se han obtenido los parámetros del modelo ARIMA. Incluir código en R para realizar esta acción.}
-\label{sec:org60479c9}
+\label{sec:org78e9cd4}
 
 
 El modelo ARIMA obtenido es \textbf{ARIMA(1,0,0)}, puesto que a partir del
 valor 1 podemos considerar que los coeficientes de autocorrelación son
 0, a excepción del valor 13 que supera ligeramente el
-umbral como vemos en la Figura \ref{org8406a3b}. Igualmente, en la Figura
-\ref{orge5792a5} observamos que salvo también el valor 13, el 1 es el único
-que supera el umbral. 
+umbral como vemos en la Figura \ref{fig:org0ecd06f}. Igualmente, en la Figura
+\ref{fig:orgd7497f0} observamos que salvo también el valor 13, el 1 es el único
+que supera el umbral, con lo que el valor de \(p\) será 1.
 
 
 \subsection{En el caso de existir más de un modelo inicial planteado, justificar cómo se ha llegado a la toma de decisiones para selección del mejor modelo. Incluir código en \texttt{R} para realizar esta acción (en su caso).}
-\label{sec:org926a284}
+\label{sec:org94c0ac0}
+
+
+
+
 \subsection{Describir cómo se han obtenido los valores predichos para la serie. Incluir código en \texttt{R} para realizar esta acción.}
-\label{sec:orga0feaec}
+\label{sec:orgc4551f6}
+
+
 \begin{verbatim}
+# Realizamos el modelo para el ajuste ARIMA(1,0,0)
 modelo <- arima(serie.tra.SinEst, order = c(1,0,0))
+# Realizamos la predicción para el train 
 valores.ajustados <- estacionalidad + modelo$residuals
 \end{verbatim}
 
 
 \begin{verbatim}
+# Realizamos la predicción para 6 nuevos valores que serán el test
 predicciones <- predict(modelo, n.ahead = n.test)$pred
 \end{verbatim}
 
 \begin{verbatim}
-error.tra <- sum(modelo$residuals^2)
+# Mostramos el error en entrenamiento
+error.tra <- mean(modelo$residuals^2)
 print(error.tra)
-error.tst <- sum((predicciones-serie.tst.SinEst)^2)
+# Mostramos el error en test
+error.tst <- mean((predicciones-serie.tst.SinEst)^2)
 print(error.tst)
 \end{verbatim}
 
 \begin{verbatim}
-[1] 1.058235
-[1] 0.2921816
+[1] 0.01603386
+[1] 0.04869693
 \end{verbatim}
 
-\begin{verbatim}
-df.results <- data.frame(index=seq(1,length(serie.ts)),
-			 serie.ts,
-			 pred = c(valores.ajustados, predicciones + estacionalidad),
-			 type = c(rep("tra", length(serie.tra)),rep("tst",n.test)))
-df.results <- melt(df.results, id.vars = c("index","type"))
-ggplot(df.results, aes(y=value,x=index,color=variable,linetype=type))+geom_line()
-\end{verbatim}
+Obtenemos un RMSE de 0.016 en entrenamiento y 0.049 en test, con lo
+que el modelado de la serie ha sido eficaz para realizar la predicción.
 
 \begin{center}
 \includegraphics[width=.9\linewidth]{results.png}
+\end{center}
+
+\subsection{Predicción para 2016}
+\label{sec:org50431b9}
+
+Una vez que tenemos el modelo, realizamos la predicción para los 6
+primeros meses de 2016 como se indica en el enunciado de la
+práctica. Para ello, sacamos la estacionalidad de la serie completa y
+aprendemos el modelo ARIMA seleccionado. 
+
+\begin{verbatim}
+# Ajustamos la estacionalidad incluyendo todos los datos disponibles
+estacionalidad <- apply(matrix(serie, ncol = 6, byrow = T),
+						2, mean)
+serie.SinEst <- serie - estacionalidad
+# Aprendemos el modelo
+modelo <- arima(serie.SinEst, order = c(1,0,0))
+# Realizamos la predicción reajustando por la estacionalidad
+predicciones <- predict(modelo, n.ahead = 6)$pred + estacionalidad
+
+\end{verbatim}
+
+
+\begin{center}
+\includegraphics[width=.9\linewidth]{pred_final.png}
 \end{center}
 \end{document}
