@@ -1,0 +1,248 @@
+% Created 2017-05-16 mar 12:14
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jacinto Carrasco Castillo}
+\date{\today}
+\title{Ejercicios examen\\\medskip
+\large Extracción de características en imágenes}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo},
+ pdftitle={Ejercicios examen},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.6)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+
+\section{Tema 1}
+\label{sec:org69a7ec6}
+
+Sólo está puesto para no descuadrar índices 
+
+\section{Tema 2 (1-10)}
+\label{sec:org5c3bf5b}
+\subsection{Give a real-world example of a joint distribution P r(x, y) where x is discrete and y is continuous.*}
+\label{sec:org3f9635a}
+
+Distribución de la temperatura en diferentes localizaciones (\(x\)) en
+diferentes momentos de tiempo \(y\).
+
+\subsection{What remains if I marginalize a joint distribution P r(v, w, x, y, z) over five variables with respect to variables w and y? What remains if I marginalize the resulting distribution with respect to v?*}
+\label{sec:org347425e}
+
+
+It remains a joint distribution over \(v,x,z\) variables if in addition
+you normalize over integral over \(w,y\)
+It remains a joint distribution over \(x,z\) if you normalize over \(v\).
+
+
+\subsection{Show that the following relation is true:}
+\label{sec:org40a2f6e}
+\[ Pr(w, x, y, z) = Pr(x, y) Pr(z|w, x, y) Pr(w|x, y) \]
+
+\begin{align} 
+Pr(w, x, y, z) &= Pr(z | w, x, y) P(w, y, x)  = \\
+	&= Pr(z | w, x, y) P(w| x, y) P(x, y)
+\end{align}
+
+\subsection{Problema}
+\label{sec:org311a0f5}
+\begin{itemize}
+\item In my pocket there are two coins. Coin 1 is unbiased, so the
+likelihood Pr(h = 1|c = 1) of getting heads is 0.5 and the
+likelihood P r(h = 0|c = 1) of getting tails is also 0.5. Coin 2 is
+biased, so the likelihood P r(h = 1|c = 2) of getting heads is 0.8
+and the likelihood P r(h = 0|c = 2) of getting tails is 0.2. I reach
+into my pocket and draw one of the coins at random. There is an
+equal prior probability I might have picked either coin. I flip the
+coin and observe a head. Use Bayes’ rule to compute the posterior
+probability that I chose coin 2.
+\end{itemize}
+
+\begin{align}
+Pr(c = 2 | h = 1) &= P(c= 2, h=1) / P(h = 1)  = P(h=1|c=2)P(c=2) / P(h=1) = \\ 
+ &=	P(h=1|c=2)P(c=2) / (P(h=1|c=1)P(c=1)+P(h=1|c=2)P(c=2)) = \\
+ &=  0.8*0.5 / (0.5*0.5+0.8*0.4) = 0.4 / 0.65 = 0.615
+\end{align}
+
+\subsection{If variables x and y are independent and variables x and z are independent, does it follow that variables y and z are independent?}
+\label{sec:orgb098a94}
+
+No, si \(Z = 2Y\), estamos en las condiciones del problema pero no \(Z\) e
+\(Y\) no son independientes. 
+
+\subsection{Use equation 2.3 to show that when x and y are independent, the marginal distribution Pr(x) is the same as the conditional distribution P r(x|y = y∗ ) for any y∗.}
+\label{sec:org0d1c9b4}
+
+\begin{LATEX}
+\begin{align}
+	P(x|y*) = P(x,y*) / P(y*) = P(x)P(y*) /P(y*) = P(x)
+\end{align}
+\end{LATEX}
+
+\subsection{The joint probability P r(w, x, y, z) over four variables factorizes as}
+\label{sec:orgf508882}
+\[ P r(w, x, y, z) = P r(w)P r(z|y)P r(y|x, w)P r(x). \]
+
+\textbf{Demonstrate that x is independent of w by showing that P r(x, w) = P
+ r(x)P r(w).}
+
+
+\begin{align}
+	Pr(w,x,y,z) &= Pr(z|y,w,x) P(y,w,x) = P(z|y,w,x) P(y|x,w) P(x,w)
+\end{align}
+
+
+\begin{align}
+  P(z|y,w,x) P(y|x,w) P(x,w) &= P(z|y) P (y|x,w) P(x) P(w)  \\
+  P(z|y,w,x) P(x,w) &= P(z|y)  P(x) P(w)  \\
+  P(z|y,w,x) P(x|w) &= P(z|y) P(x) \\
+  P(w,x,y,z) / (P(y,w,z)P(w))  &= P(z) / P(y) \\
+  P(w,x,y,z) &= P(w) P(y,w,z) P(z) / P(y) \\
+
+\end{align}
+
+\begin{align}
+	P(w,x,y,z) = P(w,x|y,z) P(z|y) P(y) 
+
+\end{align}
+
+Esto está mal
+
+\subsection{Consider a biased die where the probs of rolling sides are \{1/12,1/12,1/12,1/12,1/6,1/2\}. What is the expected value of the die. If I roll the die twice, what is the expected value of the sum of the two rolls?}
+\label{sec:org438ff17}
+
+$\sum_{i=1}^6 p_i i = \frac{1+2+3+4+10+36}{12} = 56/12 = 4.667$
+
+Dado que los sucesos son independientes, la suma de los dos dados se espera \(2 \cdot 4.667\).
+
+\subsection{Prove the four relations for manipulating expectations.}
+\label{sec:orgb6fcb85}
+
+\begin{itemize}
+\item E[k] = k
+\end{itemize}
+
+\begin{align}
+	\int_D kx dx = k \int_D x dx = k
+\end{align}
+
+\begin{itemize}
+\item 
+\end{itemize}
+
+
+\subsection{Use the relations from problem 2.9 to prove the following relationship}
+\label{sec:org6411868}
+between the second moment around zero and the second moment about the mean (variance):
+
+\begin{align}
+E[(x-\mu)^2] &= \int_{\Omega} (x-\mu)^2 dx = \int_{\Omega} x^2 -2 \mu x + \mu^2 \ dx =  \\
+	&=  \int_{\Omega} x^2 \ dx - \mu^2.
+\end{align}
+Para lo que usamos que \$ \(\mu\) = \(\int_{\Omega}\) x = \(\mu\) \$ . 
+
+\section{Tema 3 (1-7,9,10)}
+\label{sec:orgfd5b0b8}
+
+\subsection{3.1}
+\label{sec:orgbd62875}
+\begin{itemize}
+\item Consider a variable \(x\) which is Bernoulli distributed with
+parameter \(\lamda\). Show that the mean E[x] is \(\lamda\) and the variance
+E[(x − E[x])\(^{\text{2}}\) ] is \(\lamda(1 − \lamda)\).
+\end{itemize}
+
+\begin{align}
+E[x] &= \sum_{x=0}^1  \lambda^x(1-\lambda)^{1-x} x =  \\
+	&= (1-\lambda) \cdot 0 + \lambda \cdot 1
+\end{align}
+
+\begin{align}
+Var[x] &= E[X^2] - E[X]^2  = \sum_{x=0}^1 (\lambda^x (1-\lambda)^{1-x}) x^2  - E[X]^2 = \\
+	&= \lambda - \lambda^2 = \lambda(1-\lambda)
+\end{align}
+\subsection{3.2}
+\label{sec:org685de24}
+\begin{itemize}
+\item Calculate an expression for the mode (position of the peak) of the
+beta distribution with α, β > 1 in terms of the parameters α and β.
+\end{itemize}
+
+\[
+ P(\gamma) = \frac{\Gamma[\alpha+\beta]}{\Gamma[\alpha+\beta]}
+			      \lambda^{\alpha+1}  (1-\lambda)^{\beta-1}
+\]
+
+
+\begin{align}
+   f(\lambda) &=   \lambda^{\alpha-1}  (1-\lambda)^{\beta-1} \\
+   f'(\lambda) &=  (\alpha-1) \lambda^{\alpha-2} (1-\lambda)^{\beta-1} -
+                  (\beta-1)  \lambda^{\alpha-1} (1-\lambda)^{\beta-2} = 0 \\
+   \lambda = \frac{ \alpha - 1}{\alpha + \beta -2)}
+\end{align}
+
+\subsection{3.3 The mean and variance of the beta distribution are given by the expressions}
+\label{sec:org78f5447}
+
+\[ E[\lambda] = \frac{\alpha}{\alpha+\beta} \]
+\[ E[(\lambda - \mu)^2] = \sigma^2 \beta \]
+
+\begin{align}
+\alpha &= \frac{\mu^2 (1-\mu)}{\sigma^2 - \mu \\
+\beta &=  \frac{(1-\mu)(\mu(1-\mu) + \sigma^2)}{\sigma^2}
+\end{align}
+
+\subsection{3.4}
+\label{sec:org407f5c8}
+\begin{itemize}
+\item All of the distributions in this chapter are members of the
+exponential family and can be written in the form
+\end{itemize}
+\[ P(x|\theta) = a[x] ex[b[\theta]^Tc[x] -d[\theta]], \]
+where a[x] and c[x] are functions of the data and b[\(\theta\)] and
+d[\(\theta\)] are functions of the parameters. Find the functions a,b,c,d
+that allow the Beta distribution to be represented in the generalized
+form of the exponential family. 
+
+\begin{align}
+  P(\lambda|\alpha, \beta) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) + \Gamma(\beta)} \lambda^{\alpha-1} (1-\lambda)^{\beta-1} \\
+  &= G(\alpha,\beta) exp((\alpha-1,\beta-1)^T (\log \lambda, \log (\lambda-1)))
+\end{align}
+
+con lo que \(b(\theta) = (\alpha-1, \beta-1)\), \(c(x) = (\log \lambda,
+log(\lambda-1))\) y nos queda sacar \(a, d\)
+
+\begin{align}
+	G(\alpha,\beta) = g
+\end{align}
+
+\section{Tema 4}
+\label{sec:orgca2dca9}
+
+\section{Tema 5}
+\label{sec:org507f035}
+
+\section{Tema 6}
+\label{sec:org373cbd0}
+
+\section{Tema 9}
+\label{sec:org13ca834}
+\end{document}

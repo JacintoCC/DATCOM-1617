@@ -1,0 +1,4 @@
+#+TITLE: Minería de texto y web
+#+SUBTITLE: Modelos de datos no numéricos
+#+AUTHOR: Jacinto Carrasco Castillo
+

@@ -1,0 +1,15 @@
+#+TITLE: Entrega NoSQL
+#+SUBTITLE: Big Data y Cloud Computing
+#+AUTHOR: Jacinto Carrasco Castillo
+#+DATE: 20 de mayo de 2017
+
+* Elaborar el código MapReduce que resuelva la consulta
+-Obtener el par de restaurantes más próximos en cada barrio
+ (/borough/), mostrando el nombre y tipo de cocina de esos
+ restaurantes, la distancia entre ellos y la cantidad de restaurantes
+ evaluados para cada barrio, para aquellos restaurantes que hayan
+ tenido un grado= ‘A’ en alguna ocasión.
+
+#+BEGIN_SRC 
+
+#+END_SRC

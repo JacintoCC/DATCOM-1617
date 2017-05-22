@@ -1,0 +1,227 @@
+#+TITLE: Ejercicios examen
+#+SUBTITLE: Extracción de características en imágenes
+
+* Tema 2 (1-10)
+** 2.1
+*Give a real-world example of a joint distribution P r(x, y) where x
+is discrete and y is continuous.*
+
+Distribución de la temperatura en diferentes localizaciones ($x$) en
+diferentes momentos de tiempo $y$.
+
+** 2.2
+
+*What remains if I marginalize a joint distribution P r(v, w, x, y, z) over five variables with respect to variables w and y? What remains if I marginalize the resulting distribution with respect to v?*
+
+
+It remains a joint distribution over $v,x,z$. It remains a joint
+distribution over $x,z$.
+
+
+** 2.3
+*Show that the following relation is true:*
+
+\[ Pr(w, x, y, z) = Pr(x, y) Pr(z|w, x, y) Pr(w|x, y) \]
+
+#+BEGIN_SRC latex
+\begin{align} 
+Pr(w, x, y, z) &= Pr(z | w, x, y) P(w, y, x)  = \\
+	&= Pr(z | w, x, y) P(w| x, y) P(x, y)
+\end{align}
+#+END_SRC
+
+** 2.4
+-  In my pocket there are two coins. Coin 1 is unbiased, so the
+  likelihood Pr(h = 1|c = 1) of getting heads is 0.5 and the
+  likelihood P r(h = 0|c = 1) of getting tails is also 0.5. Coin 2 is
+  biased, so the likelihood P r(h = 1|c = 2) of getting heads is 0.8
+  and the likelihood P r(h = 0|c = 2) of getting tails is 0.2. I reach
+  into my pocket and draw one of the coins at random. There is an
+  equal prior probability I might have picked either coin. I flip the
+  coin and observe a head. Use Bayes’ rule to compute the posterior
+  probability that I chose coin 2.
+
+#+BEGIN_EXPORT latex
+\begin{align}
+Pr(c = 2 | h = 1) &= P(c= 2, h=1) / P(h = 1)  = P(h=1|c=2)P(c=2) / P(h=1) = \\ 
+ &=	P(h=1|c=2)P(c=2) / (P(h=1|c=1)P(c=1)+P(h=1|c=2)P(c=2)) = \\
+ &=  0.8*0.5 / (0.5*0.5+0.8*0.5) = 0.4 / 0.65 = 0.615
+\end{align}
+#+END_EXPORT
+   
+** 2.5
+*If variables x and y are independent and variables x and z are
+independent, does it follow that variables y and z are independent?*
+
+No, si $Z = 2Y$, estamos en las condiciones del problema pero no $Z$ e
+$Y$ no son independientes. 
+
+** 2.6
+*Use equation 2.3 to show that when x and y are independent, the
+marginal distribution Pr(x) is the same as the conditional
+distribution $P r(x|y = y∗ ) for any y*$.*
+
+
+#+BEGIN_EXPORT latex
+\begin{align}
+	P(x|y*) = P(x,y*) / P(y*) = P(x)P(y*) /P(y*) = P(x)
+\end{align}
+#+END_EXPORT
+
+** 2.7
+*The joint probability P r(w, x, y, z) over four variables factorizes as*
+\[ P r(w, x, y, z) = P r(w)P r(z|y)P r(y|x, w)P r(x). \]
+
+*Demonstrate that x is independent of w by showing that P r(x, w) = P(x)P(w).*
+
+
+#+BEGIN_EXPORT latex
+\begin{align}
+	Pr(w,x,y,z) &= Pr(z|y,w,x) P(y,w,x) = P(z|y,w,x) P(y|x,w) P(x,w)
+\end{align}
+#+END_EXPORT
+
+
+** 2.8
+*Consider a biased die where the probs of rolling sides are
+{1/12,1/12,1/12,1/12,1/6,1/2}. What is the expected value of the
+die. If I roll the die twice, what is the expected value of the sum of
+the two rolls?*
+
+#+BEGIN_EXPORT latex 
+$\sum_{i=1}^6 p_i i = \frac{1+2+3+4+10+36}{12} = 56/12 = 4.667$
+#+END_EXPORT
+
+Dado que los sucesos son independientes, la suma de los dos dados se espera $2 \cdot 4.667$.
+
+** 2.9
+*Prove the four relations for manipulating expectations.*
+
+- E[k] = k 
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+	\int_D kx dx = k \int_D x dx = k
+\end{align}
+#+END_EXPORT
+
+- 
+
+
+** 2.10
+*Use the relations from problem 2.9 to prove the following
+relationship between the second moment around zero and the second
+moment about the mean (variance):*
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+E[(x-\mu)^2] &= \int_{\Omega} (x-\mu)^2 dx = \int_{\Omega} x^2 -2 \mu x + \mu^2 \ dx =  \\
+	&=  \int_{\Omega} x^2 \ dx - \mu^2.
+\end{align}
+#+END_EXPORT
+Para lo que usamos que $ \mu = \int_{\Omega} x = \mu $ . 
+
+* Tema 3 (1-7,9,10)
+
+** 3.1 
+-  Consider a variable $x$ which is Bernoulli distributed with
+  parameter $\lamda$. Show that the mean E[x] is $\lamda$ and the variance
+$  E[(x − E[x])^2 ]$ is $\lambda(1 - \lamda)$.
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+E[x] &= \sum_{x=0}^1  \lambda^x(1-\lambda)^{1-x} x =  \\
+	&= (1-\lambda) \cdot 0 + \lambda \cdot 1
+\end{align}
+#+END_EXPORT
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+Var[x] &= E[X^2] - E[X]^2  = \sum_{x=0}^1 (\lambda^x (1-\lambda)^{1-x}) x^2  - E[X]^2 = \\
+	&= \lambda - \lambda^2 = \lambda(1-\lambda)
+\end{align}
+#+END_EXPORT
+** 3.2 
+-  Calculate an expression for the mode (position of the peak) of the
+  beta distribution with \alpha, \beta > 1 in terms of the parameters
+  \alpha and \beta
+\[
+ P(\lambda) = \frac{\Gamma[\alpha+\beta]}{\Gamma[\alpha]\Gamma[\beta]}
+			      \lambda^{\alpha+1}  (1-\lambda)^{\beta-1}
+\]
+
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+   f(\lambda) &=   \lambda^{\alpha-1}  (1-\lambda)^{\beta-1} \\
+   f'(\lambda) &=  (\alpha-1) \lambda^{\alpha-2} (1-\lambda)^{\beta-1} -
+                  (\beta-1)  \lambda^{\alpha-1} (1-\lambda)^{\beta-2} = 0 \\
+   \lambda = \frac{ \alpha - 1}{\alpha + \beta -2)}
+\end{align}
+#+END_EXPORT
+
+** 3.3 The mean and variance of the beta distribution are given by the expressions
+ 
+\[ E[\lambda] = \frac{\alpha}{\alpha+\beta} \]
+\[ E[(\lambda - \mu)^2] = \sigma^2 \beta \]
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+\alpha &= \frac{\mu^2 (1-\mu)}{\sigma^2 - \mu \\
+\beta &=  \frac{(1-\mu)(\mu(1-\mu) + \sigma^2)}{\sigma^2}
+\end{align}
+#+END_EXPORT
+
+** 3.4 
+- All of the distributions in this chapter are members of the
+  exponential family and can be written in the form 
+\[ P(x|\theta) = a[x] ex[b[\theta]^Tc[x] -d[\theta]], \]
+where a[x] and c[x] are functions of the data and b[\theta] and
+d[\theta] are functions of the parameters. Find the functions a,b,c,d
+that allow the Beta distribution to be represented in the generalized
+form of the exponential family. 
+
+#+BEGIN_EXPORT latex  
+\begin{align}
+  P(\lambda|\alpha, \beta) = \frac{\Gamma(\alpha+\beta)}{\Gamma(\alpha) + \Gamma(\beta)} \lambda^{\alpha-1} (1-\lambda)^{\beta-1} \\
+  &= G(\alpha,\beta) exp((\alpha-1,\beta-1)^T (\log \lambda, \log (\lambda-1)))
+\end{align}
+#+END_EXPORT
+
+con lo que $b(\theta) = (\alpha-1, \beta-1)$, $c(x) = (\log \lambda,
+log(\lambda-1))$ y nos queda sacar $a, d$
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+	G(\alpha,\beta) = exp( \log \Gamma(\alpha+\beta) - \log \Gamma(\alpha) - \log \Gamma(\beta)) \\
+	d(\theta) = \log \Gamma(\alpha) + \log \Gamma(\beta) - \log \Gamma(\alpha+\beta) 
+\end{align}
+#+END_EXPORT
+
+Y por tanto, $a(x) = 1$.
+
+
+** 3.5
+- Use integration by parts to prove that if 
+\[ \Gamma[z] = \int_0^\infty t^{z-1} e^{-t} dt, \]
+then 
+\[ \Gamma[z+1] = z\Gamma[z] \]
+
+
+#+BEGIN_EXPORT latex 
+\begin{align}
+\Gamma(z+1) &= \int_0^\infty t^z e^{-t} dt = \\
+  &= [-t^z e^{-t} ]^\infty_0 + z \int_0^\infty e^{-t} t^{z-1} dt = z \Gamma(z)
+\end{align}
+#+END_EXPORT
+
+
+
+
+* Tema 4
+
+* Tema 5
+
+* Tema 6
+
+* Tema 9

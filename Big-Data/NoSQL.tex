@@ -1,0 +1,134 @@
+% Created 2017-05-15 lun 11:58
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jacinto Carrasco Castillo}
+\date{20 de mayo de 2017}
+\title{Entrega NoSQL\\\medskip
+\large Big Data y Cloud Computing}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo},
+ pdftitle={Entrega NoSQL},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.6)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+
+\section{Elaborar el código MapReduce que resuelva la consulta}
+\label{sec:org6183ee1}
+-Obtener el par de restaurantes más próximos en cada barrio
+ (\emph{borough}), mostrando el nombre y tipo de cocina de esos
+ restaurantes, la distancia entre ellos y la cantidad de restaurantes
+ evaluados para cada barrio, para aquellos restaurantes que hayan
+ tenido un grado= ‘A’ en alguna ocasión.
+
+\begin{verbatim}
+mongoimport -u mdat_32056356 -p BDat.2017 \
+	--db db_mdat_32056356 --collection restaurantes1 --type json \
+	--drop --file /var/tmp/restaurantes1.json
+\end{verbatim}
+\captionof{figure}{"Código para importar la base de datos"}
+
+\begin{verbatim}
+db.runCommand({ mapReduce: "restaurants",
+ map : function Map() {
+	var key = this.borough;
+	emit(key, {
+		 "data": [
+			{
+			   "name" : this.name,
+			   "lat" : this.address.coord[0],
+			   "lon" : this.address.coord[1],
+			   "cuisine": this.cuisine
+			}
+		]
+		});
+
+},
+ reduce : function Reduce(key, values) {
+	var reduced = {"data":[]};
+	for (var i in values) {
+		var inter = values[i];
+		for (var j in inter.data) {
+			reduced.data.push(inter.data[j]);
+		}
+	}
+	return reduced;
+},
+
+ finalize : function Finalize(key, reduced) {
+	if (reduced.data.length == 1) {
+		return { "message" : "Este barrio sólo tiene un restaurante" };
+	}
+	var min_dist = 999999999999;
+	var rest1 = { "name": "" };
+	var rest2 = { "name": "" };
+	var r1;
+	var r2;
+	var d;
+	for (var i in reduced.data) {
+		for (var j in reduced.data) {
+			if (i>=j) continue;
+			r1 = reduced.data[i];
+			r2 = reduced.data[j];
+			d = (r1.lat-r2.lat)*(r1.lat-r2.lat)+(r1.lon-r2.lon)*(r1.lon-r2.lon);
+			if (d < min_dist && d > 0) {
+				min_dist = d;
+				rest1 = r1;
+				rest2 = r2;
+			}
+		}
+	}
+	return {"rest1": rest1.name, "tipo1": rest1.cuisine, 
+			"rest2": rest2.name, "tipo2": rest2.cuisine,
+			"dist": Math.sqrt(min_dist),
+			"Num.Rest":reduced.data.length};
+},
+
+ query : {'grades.grade':{$eq:"A"}},
+ out: { replace: "rest_resultado" }
+ });
+\end{verbatim}
+\captionof{figure}{"Consulta"}
+
+\begin{verbatim}
+{ "_id" : "Bronx", "value" : { "rest1" : "Subway", "tipo1" : "American ", 
+							   "rest2" : "Chen'S Foo Hai", "tipo2" : "Chinese", 
+							   "dist" : 5.656854265355972e-7, "Num.Rest" : 2168 } }
+{ "_id" : "Brooklyn", "value" : { "rest1" : "Dunkin' Donuts", "tipo1" : "Donuts", 
+								  "rest2" : "V J Bakery", "tipo2" : "Delicatessen", 
+								  "dist" : 0.000003862641583420379, "Num.Rest" : 5610 } }
+{ "_id" : "Manhattan", "value" : {"rest1" : "Rockwood Music Hall (Stage Zero)", 
+								  "tipo1" : "American ", 
+								  "rest2" : "Cheese Grille", 
+								  "tipo2" : "Sandwiches/Salads/Mixed Buffet", 
+								  "dist" : 0.000010016985567509196, "Num.Rest" : 9579 } }
+{ "_id" : "Missing", "value" : { "rest1" : "Lima 33", "tipo1" : "Peruvian", 
+								 "rest2" : "Little Neck Shanghai & Taiwanese Cuisine", 
+								 "tipo2" : "Asian", 
+								 "dist" : 0.0011684476282611152, "Num.Rest" : 50 } }
+{ "_id" : "Queens", "value" : { "rest1" : "New Haw Hing Garden", "tipo1" : "Chinese", 
+								"rest2" : "Domino'S Pizza", "tipo2" : "Pizza", 
+								"dist" : 9.999997985232767e-8, "Num.Rest" : 5157 } }
+{ "_id" : "Staten Island", "value" : { "rest1" : "Egger'S Ice Cream Parlor", 
+									   "tipo1" : "Ice Cream, Gelato, Yogurt, Ices", 
+									   "rest2" : "Sumac", "tipo2" : "Mediterranean", 
+									   "dist" : 0.000007071067808080774, "Num.Rest" : 876 } }
+\end{verbatim}
+\captionof{figure}{"Resultado"}
+\end{document}
