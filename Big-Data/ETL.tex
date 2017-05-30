@@ -1,0 +1,108 @@
+% Created 2017-05-30 mar 09:04
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\author{Jacinto Carrasco Castillo}
+\date{2 de junio de 2017}
+\title{ETL\\\medskip
+\large Big Data y Cloud Computing}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo},
+ pdftitle={ETL},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.7)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\section{Dataset}
+\label{sec:org41b9afe}
+
+El conjunto de datos utilizado ha sido el data set de la competición
+\emph{KDD Cup 2010: Student performance evaluation}
+\cite{stamper2010algebra}, consistente en los resultados obtenidos por
+diferentes alumnos en varios problemas de álgebra. La introducción a
+la competición y una descripción del conjunto de datos están
+disponibles en la \href{http://www.kdd.org/kdd-cup/view/kdd-cup-2010-student-performance-evaluation/}{web de KDD}, aunque el enlace al propio conjunto está
+roto y lo que se ha obtenido ha sido un subconjunto a través del
+siguiente \href{https://github.com/Microsoft/azure-docs/blob/master/articles/machine-learning/machine-learning-use-sample-datasets.md}{repositorio} en formato TSV. Al final encontramos el conjunto
+de datos \href{https://azuremlsampleexperiments.blob.core.windows.net/datasets/student\_performance.txt}{\texttt{student\_performance.txt}} con el que hemos trabajado aquí.
+
+\section{Consultas}
+\label{sec:orgbfe150c}
+Comenzamos cargando el conjunto de datos, indicando el tipo de dato
+para cada campo. Filtramos la primera entrada pues contiene el nombre
+de los campos en el conjunto original.
+
+\begin{verbatim}
+algebra = load 'input/student_performance.txt' using PigStorage('\t') 
+	AS (Row:int,Anon_Student_Id:chararray,Problem_Hierarchy:chararray,
+	Problem_Name:chararray, Problem_View:int, Step_Name:chararray, 
+	Step_Start_Time:chararray, First_Transaction_Time:chararray, 
+	Correct_Transaction_Time:chararray, Step_End_Time:chararray,
+	Step_Duration:int,Correct_Step_Duration:int, Error_Step_Duration:int,
+	Correct_First_Attempt:int, Incorrects:int, Hints:int,Corrects:int,
+	KC_SubSkills:chararray,Opportunity_SubSkills:chararray,
+	KC_KTracedSkills:chararray,Opportunity_KTracedSkills:chararray,
+	KC_Rules:chararray,Opportunity_Rules:chararray);
+algebra = Filter algebra BY Anon_Student_Id != 'Anon Student Id';
+\end{verbatim}
+
+\begin{itemize}
+\item \textbf{Operación de proyección}
+\end{itemize}
+
+Proyección por el nombre dado al problema para cada entrada. 
+
+\begin{verbatim}
+ProblemNames = foreach algebra generate Problem_Name;
+\end{verbatim}
+
+\begin{itemize}
+\item \textbf{Operación de selección}
+
+  Selección de los problemas resueltos sin fallos y proyección por
+la variable identificación del estudiante y por el número de pistas
+necesitadas.
+\end{itemize}
+
+\begin{verbatim}
+CorrectResolutions = FOREACH (FILTER algebra By Incorrects == 0) 
+	GENERATE Anon_Student_Id, Hints;
+\end{verbatim}
+
+\begin{itemize}
+\item \textbf{Agrupamiento y resúmenes de información}
+
+Conteo de problemas resueltos a la primera por cada estudiante y
+ordenación posterior según el número de pistas totales que
+necesitaron.
+\end{itemize}
+
+\begin{verbatim}
+GroupsByStudent = GROUP CorrectResolutions BY  Anon_Student_Id;
+CountedStudent = FOREACH GroupsByStudent GENERATE 
+	group AS Anon_Student_Id, 
+	COUNT(CorrectResolutions) AS count, 
+	SUM(CorrectResolutions.Hints) AS sum_hints;
+OrderedStudents = ORDER CountedStudent BY count DESC, sum_hints ASC;
+\end{verbatim}
+
+\section{Referencias}
+\label{sec:orgf29b0b6}
+\bibliographystyle{plain}
+\bibliography{bibliography}
+\end{document}

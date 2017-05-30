@@ -1,15 +1,78 @@
-#+TITLE: Entrega NoSQL
+#+TITLE: ETL
 #+SUBTITLE: Big Data y Cloud Computing
 #+AUTHOR: Jacinto Carrasco Castillo
-#+DATE: 20 de mayo de 2017
+#+DATE: 2 de junio de 2017
+#+OPTIONS: toc:nil
+#+OPTIONS: 
+* Dataset
 
-* Elaborar el código MapReduce que resuelva la consulta
--Obtener el par de restaurantes más próximos en cada barrio
- (/borough/), mostrando el nombre y tipo de cocina de esos
- restaurantes, la distancia entre ellos y la cantidad de restaurantes
- evaluados para cada barrio, para aquellos restaurantes que hayan
- tenido un grado= ‘A’ en alguna ocasión.
+El conjunto de datos utilizado ha sido el data set de la competición
+/KDD Cup 2010: Student performance evaluation/
+cite:stamper2010algebra, consistente en los resultados obtenidos por
+diferentes alumnos en varios problemas de álgebra. La introducción a
+la competición y una descripción del conjunto de datos están
+disponibles en la [[http://www.kdd.org/kdd-cup/view/kdd-cup-2010-student-performance-evaluation/][web de KDD]], aunque el enlace al propio conjunto está
+roto y lo que se ha obtenido ha sido un subconjunto a través del
+siguiente [[https://github.com/Microsoft/azure-docs/blob/master/articles/machine-learning/machine-learning-use-sample-datasets.md][repositorio]] en formato TSV. Al final encontramos el conjunto
+de datos [[https://azuremlsampleexperiments.blob.core.windows.net/datasets/student_performance.txt][=student_performance.txt=]] con el que hemos trabajado aquí.
 
-#+BEGIN_SRC 
+* Consultas
+:PROPERTIES: 
+:header-args: :tangle pig-etl.txt
+:END:
 
+Comenzamos cargando el conjunto de datos, indicando el tipo de dato
+para cada campo. Filtramos la primera entrada pues contiene el nombre
+de los campos en el conjunto original.
+
+#+BEGIN_SRC pig
+algebra = load 'input/student_performance.txt' using PigStorage('\t') 
+	AS (Row:int,Anon_Student_Id:chararray,Problem_Hierarchy:chararray,
+	Problem_Name:chararray, Problem_View:int, Step_Name:chararray, 
+	Step_Start_Time:chararray, First_Transaction_Time:chararray, 
+	Correct_Transaction_Time:chararray, Step_End_Time:chararray,
+	Step_Duration:int,Correct_Step_Duration:int, Error_Step_Duration:int,
+	Correct_First_Attempt:int, Incorrects:int, Hints:int,Corrects:int,
+	KC_SubSkills:chararray,Opportunity_SubSkills:chararray,
+	KC_KTracedSkills:chararray,Opportunity_KTracedSkills:chararray,
+	KC_Rules:chararray,Opportunity_Rules:chararray);
+algebra = Filter algebra BY Anon_Student_Id != 'Anon Student Id';
 #+END_SRC
+
+- *Operación de proyección*
+
+Proyección por el nombre dado al problema para cada entrada. 
+
+#+BEGIN_SRC pig
+ProblemNames = foreach algebra generate Problem_Name;
+#+END_SRC
+
+- *Operación de selección*
+
+	Selección de los problemas resueltos sin fallos y proyección por
+  la variable identificación del estudiante y por el número de pistas
+  necesitadas. 
+
+#+BEGIN_SRC pig
+CorrectResolutions = FOREACH (FILTER algebra By Incorrects == 0) 
+	GENERATE Anon_Student_Id, Hints;
+#+END_SRC
+
+- *Agrupamiento y resúmenes de información*
+
+  Conteo de problemas resueltos a la primera por cada estudiante y
+  ordenación posterior según el número de pistas totales que
+  necesitaron.
+
+#+BEGIN_SRC pig
+GroupsByStudent = GROUP CorrectResolutions BY  Anon_Student_Id;
+CountedStudent = FOREACH GroupsByStudent GENERATE 
+	group AS Anon_Student_Id, 
+	COUNT(CorrectResolutions) AS count, 
+	SUM(CorrectResolutions.Hints) AS sum_hints;
+OrderedStudents = ORDER CountedStudent BY count DESC, sum_hints ASC;
+#+END_SRC
+
+* Referencias
+\bibliographystyle{plain}
+\bibliography{bibliography}
