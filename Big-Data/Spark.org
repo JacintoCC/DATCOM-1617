@@ -1,0 +1,521 @@
+#+TITLE: Práctica Spark
+#+SUBTITLE: Big Data & Cloud Computing
+#+DATE: 2 de junio de 2017
+
+*Práctica de Big Data*: Resolver el problema de clasificación no
+ balanceada asociado utilizando como medida $TPR \times TNR$ en test
+ (el producto de los porcentajes de clasificación en cada clase). Hay
+ que resolver el problema utilizando la biblioteca MLLib para los
+ algoritmos Decision Tree y Random Forest, y los algoritmos de
+ preprocesamiento ROS y RUS. 
+
+Los algoritmos de preprocesamiento utilizados han sido obtenidos del
+[[https://github.com/gDanix/Imb-sampling-ROS_and_RUS][repositorio]] del compañero del máster Daniel Sánchez Trujillo, que es a
+su vez un /fork/ del repositorio indicado de Sara del Río, con la
+diferencia de que éste permite ser usado como biblioteca y manejar los
+conjuntos preprocesados dentro del propio programa sin necesidad de
+que éstos sean escritos en disco.
+
+
+* Experimentación
+** Medidas a mostrar
+
+#+BEGIN_SRC scala
+  def getMeasures(predictions: RDD[(Double, Double)]): Array[Double] = {
+      val metrics = new MulticlassMetrics(predictions)
+      val tpr = metrics.truePositiveRate(0)
+      val tnr = metrics.truePositiveRate(1)
+      
+      Array(tpr,tnr,tpr*tnr)
+  }
+#+END_SRC
+
+
+** Sin preprocesamiento
+*** Decision Trees
+#+NAME: DT
+#+BEGIN_SRC scala
+	val preprocesedTrain = train
+    
+    // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50,60,75)
+    val maxDepth = List(2,3,4,5)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size ,5)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_depth <- 0 to (maxDepth.size-1)){  
+      for(index_bins <- 0 to (maxBins.size-1)){
+        for(index_perc <- 0 to (percentage.size-1)){
+            val model = DecisionTree.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                     impurity, maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](maxDepth(index_depth), maxBins(index_bins)) ++ results
+            resultMatrix(index_depth*maxBins.size + index_bins)= merged
+        }
+      }
+    }
+#+END_SRC
+
+#+NAME: tab:DT-local
+| DepthMax | MaxBins |                TPR |                 TNR |           TPR x TNR |
+|----------+---------+--------------------+---------------------+---------------------|
+|      1.0 |      25 |                1.0 |                 0.0 |                 0.0 |
+|      1.0 |      50 |                1.0 |                 0.0 |                 0.0 |
+|      1.0 |      75 |                1.0 |                 0.0 |                 0.0 |
+|      1.0 |     100 |                1.0 |                 0.0 |                 0.0 |
+|      2.0 |      25 |                1.0 |                 0.0 |                 0.0 |
+|      2.0 |      50 |                1.0 |                 0.0 |                 0.0 |
+|      2.0 |      75 |                1.0 |                 0.0 |                 0.0 |
+|      2.0 |     100 |                1.0 |                 0.0 |                 0.0 |
+|      3.0 |      25 | 0.8714285714285714 |               0.456 |  0.3973714285714286 |
+|      3.0 |      50 | 0.8628571428571429 |               0.462 | 0.39864000000000005 |
+|      3.0 |      75 |               0.86 |  0.4713333333333333 | 0.40534666666666663 |
+|      3.0 |     100 |               0.86 |  0.4713333333333333 | 0.40534666666666663 |
+|      4.0 |      25 | 0.8505714285714285 | 0.48133333333333334 |  0.4094083809523809 |
+|      4.0 |      50 | 0.8448571428571429 | 0.48733333333333334 |  0.4117270476190476 |
+|      4.0 |      75 |              0.842 | 0.49666666666666665 |  0.4181933333333333 |
+|      4.0 |     100 |              0.842 | 0.49666666666666665 |  0.4181933333333333 |
+|      5.0 |      25 | 0.9071428571428571 |               0.324 | 0.29391428571428574 |
+|      5.0 |      50 | 0.9025714285714286 |  0.3426666666666667 | 0.30928114285714287 |
+|      5.0 |      75 | 0.9245714285714286 | 0.26866666666666666 | 0.24840152380952382 |
+|      5.0 |     100 | 0.9162857142857143 |  0.2773333333333333 |  0.2541165714285714 |
+|      6.0 |      25 | 0.8651428571428571 |  0.4086666666666667 |  0.3535550476190476 |
+|      6.0 |      50 | 0.8462857142857143 |  0.4513333333333333 |  0.3819569523809524 |
+|      6.0 |      75 | 0.8308571428571428 |  0.4746666666666667 |  0.3943801904761905 |
+|      6.0 |     100 |              0.832 | 0.47933333333333333 |  0.3988053333333333 |
+|      7.0 |      25 | 0.8697142857142857 |               0.392 |            0.340928 |
+|      7.0 |      50 | 0.8674285714285714 |               0.386 |  0.3348274285714286 |
+|      7.0 |      75 | 0.8491428571428571 |  0.4073333333333333 | 0.34588419047619046 |
+|      7.0 |     100 | 0.8531428571428571 |  0.4186666666666667 | 0.35718247619047616 |
+|      8.0 |      25 | 0.8508571428571429 |               0.378 |            0.321624 |
+|      8.0 |      50 | 0.8557142857142858 |  0.3953333333333333 | 0.33829238095238096 |
+|      8.0 |      75 |              0.838 |  0.4226666666666667 | 0.35419466666666666 |
+|      8.0 |     100 | 0.8371428571428572 | 0.43133333333333335 |  0.3610876190476191 |
+|      9.0 |      25 | 0.8037142857142857 |               0.444 | 0.35684914285714286 |
+|      9.0 |      50 | 0.7948571428571428 | 0.42866666666666664 | 0.34072876190476187 |
+|      9.0 |      75 | 0.7948571428571428 |               0.462 |            0.367224 |
+|      9.0 |     100 | 0.7694285714285715 |  0.5026666666666667 |  0.3867660952380953 |
+|     10.0 |      25 | 0.8082857142857143 |  0.4033333333333333 |  0.3260085714285714 |
+|     10.0 |      50 | 0.8108571428571428 |               0.412 | 0.33407314285714285 |
+|     10.0 |      75 | 0.7805714285714286 |               0.464 | 0.36218514285714287 |
+|     10.0 |     100 | 0.7708571428571429 |               0.484 |  0.3730948571428572 |
+
+#+NAME: tab:DT-Cluster
+| 3 | 50 |  0.841906859911811 |  0.4907484823148788 | 0.41316451375220653 |
+| 3 | 65 | 0.8466943665914188 | 0.48264931476971173 | 0.40865645585472343 |
+| 3 | 80 |  0.844404215332381 |   0.486786142716929 | 0.41104427087556483 |
+| 4 | 50 |  0.897572076149347 | 0.37660402050238106 |  0.3380292525685134 |
+| 4 | 65 | 0.8340549127379667 |  0.5174088480133774 |  0.4315473915796494 |
+| 4 | 80 | 0.8975938871137187 | 0.37660402050238106 |  0.3380374666653868 |
+| 5 | 50 | 0.8835476260582862 | 0.43971064015413136 |  0.3885052922607521 |
+| 5 | 65 | 0.8885350665779688 | 0.42737285979134104 | 0.37973577242831613 |
+| 5 | 80 | 0.9324987004300395 | 0.29442000799738266 | 0.27454627483816113 |
+| 6 | 50 | 0.8836603160408737 |  0.4425678868733869 |  0.3910796787840787 |
+| 6 | 65 | 0.8779167620896358 | 0.46848667708749864 | 0.41129230663078953 |
+| 6 | 80 | 0.8804468339567634 | 0.44906757788360174 |  0.3953801271802494 |
+
+*** Random Forest
+
+#+BEGIN_SRC scala
+	val preprocesedTrain = train
+    
+    // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50,60,75)
+    val maxDepth = List(2,3,4,5)
+    val sizeForest = List(30,50,100,150)
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size * sizeForest.size ,6)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_depth <- 0 to (maxDepth.size-1)){  
+      for(index_bins <- 0 to (maxBins.size-1)){
+        for(index_size <- 0 to (sizeForest.size-1)){
+		   	val model = RandomForest.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                   sizeForest(index_size), "auto", impurity,
+                                                   maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](maxDepth(index_depth), maxBins(index_bins)) ++ results
+            resultMatrix(index_depth*maxBins.size*sizeForest.size + 
+				index_bins*sizeForest.size + index_size)= merged
+        }
+      }
+    }
+#+END_SRC
+
+
+** Undersampling
+*** Decision Tree
+#+NAME: DT-US
+#+BEGIN_SRC scala
+	val preprocesedTrain = runRUS(train, minorityLabel, majorityLabel)  
+    
+    // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(25,50,75,100)
+    val maxDepth = List(1 to 10)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size ,5)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_depth <- 0 to (maxDepth.size-1)){  
+      for(index_bins <- 0 to (maxBins.size-1)){
+        for(index_perc <- 0 to (percentage.size-1)){
+            val model = DecisionTree.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                     impurity, maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](maxDepth(index_depth), maxBins(index_bins)) ++ results
+            resultMatrix(index_depth*maxBins.size + index_bins)= merged
+          }
+      }
+    }
+#+END_SRC
+
+#+TABLENAME: US-
+| DepthMax | MaxBins |                 TPR |                TNR |           TPR x TNR |
+|----------+---------+---------------------+--------------------+---------------------|
+|        1 |      25 |               0.546 | 0.7326666666666667 | 0.40003600000000006 |
+|        1 |      50 |               0.424 | 0.8213333333333334 | 0.34824533333333335 |
+|        1 |      75 |  0.4562857142857143 |                0.8 |  0.3650285714285715 |
+|        1 |     100 |               0.424 | 0.8213333333333334 | 0.34824533333333335 |
+|        2 |      25 |    0.73485728571429 |              0.598 |  0.4394445714285714 |
+|        2 |      50 |               0.658 | 0.6726666666666666 | 0.44261466666666666 |
+|        2 |      75 |  0.6768571428571428 |              0.654 |  0.4426645714285714 |
+|        2 |     100 |               0.658 | 0.6726666666666666 | 0.44261466666666666 |
+|        3 |      25 |               0.654 | 0.6846666666666666 |            0.447772 |
+|        3 |      50 | 0.49142857142857144 | 0.8026666666666666 |  0.3944533333333333 |
+|        3 |      75 |  0.6525714285714286 | 0.6733333333333333 | 0.43939809523809525 |
+|        3 |     100 |  0.5914285714285714 |              0.738 |  0.4364742857142857 |
+|        4 |      25 |  0.6211428571428571 | 0.7186666666666667 | 0.44639466666666666 |
+|        4 |      50 |               0.652 |              0.686 | 0.44727200000000006 |
+|        4 |      75 |  0.7245714285714285 |              0.638 |  0.4622765714285714 |
+|        4 |     100 |  0.5954285714285714 | 0.7346666666666667 | 0.43744152380952384 |
+|        5 |      25 |                0.65 |              0.716 |              0.4654 |
+|        5 |      50 |  0.7374285714285714 |              0.632 | 0.46605485714285716 |
+|        5 |      75 |               0.756 | 0.5833333333333334 | 0.44100000000000006 |
+|        5 |     100 |  0.7277142857142858 | 0.6393333333333333 |            0.465252 |
+|        6 |      25 |               0.676 | 0.6453333333333333 |  0.4362453333333334 |
+|        6 |      50 |  0.6582857142857143 | 0.6766666666666666 | 0.44543999999999995 |
+|        6 |      75 |  0.7437142857142857 |              0.604 | 0.44920342857142853 |
+|        6 |     100 |  0.6808571428571428 | 0.6733333333333333 | 0.45844380952380953 |
+|        7 |      25 |  0.6577142857142857 |              0.656 |  0.4314605714285714 |
+|        7 |      50 |  0.6305714285714286 |               0.68 | 0.42878857142857146 |
+|        7 |      75 |  0.7417142857142857 |              0.586 |  0.4346445714285714 |
+|        7 |     100 |  0.6522857142857142 | 0.6673333333333333 | 0.43529199999999996 |
+|        8 |      25 |  0.6422857142857142 |              0.644 |            0.413632 |
+|        8 |      50 |  0.5954285714285714 | 0.6993333333333334 |  0.4164030476190476 |
+|        8 |      75 |               0.706 |              0.594 | 0.41936399999999996 |
+|        8 |     100 |               0.626 | 0.6813333333333333 | 0.42651466666666665 |
+|        9 |      25 |  0.6042857142857143 |              0.662 | 0.40003714285714287 |
+|        9 |      50 |  0.6168571428571429 | 0.6566666666666666 |  0.4050695238095238 |
+|        9 |      75 |                0.73 | 0.5693333333333334 | 0.41561333333333333 |
+|        9 |     100 |  0.6482857142857142 | 0.6373333333333333 |  0.4131740952380952 |
+|       10 |      25 |  0.6128571428571429 |              0.646 |  0.3959057142857143 |
+|       10 |      50 |  0.6425714285714286 | 0.6206666666666667 |  0.3988226666666667 |
+|       10 |      75 |  0.7071428571428572 | 0.5673333333333334 |  0.4011857142857143 |
+|       10 |     100 |  0.6505714285714286 | 0.6233333333333333 | 0.40552285714285713 |
+
+#+NAME: tab:RUS-DT-Cluster
+| 3 | 60 | 0.8261557084746503 |  0.521858300919699 |  0.4311362143196911 |
+| 4 | 50 | 0.6756346081842008 | 0.7186811588934531 | 0.48556586319834555 |
+
+
+*** Random Forest
+#+NAME: RF-US
+#+BEGIN_SRC scala
+      // Variables para Random Forest
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50, 65, 80)
+    val maxDepth = List(3,4,5,6)
+    val sizeForest = List(30,50,100,150)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size * sizeForest.size,6)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    val preprocesedTrain = runRUS(train, minorityLabel, majorityLabel)
+  
+    for(index_depth <- 0 to (maxDepth.size-1)){  
+      for(index_bins <- 0 to (maxBins.size-1)){
+        for(index_size <- 0 to (sizeForest.size - 1)){
+          val model = RandomForest.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                   sizeForest(index_size), "auto", impurity,
+                                                   maxDepth(index_depth), maxBins(index_bins))
+    
+          val predictions = test.map{
+            point => 
+            val prediction = model.predict(point.features)
+               (prediction, point.label)
+          }.persist
+       
+          var results = getMeasures(predictions)
+          var merged = Array[Double](maxDepth(index_depth), maxBins(index_bins),percentage(index_perc)) ++ results
+          resultMatrix(index_perc*maxDepth.size*maxBins.size*sizeForest.size +
+              index_depth*maxBins.size*sizeForest.size +
+              index_bins*sizeForest.size +
+              index_size)= merged
+        }
+      }
+    }
+#+END_SRC
+
+#+NAME: tab:RUS-RF-Server
+|4|60|50|0.6777102849602495|      0.715002362863063|       0.48456445508317814|
+
+** Oversampling
+|\1|\2|\3|\4|\5|\6|
+^Array(\([0-9]*\).0, \([0-9]+\).0, \([0-9]+\).0, \(0.[0-9]+\), \(0.[0-9]+\), \(0.[0-9]+\))
+*** Decision Tree
+#+BEGIN_SRC scala
+    // Oversampling
+    val percentage = List(75,100,125,150,175,200,225,250) 
+    
+      
+      // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50, 65, 80)
+    val maxDepth = List(3,4,5,6)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size * percentage.size,6)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_depth <- 0 to (maxDepth.size-1)){  
+      for(index_bins <- 0 to (maxBins.size-1)){
+        for(index_perc <- 0 to (percentage.size-1)){
+            val preprocesedTrain = runROS(train, minorityLabel, majorityLabel, percentage(index_perc))
+            val model = DecisionTree.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                     impurity, maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](maxDepth(index_depth), maxBins(index_bins),percentage(index_perc)) ++ results
+            resultMatrix(index_depth*maxBins.size*percentage.size + index_bins*percentage.size + index_perc)= merged
+          }
+      }
+    }
+    
+#+END_SRC
+#+NAME: tab:OS-DT
+| DepthMax | MaxBins | Perc |                 TPR |                 TNR |           TPR x TNR |
+|----------+---------+------+---------------------+---------------------+---------------------|
+|        3 |      50 |   75 |  0.8654285714285714 |                 0.4 |  0.3461714285714286 |
+|        3 |      50 |  100 |  0.6131428571428571 |  0.7453333333333333 | 0.45699580952380947 |
+|        3 |      50 |  125 |  0.5265714285714286 |  0.8073333333333333 |  0.4251186666666667 |
+|        3 |      50 |  150 |  0.5997142857142858 |  0.7346666666666667 |  0.4405900952380953 |
+|        3 |      50 |  175 |  0.4837142857142857 |  0.8466666666666667 |  0.4095447619047619 |
+|        3 |      50 |  200 | 0.42428571428571427 |  0.8706666666666667 | 0.36941142857142856 |
+|        3 |      50 |  225 |  0.4002857142857143 |               0.882 | 0.35305200000000003 |
+|        3 |      50 |  250 |  0.4114285714285714 |                0.87 |  0.3579428571428571 |
+|        3 |      65 |   75 |                0.71 |               0.622 | 0.44161999999999996 |
+|        3 |      65 |  100 |  0.5802857142857143 |  0.7526666666666667 |  0.4367617142857143 |
+|        3 |      65 |  125 |               0.556 |               0.772 | 0.42923200000000006 |
+|        3 |      65 |  150 |  0.5077142857142857 |               0.822 |  0.4173411428571428 |
+|        3 |      65 |  175 |               0.412 |  0.8746666666666667 | 0.36036266666666666 |
+|        3 |      65 |  200 |  0.4142857142857143 |  0.8746666666666667 |  0.3623619047619048 |
+|        3 |      65 |  225 |  0.3322857142857143 |  0.9093333333333333 |  0.3021584761904762 |
+|        3 |      65 |  250 |  0.3314285714285714 |                0.91 |              0.3016 |
+|        3 |      80 |   75 |  0.7431428571428571 |  0.5433333333333333 |  0.4037742857142857 |
+|        3 |      80 |  100 |  0.5542857142857143 |  0.7833333333333333 |  0.4341904761904762 |
+|        3 |      80 |  125 |  0.5228571428571429 |  0.7866666666666666 | 0.41131428571428574 |
+|        3 |      80 |  150 |  0.5868571428571429 |               0.758 |  0.4448377142857143 |
+|        3 |      80 |  175 |  0.4382857142857143 |  0.8586666666666667 | 0.37634133333333336 |
+|        3 |      80 |  200 | 0.41628571428571426 |               0.868 |            0.361336 |
+|        3 |      80 |  225 |  0.3282857142857143 |                0.91 |             0.29874 |
+|        3 |      80 |  250 |  0.3062857142857143 |  0.9053333333333333 | 0.27729066666666663 |
+|        4 |      50 |   75 |  0.6851428571428572 |  0.6846666666666666 |  0.4690944761904762 |
+|        4 |      50 |  100 |  0.5897142857142857 |  0.7913333333333333 |  0.4666605714285715 |
+|        4 |      50 |  125 |  0.5657142857142857 |               0.782 | 0.44238857142857146 |
+|        4 |      50 |  150 |               0.524 |               0.816 | 0.42758399999999996 |
+|        4 |      50 |  175 |  0.4042857142857143 |  0.8746666666666667 | 0.35361523809523815 |
+|        4 |      50 |  200 |  0.4205714285714286 |  0.8633333333333333 |  0.3630933333333333 |
+|        4 |      50 |  225 |  0.4174285714285714 |                0.86 | 0.35898857142857143 |
+|        4 |      50 |  250 |  0.3445714285714286 |  0.8973333333333333 | 0.30919542857142857 |
+|        4 |      65 |   75 |  0.8148571428571428 | 0.47933333333333333 |  0.3905881904761905 |
+|        4 |      65 |  100 |  0.6054285714285714 |  0.7726666666666666 | 0.46779447619047615 |
+|        4 |      65 |  125 |                0.59 |  0.7566666666666667 | 0.44643333333333335 |
+|        4 |      65 |  150 |  0.6022857142857143 |  0.7393333333333333 |  0.4452899047619048 |
+|        4 |      65 |  175 | 0.38657142857142857 |               0.886 |  0.3425022857142857 |
+|        4 |      65 |  200 | 0.45485714285714285 |  0.8573333333333333 | 0.38996419047619046 |
+|        4 |      65 |  225 | 0.40685714285714286 |  0.8713333333333333 |  0.3545081904761905 |
+|        4 |      65 |  250 |  0.3222857142857143 |  0.9113333333333333 |  0.2937097142857143 |
+|        4 |      80 |   75 |  0.7434285714285714 |  0.6393333333333333 | 0.47529866666666665 |
+|        4 |      80 |  100 |  0.6848571428571428 |  0.6853333333333333 |  0.4693554285714286 |
+|        4 |      80 |  125 |  0.5965714285714285 |  0.7746666666666666 | 0.46214399999999994 |
+|        4 |      80 |  150 |               0.638 |               0.754 | 0.48105200000000004 |
+|        4 |      80 |  175 | 0.46514285714285714 |  0.8506666666666667 |  0.3956815238095238 |
+|        4 |      80 |  200 | 0.43857142857142856 |               0.862 |  0.3780485714285714 |
+|        4 |      80 |  225 | 0.45714285714285713 |  0.8526666666666667 |  0.3897904761904762 |
+|        4 |      80 |  250 | 0.34714285714285714 |               0.904 | 0.31381714285714285 |
+|        5 |      50 |   75 |  0.7237142857142858 |  0.6313333333333333 | 0.45690495238095236 |
+|        5 |      50 |  100 |  0.5785714285714286 |               0.778 |  0.4501285714285715 |
+|        5 |      50 |  125 |               0.554 |  0.7873333333333333 |  0.4361826666666667 |
+|        5 |      50 |  150 |  0.5588571428571428 |  0.7753333333333333 |  0.4333005714285714 |
+|        5 |      50 |  175 |               0.448 |  0.8473333333333334 | 0.37960533333333335 |
+|        5 |      50 |  200 |  0.3851428571428571 |  0.8726666666666667 |  0.3361013333333333 |
+|        5 |      50 |  225 |  0.4125714285714286 |  0.8553333333333333 |  0.3528860952380952 |
+|        5 |      50 |  250 |  0.2897142857142857 |  0.9046666666666666 | 0.26209485714285713 |
+|        5 |      65 |   75 |  0.7182857142857143 |  0.6326666666666667 |  0.4544354285714286 |
+|        5 |      65 |  100 |  0.6308571428571429 |  0.7366666666666667 | 0.46473142857142863 |
+|        5 |      65 |  125 |  0.6342857142857142 |  0.7446666666666667 | 0.47233142857142857 |
+|        5 |      65 |  150 |               0.502 |                 0.8 |              0.4016 |
+|        5 |      65 |  175 |  0.4694285714285714 |  0.8313333333333334 | 0.39025161904761907 |
+|        5 |      65 |  200 | 0.44942857142857146 |  0.8426666666666667 |  0.3787184761904762 |
+|        5 |      65 |  225 | 0.41628571428571426 |  0.8626666666666667 |  0.3591158095238095 |
+|        5 |      65 |  250 | 0.38285714285714284 |                0.87 | 0.33308571428571426 |
+|        5 |      80 |   75 |  0.6965714285714286 |                0.66 |  0.4597371428571429 |
+|        5 |      80 |  100 |  0.7222857142857143 |  0.6386666666666667 | 0.46129980952380956 |
+|        5 |      80 |  125 |  0.5457142857142857 |  0.7986666666666666 |  0.4358438095238095 |
+|        5 |      80 |  150 |  0.5054285714285714 |  0.8193333333333334 |  0.4141144761904762 |
+|        5 |      80 |  175 |               0.532 |  0.8006666666666666 | 0.42595466666666665 |
+|        5 |      80 |  200 |  0.4077142857142857 |  0.8566666666666667 |  0.3492752380952381 |
+|        5 |      80 |  225 | 0.42828571428571427 |                0.85 |  0.3640428571428571 |
+|        5 |      80 |  250 | 0.45371428571428574 |  0.8393333333333334 | 0.38081752380952383 |
+|        6 |      50 |   75 |  0.7548571428571429 |  0.5626666666666666 |  0.4247329523809524 |
+|        6 |      50 |  100 |               0.698 |               0.594 |            0.414612 |
+|        6 |      50 |  125 |  0.6085714285714285 |               0.734 |  0.4466914285714285 |
+|        6 |      50 |  150 |  0.4725714285714286 |               0.804 |  0.3799474285714286 |
+|        6 |      50 |  175 |               0.516 |  0.7886666666666666 |            0.406952 |
+|        6 |      50 |  200 |  0.5682857142857143 |  0.7733333333333333 |  0.4394742857142857 |
+|        6 |      50 |  225 | 0.42742857142857144 |  0.8393333333333334 | 0.35875504761904764 |
+|        6 |      50 |  250 | 0.42457142857142854 |  0.8346666666666667 | 0.35437561904761905 |
+|        6 |      65 |   75 |  0.7114285714285714 |  0.6386666666666667 |  0.4543657142857143 |
+|        6 |      65 |  100 |  0.6145714285714285 |               0.752 |  0.4621577142857143 |
+|        6 |      65 |  125 |  0.5597142857142857 |  0.7793333333333333 |            0.436204 |
+|        6 |      65 |  150 |  0.5925714285714285 |  0.7646666666666667 | 0.45311961904761905 |
+|        6 |      65 |  175 |  0.5011428571428571 |  0.8133333333333334 | 0.40759619047619045 |
+|        6 |      65 |  200 |  0.4825714285714286 |  0.8033333333333333 | 0.38766571428571434 |
+|        6 |      65 |  225 |  0.3994285714285714 |               0.854 | 0.34111199999999997 |
+|        6 |      65 |  250 |  0.4134285714285714 |  0.8373333333333334 |  0.3461775238095238 |
+|        6 |      80 |   75 |  0.6805714285714286 |  0.6513333333333333 | 0.44327885714285714 |
+|        6 |      80 |  100 |               0.646 |  0.6933333333333334 | 0.44789333333333337 |
+|        6 |      80 |  125 |  0.5662857142857143 |               0.756 |            0.428112 |
+|        6 |      80 |  150 | 0.49542857142857144 |  0.7993333333333333 | 0.39601257142857144 |
+|        6 |      80 |  175 | 0.47828571428571426 |  0.8173333333333334 |  0.3909188571428571 |
+|        6 |      80 |  200 | 0.43514285714285716 |  0.8146666666666667 | 0.35449638095238095 |
+|        6 |      80 |  225 | 0.45771428571428574 |  0.8353333333333334 |            0.382344 |
+|        6 |      80 |  250 | 0.45085714285714285 |  0.8313333333333334 | 0.37481257142857144 |
+
+#+NAME: ROS-DT-Server
+|  25 |  0.9597914871806057 |  0.197913410156676 | 0.18995560626726124 |
+|  75 |  0.7013170187319833 | 0.6882474826420444 | 0.48267967267631096 |
+| 125 |  0.6185953011912422 | 0.7597731651459523 | 0.46999210993048374 |
+| 150 |   0.548258576252949 | 0.8141844487258715 |  0.4463836066657385 |
+| 175 |  0.5465500507104921 | 0.8172089134465084 |  0.4466455730852553 |
+| 200 | 0.43332933465653184 | 0.8784325129957469 | 0.38065057639711225 |
+
+*** Random Forest
+#+NAME: RF-OS
+#+BEGIN_SRC scala
+    // Oversampling
+    val percentage = List(75,100,125,150,175,200) 
+    
+      
+      // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50, 65, 80)
+    val maxDepth = List(3,4,5,6)
+    val sizeForest = List(30,50,100,150)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size * percentage.size * sizeForest.size,7)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_perc <- 0 to (percentage.size-1)){
+      val preprocesedTrain = runROS(train, minorityLabel, majorityLabel, percentage(index_perc))
+  
+      for(index_depth <- 0 to (maxDepth.size-1)){  
+        for(index_bins <- 0 to (maxBins.size-1)){
+          for(index_size <- 0 to (sizeForest.size - 1)){
+            val model = RandomForest.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                     sizeForest(index_size), "auto", impurity,
+                                                     maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](percentage(index_perc),maxDepth(index_depth), 
+			                           maxBins(index_bins),percentage(index_perc)) ++ results
+            resultMatrix(index_depth*maxBins.size*sizeForest.size +
+                index_bins*sizeForest.size +
+                index_size)= merged
+          }
+        }
+      }
+    }
+#+END_SRC
+
+#+NAME: ROS-RF-Server
+|  75 |   0.843495425150223 | 0.5219164637027882 |  0.4402341494438843 |
+| 125 |   0.524477354766241 | 0.8309062488640081 | 0.43579151146293493 |
+| 150 |  0.3645702694744648 | 0.9139845141590025 | 0.33321158062243533 |
+| 175 |  0.2414291997920688 | 0.9572358137336872 | 0.23110467652203392 |
+| 200 | 0.12699797521547415 | 0.9845432403940528 | 0.12503499804212653 |
+
+
+* Resultados
+
+|    | Sin Preprocesamiento | RUS | ROS | FS |
+|----+----------------------+-----+-----+----|
+| DT |                      |     |     |    |
+| RF |                      |     |     |    |
+
+* Anexo
