@@ -1,0 +1,292 @@
+% Created 2017-06-05 lun 12:11
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\usemintedstyle{lovelace}
+\author{Jacinto Carrasco Castillo}
+\date{5 de junio de 2017}
+\title{Práctica Spark\\\medskip
+\large Big Data \& Cloud Computing}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo},
+ pdftitle={Práctica Spark},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.7)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+\textbf{Práctica de Big Data}: Resolver el problema de clasificación no
+ balanceada asociado utilizando como medida \(TPR \times TNR\) en test
+ (el producto de los porcentajes de clasificación en cada clase). Hay
+ que resolver el problema utilizando la biblioteca MLLib para los
+ algoritmos Decision Tree y Random Forest, y los algoritmos de
+ preprocesamiento ROS y RUS. 
+
+
+
+Los algoritmos de preprocesamiento utilizados han sido obtenidos del
+\href{https://github.com/gDanix/Imb-sampling-ROS\_and\_RUS}{repositorio} del compañero del máster Daniel Sánchez Trujillo, que es a
+su vez un \emph{fork} del repositorio indicado de Sara del Río, con la
+diferencia de que éste permite ser usado como biblioteca y manejar los
+conjuntos preprocesados dentro del propio programa sin necesidad de
+que éstos sean escritos en disco.
+
+\section{Experimentación}
+\label{sec:org74f0206}
+
+Para la experimentación se han ejecutado tanto en local como en el
+servidor las combinaciones de los métodos de preprocesamiento ROS y
+RUS con los modelos de aprendizaje \texttt{Decision Tree} y \texttt{Random Forest}
+de la biblioteca \texttt{MLLib}. Tomaremos para cada ejecución los valores de
+TPR, TNR y el producto de ambos. Para eso se ha implementado la
+\hyperref[orge32338b]{función} \texttt{getResults} que, a partir de la combinación de predicciones
+y valores reales y haciendo uso de la función \texttt{truePositiveRate} de la
+clase \texttt{MulticlassMetrics}, nos devuelve un \texttt{Array} con los valores
+requeridos.
+
+Los parámetros que usaremos serán los indicados en las transparencias
+de clase tanto para \texttt{DecisionTree}:
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val numClasses = converter.getNumClassFromHeader()
+val categoricalFeaturesInfo = Map[Int,Int]()
+val impurity = "entropy"
+val maxBins = 100
+val maxDepth = 10
+\end{minted}
+como para \texttt{RandomForest}:
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val impurity = "gini"
+val maxBins = 32
+val maxDepth = 4
+val numTrees = 30
+\end{minted}
+
+Para evaluar el modelo \texttt{model}, realizaremos la predicción sobre cada
+instancia en el conjunto de test:
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val predictions = test.map{
+  point =>
+  val prediction = model.predict(point.features)
+  (prediction, point.label)
+}.persist
+
+var results = getResults(predictions)
+\end{minted}
+\subsection{Modelos}
+\label{sec:orgff64da0}
+
+Comenzamos ejecutando los métodos de aprendizaje sin ningún
+preprocesamiento.
+
+\begin{itemize}
+\item \textbf{Decision Trees}
+\end{itemize}
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val model = DecisionTree.trainClassifier(train, numClasses,
+  categoricalFeaturesInfo, impurity, maxDepth, maxBins)
+\end{minted}
+
+\begin{itemize}
+\item \textbf{Random Forest}
+\end{itemize}
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+var size_forest = 70
+var model = RandomForest.trainClassifier(train, numClasses,
+  categoricalFeaturesInfo, size_forest, "auto", impurity, maxDepth, maxBins)
+\end{minted}
+
+\section{Preprocesamiento}
+\label{sec:org40b2bd7}
+
+\subsection{Undersampling}
+\label{sec:org3132c15}
+
+Para aplicar \emph{Random Undersampling}, habremos importado la biblioteca 
+
+\texttt{Imbalanced} mencionada previamente y modificamos el conjunto de
+entrenamiento con:
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val minorityLabel = "1"
+val majorityLabel = "0"
+
+val preprocesedTrain = runRUS(train, minorityLabel, majorityLabel)  
+\end{minted}
+
+
+\subsection{Oversampling}
+\label{sec:orgb66e170}
+
+Para aplicar \emph{Random Oversampling}, probaremos con diferentes
+porcentajes, que irán desde 75$\backslash$%, lo que significaría reducir aún más
+la clase minoritaria, hasta 200$\backslash$%, lo que supone duplicar el número de
+instancias de la clase positiva con un paso de 25$\backslash$%:
+
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val minorityLabel = "1"
+val majorityLabel = "0"
+
+val preprocesedTrain = runROS(train, minorityLabel, majorityLabel,percentage)  
+\end{minted}
+
+
+\subsection{Discretización y FS}
+\label{sec:orgcb1bab8}
+
+Se ha aplicado también el discretizador y la selección de
+características explicada en clase de la biblioteca de Sergio Ramírez.
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+val categoricalFeat: Option[Seq[Int]] = None
+
+val nBins = 15
+val maxByPart = 10000
+
+val discretizer = MDLPDiscretizer.train(train, categoricalFeat, nBins, maxByPart)
+val discrete = train.map(i =>
+  LabeledPoint(i.label, discretizer.transform(i.features)))
+  .cache()
+
+val discreteTest = test.map(i =>
+  LabeledPoint(i.label,discretizer.transform(i.features)))
+  .cache()
+
+/*
+ * Feature Selection
+ */
+
+val criterion = new InfoThCriterionFactory("mrmr")
+val nToSelect = 10
+val nPartitions = 6
+
+val featureSelector = new InfoThSelector(criterion,nToSelect,nPartitions)
+  .fit(discrete)
+val reduced = discrete.map(i =>
+  LabeledPoint(i.label, featffureSelector.transform(i.features)))
+  .cache()
+
+val reducedTest = discreteTest.map(i =>
+  LabeledPoint(i.label, featureSelector.transform(i.features)))
+  .cache()
+\end{minted}
+
+\section{Resultados}
+\label{sec:org3436797}
+
+
+Tras probar con los parámetros visto en clase, cuyos resultados están
+incluidos en la Tabla\ref{tab:orgeeef490}, se ha lanzado también una
+ejecución en el servidor incrementando el número de características
+seleccionadas, y se incluyen los resultados en la Tabla\ref{tab:orga77615f}.
+
+\begin{table}[htbp]
+\caption{\label{tab:orgeeef490}
+Tabla de resultados}
+\centering
+\begin{tabular}{|l|lrr|rr|r|}
+\hline
+Alg. & Prepr. & \% & FS & TPR & TNR & TPR \texttimes{} TNR\\
+\hline
+DT & - &  &  & 0.8928 & 0.4672 & 0.4171\\
+ & RUS & - &  & 0.7131 & 0.7234 & 0.5159\\
+ & ROS & 75 &  & 0.7753 & 0.6584 & 0.5105\\
+ &  & 125 &  & 0.6647 & 0.7650 & 0.5085\\
+ &  & 150 &  & 0.5921 & 0.8232 & 0.4874\\
+ &  & 175 &  & 0.5565 & 0.8468 & 0.4712\\
+ &  & 200 &  & 0.5146 & 0.8698 & 0.4476\\
+ & - &  & 10 & 0.9098 & 0.3727 & 0.3391\\
+ & RUS & - & 10 & 0.7116 & 0.6697 & 0.4765\\
+ & ROS & 75 & 10 & 0.7969 & 0.5671 & 0.4520\\
+ &  & 125 & 10 & 0.6170 & 0.7563 & 0.4667\\
+ &  & 150 & 10 & 0.5389 & 0.8143 & 0.4389\\
+ &  & 175 & 10 & 0.4644 & 0.8585 & 0.3987\\
+ &  & 200 & 10 & 0.4272 & 0.8780 & 0.3751\\
+RF & - &  &  & 0.9857 & 0.1196 & 0.1179\\
+ & RUS & - &  & 0.7157 & 0.6892 & 0.4932\\
+ & ROS & 75 &  & 0.8465 & 0.5147 & 0.4357\\
+ &  & 125 &  & 0.5313 & 0.8255 & 0.4387\\
+ &  & 150 &  & 0.4056 & 0.8945 & 0.3628\\
+ &  & 175 &  & 0.2384 & 0.9608 & 0.2291\\
+ &  & 200 &  & 0.1706 & 0.9754 & 0.1664\\
+ & - &  & 10 & 0.9467 & 0.2139 & 0.2025\\
+ & RUS &  & 10 & 0.6417 & 0.7045 & 0.4521\\
+ & ROS & 75 & 10 & 0.7810 & 0.5512 & 0.4305\\
+ &  & 125 & 10 & 0.5470 & 0.7884 & 0.4313\\
+ &  & 150 & 10 & 0.4918 & 0.8172 & 0.4019\\
+ &  & 175 & 10 & 0.4019 & 0.8789 & 0.3533\\
+ &  & 200 & 10 & 0.3159 & 0.9222 & 0.2914\\
+\hline
+\end{tabular}
+\end{table}
+
+
+\begin{table}[htbp]
+\caption{\label{tab:orga77615f}
+TPR \texttimes{} TNR para selección de características}
+\centering
+\begin{tabular}{|llr|rrrr|}
+\hline
+ &  &  & FS &  &  & \\
+ &  &  & 10 & 20 & 50 & 80\\
+\hline
+DT & - &  & 0.3391 & 0.3797 & 0.4277 & 0.4178\\
+ & RUS & - & 0.4785 & 0.5012 & 0.5122 & 0.5139\\
+ & ROS & 75 & 0.4523 & 0.4813 & 0.5013 & 0.5038\\
+ &  & 125 & 0.4696 & 0.4938 & 0.5063 & 0.5093\\
+ &  & 150 & 0.4414 & 0.4635 & 0.4903 & 0.4879\\
+ &  & 175 & 0.4061 & 0.4355 & 0.4581 & 0.4582\\
+\hline
+RF & - &  & 0.1923 & 0.1628 & 0.1740 & 0.1763\\
+ & RUS & - & 0.4530 & 0.4752 & 0.4912 & 0.4946\\
+ & ROS & 75 & 0.4263 & 0.4493 & 0.4403 & 0.4482\\
+ &  & 125 & 0.4266 & 0.4315 & 0.4414 & 0.4544\\
+ &  & 150 & 0.3921 & 0.3834 & 0.3940 & 0.3788\\
+ &  & 175 & 0.3290 & 0.2927 & 0.3231 & 0.3020\\
+\hline
+\end{tabular}
+\end{table}
+
+En estas tablas vemos cómo en general los métodos de preprocesamiento
+son útiles para la resolución del problema, tanto los métodos de
+balanceo como la selección de características. También se observa cómo
+para este problema \emph{random undersampling} tiene un mejor
+comportamiento y también vemos que con 50 y 80 características se
+obtienen resultados muy cercanos a los obtenidos con todas las
+características.
+
+\section{Anexo}
+\label{sec:org17359bb}
+
+\begin{itemize}
+\item Función para obtener los valores TPR, TNR y su producto.
+\end{itemize}
+
+\begin{minted}[linenos=true,mathescape,escapeinside=||]{scala}
+def getResults(predictions: RDD[(Double, Double)]): Array[Double] ={
+  val metrics = new MulticlassMetrics(predictions)
+  val tpr = metrics.truePositiveRate(0)
+  val tnr = metrics.truePositiveRate(1)
+  
+  Array(tpr,tnr,tpr*tnr)
+}
+\end{minted}
+\end{document}

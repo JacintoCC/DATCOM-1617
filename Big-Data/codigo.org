@@ -1,0 +1,86 @@
+#+BEGIN_SRC scala
+    // Oversampling
+    val percentage = List(75,100,125,150,175,200,225,250) 
+    
+      
+      // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50, 65, 80)
+    val maxDepth = List(3,4,5,6)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size * percentage.size,6)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_depth <- 0 to (maxDepth.size-1)){  
+      for(index_bins <- 0 to (maxBins.size-1)){
+        for(index_perc <- 0 to (percentage.size-1)){
+            val preprocesedTrain = runROS(train, minorityLabel, majorityLabel, percentage(index_perc))
+            val model = DecisionTree.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                     impurity, maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](maxDepth(index_depth), maxBins(index_bins),percentage(index_perc)) ++ results
+            resultMatrix(index_depth*maxBins.size*percentage.size + index_bins*percentage.size + index_perc)= merged
+          }
+      }
+    }
+    
+#+END_SRC
+
+#+BEGIN_SRC scala
+    // Oversampling
+    val percentage = List(75,100,125,150,175,200) 
+    
+      
+      // Variables para Decision Trees
+    val numClasses = converter.getNumClassFromHeader()
+    val categoricalFeaturesInfo = Map[Int,Int]()
+    val impurity = "entropy"
+    val maxBins = List(50, 65, 80)
+    val maxDepth = List(3,4,5,6)
+    val sizeForest = List(30,50,100,150)
+
+    val resultMatrix = Array.ofDim[Double](maxBins.size * maxDepth.size * percentage.size * sizeForest.size,7)
+
+    /*
+     * Ejecución de experimentos
+     */
+    
+    for(index_perc <- 0 to (percentage.size-1)){
+      val preprocesedTrain = runROS(train, minorityLabel, majorityLabel, percentage(index_perc))
+  
+      for(index_depth <- 0 to (maxDepth.size-1)){  
+        for(index_bins <- 0 to (maxBins.size-1)){
+          for(index_size <- 0 to (sizeForest.size - 1)){
+            val model = RandomForest.trainClassifier(preprocesedTrain, numClasses, categoricalFeaturesInfo, 
+                                                     sizeForest(index_size), "auto", impurity,
+                                                     maxDepth(index_depth), maxBins(index_bins))
+    
+            val predictions = test.map{
+              point => 
+              val prediction = model.predict(point.features)
+                 (prediction, point.label)
+            }.persist
+        
+            var results = getMeasures(predictions)
+            var merged = Array[Double](percentage(index_perc),maxDepth(index_depth), 
+			                           maxBins(index_bins),percentage(index_perc)) ++ results
+            resultMatrix(index_depth*maxBins.size*sizeForest.size +
+                index_bins*sizeForest.size +
+                index_size)= merged
+          }
+        }
+      }
+    }
+#+END_SRC

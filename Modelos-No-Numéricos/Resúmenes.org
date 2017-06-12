@@ -1,0 +1,3068 @@
+#+TITLE: Resúmenes de la asignatura Modelos de ciencia de datos no numéricos
+#+SUBTITLE: Máster DATCOM 16/17
+#+OPTIONS: toc:nil
+#+OPTIONS: H:1
+
+* Bloque I: Fundamentos de redes y sistemas complejos
+** Sistemas complejos                                                 :drill:
+   :PROPERTIES:
+   :ID:       75f11db8-2bdd-44ec-a991-9490c7ee60e8
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 1.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 2
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:00]
+   :END:
+Preguntas
+*** Ejemplos
+- Sociedades biológicas
+- Cerebros
+- Genomas
+- Sistemas financieros
+- Sistemas de transmisiones
+*** Definición 
+Teoría científica que asgura que algunos fenómenos de comportamiento
+son inexplicable por cualquier análisis convencional de las
+partes. Estos fenómenos dse llaman normalmente comportamiento
+emergente.
+*** Características
+- Auto organizado
+- Descentralizado
+- Comportamiento emergente
+- Robusto 
+** Redes en sistemas complejos                                        :drill:
+   :PROPERTIES:
+   :ID:       9a7a28d6-c1b4-4434-9625-883ae5743391
+   :END:
+Rol de las redes en sistemas complejos
+*** Respuesta
+- Define interacciones entr sus componentes. No seremos capaces de
+  entender sistemas complejos sin mapear las redes que lo soportan. 
+- Las redes siguen unas leyes comunes, mecanismos reproducibles
+** Sistemas complejos                                                 :drill:
+   :PROPERTIES:
+   :ID:       14017022-e0b9-4245-b217-15edd9dd1fda
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:52]
+   :END:
+Componentes y nomenclatura
+*** Respuesta
+- Componentes: nodos, vértices
+- Interacciones: enlaces, arcos
+- Sistema: red, grafo (N,L)
+- Red se suele referir a sistemas reales.
+- Red social: Grupo de individuos conectados dentro de relación.
+- Grafo: representación matemática de la red
+** Redes                                                              :drill:
+   :PROPERTIES:
+   :ID:       296499e6-d87c-4e9c-a120-5d0e52c479f9
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 2.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 2
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:43]
+   :END:
+Descripción general
+*** Propiedades
+- Ofrecen lenguaje común para estudiar sistemas
+- Dirigidos y no dirigidos.
+  - $L = \frac{1}{2} \sum A_{ij}, <k> = \frac{2L}{N}$
+  - $L = \sum A_{ij},\ <k> = \frac{L}{N}$
+- Pueden ser ponderados y no ponderados
+- Con autoenlaces, multigrafos
+** Redes de la WWW                                                    :drill:
+   :PROPERTIES:
+   :ID:       7d52548f-a5b5-41ac-884b-654b236acaf2
+   :END:
+Descripción
+*** Respuesta
+- Representan las conexiones de los sitios web. 
+- Nodos sitios, enlaces hiperenlaces.
+- Multigrafo dirigido
+** Grafos ponderados con signo                                        :drill:
+   :PROPERTIES:
+   :ID:       6902cf13-7a26-49c7-a88f-89e496c237ca
+   :END:
+ Descripción
+*** Respuesta
+Redes  con pesos, pueden ser negativos: enemigos
+** Dispersión de las redes                                            :drill:
+   :PROPERTIES:
+   :ID:       3cc52581-7bcf-4f57-bf41-8370f64fdda8
+   :END:
+Definición
+*** Respuesta
+- La dispersión la entendemos como el grado de separación entre
+  distintos nodos. A menor densidad de enlaces de la red, mayor
+  dispersión. 
+- Formalmente, diremos que una red es dispersa si $L << L_{max}$ ó
+  $<k> << N-1$.
+- La mayoría de redes observadas en sistemas reales (y en particular
+  en los medios sociales) son dispersas
+** Ciencia de redes                                                   :drill:
+   :PROPERTIES:
+   :ID:       25d3d8c3-168f-43a8-940e-f0031f2d870a
+   :END:
+Medidas de análisis de redes
+*** Respuesta
+- Distribución de probabilidad de grados $p_{k}$. Probabilidad de
+  encontrar nodos con $k$ enlaces (grado medio, presencia de hubs)
+- Distancia media de los caminos entre todos los nodos de la red
+- Coeficiente de clustering $C_{i}$: Mide densidad local de la red.
+\[ C_{i} = \frac{L_{i}}{k_{i}(k_{i}-1)} \]
+\[ <C> = \frac{1}{N}\sum C_{i} (diámetro)\]
+- Los valores de estas medidas de una red concreta determinan
+  comportamiento dinámico del sistema complejo
+** Redes reales y modelos complejos                                   :drill:
+   :PROPERTIES:
+   :ID:       3abce7b5-241a-4c15-bbb3-9a6201908886
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:44]
+   :END:
+Ejemplos de redes reales y medidas asociadas
+*** Tabla
+|                  | Dist Media              | Clustering      | Dist grados          |
+|------------------+-------------------------+-----------------+----------------------|
+| regulares        | N^{1/D}                 | const           | $\delta(k-k_{d})$    |
+| aleatorias       | $\frac{log N}{log <k>}$ | $\frac{<k>}{N}$ | $e^{-<k>}<k>^{k}/k!$ |
+| mundos pequeños  | $\frac{log N}{log <k>}$ | const           | exponencial          |
+| libres de escala | $\frac{log N}{log <k>}$ | const           | k^{-\gamma}          |
+*** Notas
+**** Mundos pequeños
+En sociología, una persona cualquiera conoce a otras mil, $k \sim
+1000$, luego <d> = $\frac{log 7\cdot 10^{9}}{log{10^3}} = 3.28$
+**** Libres de escala
+Red de la WWW. Antes se pensaba que era una red aleatoria
+** Hub                                                                :drill:
+   :PROPERTIES:
+   :ID:       e0ffe84d-9455-4a8e-9e44-0b4c579da539
+   :END:
+Definición
+*** Respuesta
+Nodos de una red fuertemente conectados, es decir, con mayor $k$. Por
+ejemplo en la red de proteínas de la levadura, el mayor tiene
+grado 91. Consecuencia de la propiedad libre de escala, muy común en
+redes reales
+** Propiedades de las redes                                           :drill:
+   :PROPERTIES:
+   :ID:       11316a2e-bbed-40b5-834c-6a7c68afa060
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:57]
+   :END:
+Propiedades generales de las redes
+*** Respuesta
+- Conectividad: Número de componentes conexas. 
+- Coeficiente de clustering medio (por ejemplo 0.12 es alto)
+- Coeficiente de clustering mayor en los nodos poco conectados que en
+  los hubs. 
+- Jerarquía de redes: tiene como consecuencia que el coef de
+  clustering es mayor en los nodos poco conectados. 
+- Propiedad libre de escala: Existen unos pocos fuertemente conectados
+- Propiedad de los mundos pequeños: No existen distancias grandes. 
+** Redes sociales                                                     :drill:
+   :PROPERTIES:
+   :ID:       3cbe0ff7-375c-4f41-aaec-f1e9a7b2e27d
+   :END:
+Definición
+*** Respuesta 
+Tipo de red compleja que modela relaciones existentes entre conjunto
+de entidades sociales, como personas, grupos u organizaciones. 
+*** Clasificación según Newman
+- RRSS
+- Redes de información o conocimiento
+- Tecnológicas
+- Biolígicas
+*** Notas
+Son las que resultan de interacciones humanas y sociales, como las
+redes de amistad, las redes informales de comunicación entre empresas
+y redes de colaboración
+*** Ejemplos histórico
+- 1ª y 2ª compañera de mesa en una residencia femenina.
+- Relaciones de amistad
+- Relaciones sexuales
+*** Ejemplo de Facebook
+- Es un grafo no dirigido, los nodos son usuarios y los enlaces
+  indican la amistad
+*** Ejemplo de Twitter
+Grafo dirigido: Los nodos son uauarios y los enlaces indican a quién
+sigues. Tus seguidores ven lo que publicas. Redes generables a partir
+de Twitter
+
+- Redes de flujo de información: Nodos usuarios y enlaces indican el
+  camino seguidopor el tuit. 
+- Redes de coocurrencia de hashtags. Los nodos son hashtags y los
+  enlaces indican que dischos hashtags aparecen conjuntamente en el
+  mismo tuit. Los enlaces están ponderados por número de coocurrencias
+*** Análisis de red de Óscar
+- Coef de clustering medio, $<C> = 0.558$, bastante alto, indicando
+  grado significativo de clustering local. 
+*** Análisis de redes sociales online
+Todas las distribuciones muestran comportamiento de larga cola,
+desviaciones de varios órdenes de magnitud. Active users in social
+networks also tend to be popular. This unusually high clustering
+coefficient suggests the presence of strong local clustering, and has
+a natural explanation in social networks: people  tend to be
+introduced to other people via mutual friends, increasing the prob
+that two friends of a single user are also friends. This clustering
+and the small diameter of these networks qualifies these graphs as
+small-world netwoks an further indicates that the graph has scale-free
+properties 
+* Bloque I: Análisis de RRSS
+** Análisis de RRSS                                                   :drill:
+   :PROPERTIES:
+   :ID:       e54c4948-0cdd-47b8-a734-557c4686a58b
+   :END:
+Preguntas
+*** Definición y orígenes
+- SNA. Se centra en el descubrimiento de patrones de interacción entre
+actores sociales.
+- Área de investigación metodológica interdisciplinar con
+  contribuciones de la sociología, la psicología social, antropología,
+  física, Matemáticas y la informática.
+
+- Orígenes a comienzos de los 30 por Moreno. Desarrolló enfoque
+  sociométrico. 
+*** Objetivo:
+- Examinar tanto los contenidos como los patrones de relaciones entre
+  actores e implicaciones
+*** Tareas habituales: 
+- Identificar actores influyentes y centrales
+- Identificar hubs y autoridades
+- Determinar patrones de interacción comunes entre actores, mediante
+  medidas de niveles de interacción
+- Descubrir grupos cohesionados, técnicas de detección de comunidades
+** Aplicación de análisis de RRSS                                     :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       f583fd5a-6149-44e2-95fb-3fab84c4d114
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 1.5
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:03]
+   :END:
+Ejemplos
+*** Respuesta
+- Marketing viral
+- Análisis de las erdes de llamadas telefónicas para identificación de
+  perfiles de usuarios y recomenddación de tarivas personalizadas
+- Uso para predicción de la deserción de clientes: identificando
+  cambios en sus patrones de contactos telefónicos.
+- Detección de fraudes
+** Medidas de análisis de RRSS                                        :drill:
+   :PROPERTIES:
+   :ID:       442864c1-af6a-47fe-a45c-98d92727d94a
+   :END:
+Medidas para entender comportamiento
+*** Respuesta
+- Locales, basadas en concepto general de centralidad (redes no
+  dirigidas) o prestigio (redes dirigidas), una medida general de la
+  posición de un actor en la estructura global de la red
+  social. Identifican actores clave. 
+- Medidas globales: Info más compacta para evaluar la estructura
+  global de la red aportando info sobre propiedades importantes de los
+  fenómenos sociales subyacentes
+** Centralidad                                                        :drill:
+   :PROPERTIES:
+   :ID:       edd0ae40-9f44-4979-805b-eb35e88b7fc3
+   :END:
+ Concepto de centralidad en RRSS
+*** Respuesta
+Nodos con acceso másfácil y rápido a los demás y mayor capacidadpara
+ejercer control del flujo entre ellos
+*** Medidas locales
+- Grado
+- Intermediación: medida pensada para capturar correduría.  El grado
+  no captura corredurías: brokerage
+- Cercanía
+- Excentricidad
+- Centralidad de vector propio
+- Centralidad de grado: Número de enlaces que lo conectan con
+  otros. Grafos no dirigidos. Actores con más amigos son más
+  centrales. Sólo mide importancia con respecto a amigos más cercanos
+- En redes dirigidas
+  - prestigio de entrada (in degree, soporte). Actores que reciben
+    enlaces, son prominentes
+  - Prestigio de salida (out-degree, influencia). Actores con
+    conexiones directas con otros. Se entiende que pueden intercambiar
+    o transferir información
+
+** Intermediación                                                     :drill:
+   :PROPERTIES:
+   :ID:       0772b9b2-8879-428b-b8b2-1d286a073408
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:43]
+   :END:
+Medida local de centralidad RRSS
+*** Definición
+- Pensada para capturar correduría. Media de número de caminos mínimos
+  con respecto al número de caminos que incluyen al nodo.
+- Es habitual considerar medida normalizada
+- Actores con intermediación alta ocupan roles críticos en la
+  estructura de la red puedto que suelen ocupar posición que les
+  permite trabajar como interfaces entre subgrupos fuertemente unidos
+- Interacciones entre dos actores no adyacentes pueden depender de
+  otros actores en los caminos entre ambos: porteros o gatekeepers. 
+- La intermediación también puede calcularse para las relaciones.
+** Cercanía                                                           :drill:
+   :PROPERTIES:
+   :ID:       9bcb264b-5689-492f-a3d0-ca774594376f
+   :END:
+Definición
+*** Respuesta
+- Tercera forma alternativa de medir centralidad, puede que no sea tan
+  importante tener muchos amigos directos ni estar entre otro. Se le
+  da importancia a estar en medio de las cosass, para lo cual  no es
+  necesario estar en posición de correduría. 
+- Se enfatiza la distancia de un actor a otros en la red.
+
+- La medida de cercanía es la inversa de la suma de distancias
+  geodésicas para cada actor. 
+- Asociada, medida de centralidad de cercanía
+** Excentricidad                                                      :drill:
+   :PROPERTIES:
+   :ID:       1406b4ec-27a3-474a-abf9-cf071ae47735
+   :END:
+Definición
+*** Respuesta
+- Inversa de la excentricidad: máxima distancia geodésica.
+- Los actores con mayor valor de excentricidad se denominan actores
+  periféricos, los de menor valor forman el centro de la red
+** Centralidad de vector propio                                       :drill:
+   :PROPERTIES:
+   :ID:       58afad84-674d-4912-86fb-c1518554bbe7
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:47]
+   :END:
+Definición
+*** Respuesta
+- La centralidad de un nodo concreto depende de cómo de centrales sean
+  sus vecinos (prominencia)
+- El poder y status de un ego se define recursivamente pr el de sus
+  vecinos. $w_{ij}(a_{ij}): Entrada de matriz de adyacencia. Medida
+  válida para dirigidas y no dirigidas.
+\[ C(i) = w_{ji}C(j) + w_{ki}C(k) + w_{li}C(l) \]
+- Versión más elaborada con importancia en las conexiones.
+*** Cálculo 
+\[ C = A^{T} C \],
+ con C la matriz de adyacencia. Método de las potencias
+*** Normalización
+- Es habitual considerar media normalizada por $\lambda$, constante
+  que equivale al mayor valor absoluto del vector propio dominante de
+  $A$. nn
+
+** Medidas globales                                                   :drill:
+   :PROPERTIES:
+   :ID:       5decb1bb-93de-4e8d-9d26-2a99e7bd08b1
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:48]
+   :END:
+Lista de medidas globales:
+*** Lista
+- Densidad
+- Diametro y radio (longitud del máximo y mínimo camino geodésico)
+- Distancia media
+- Grado medio.
+Existen medidas adicionales para analizar patrones de interacción como
+el coef global medio de clustering, que mide la transitividad y la
+reciprocidad
+** Aplicaciones                                                       :drill:
+   :PROPERTIES:
+   :ID:       12e32eec-12f0-4b87-be78-5cb9f283b330
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:44]
+   :END:
+Ejemplos de usos
+*** Ejemplos
+- Análisis influencia de los líderes chinos
+- Análisis de cuentas sobre "information visualization"
+- Detección de comunidades con el método de Lovaina
+* Bloque I: Detección de comunidades
+** Estructura de comunidades                                          :drill:
+   :PROPERTIES:
+   :ID:       a827737d-4cbd-4c34-a28c-efe2a3d73072
+   :END:
+Introducción
+*** Introducción
+- Redes complejas tienden a mostrar estructuras de comunidades.
+- Consecuencia de heterogeneidad global y local de la distribución de
+  enlace. 
+- A menudo, alta concentración de enlaces en regiones (comunidades) y
+  baja concentración de enlaces entre regiones (modularidad)
+- Se definen de forma sencilla como nodos grupos de nodos simples. 
+** Comunidades en redes complejas                                     :drill:
+   :PROPERTIES:
+   :ID:       653e49b0-e949-4de7-a9b2-89228356b589
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:48]
+   :END:
+Definición 
+*** Def
+- Regiones de un grafo con alta concentración de enlaces entre sus
+nodos, y baja concentración entre las distintas regiones.
+- Grupos de nodos densamente conectados internamente que presentan
+  conexiones dispersas entre sí.
+- Se definen cliques los subgrafos completos y puentes los enlaces
+  entre comunidadesn
+** Modularidad de las redes                                           :drill:
+   :PROPERTIES:
+   :ID:       723cee0a-6658-48ec-bcc5-469d88b9beaf
+   :END:
+Propiedades de las redes modulares
+*** Propiedades
+- Clustering implica modularidad
+- Clustering sólo en la periferia. 
+- Nodos de grado bajo suelen pertenecer a único módulo, hubs hacen de
+  puente 
+*** Definición
+- Es una función que mide la calidad de una partición concreta de una
+  red en comunidades. 
+- Valor máximo si componentes conexas son cliques. Usa producto grados
+  entre 2* número de enlaces como probabilidad de enlace entre dos
+  nodos.
+- $Q \in [-1,1]$
+- En la práctica 0.3 es un buen valor
+*** Idea
+La red muestra estructura modeular coherernte si el número de enlaces
+entre comunidades es menor que el esperado en una red aleatoria.
+** Detección de comunidades                                           :drill:
+   :PROPERTIES:
+   :ID:       73057131-ef4f-4a4a-90de-97c7cad314be
+   :END:
+Motivación
+*** Comunidades en el mundo real
+- Sociedades: familias...
+- Económicas: compañías
+- Biología
+- RRSS
+*** Propiedades comunes
+- Agrupamientos sociales según intereses
+- Modularidad funcional
+- Artículos sobre un mismo tema en redes científicas
+*** Ejemplo
+- Club de kárate de Zachary
+** Formación de opiniones                                             :drill:
+   :PROPERTIES:
+   :ID:       ac83a899-b706-4035-9a40-e4485df51336
+   :END:
+Motivación
+*** Respuesta
+- Si cada nodo adopta la opinión de la mayoría de vecinos, es posible
+  formar opiniones distintas 
+- Más uniformidad dentro de un grupo cohesivo
+- Individuos forman grupos basados en intereses. Queremos identificar
+  grupos. 
+** Comunidades en medios sociales                                     :drill:
+   :PROPERTIES:
+   :ID:       551f11b5-a9ca-4f4e-aec2-8076b0274f83
+   :END:
+Motivación
+*** Respuesta
+- Proporcionan visión clobal de las interacciones. Algunos
+  comportamientos sólo visible a nivel de grupo y no a nivel de
+  individuos.
+- Comunidades en las RRSS son más o menos representativas de las
+  comunidades en el mundo real. 
+- Existen comunidades implícitas en las redes sociales. Los individuos
+  con el mismo gusto de películas no suelen ser comunidades
+  explícitas.
+** Detección de comunidades                                           :drill:
+   :PROPERTIES:
+   :ID:       712d80a9-79be-4911-a08e-f983457c1097
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:00]
+   :END:
+Taxonomía
+*** Clasificación
+- Centradas en nodo.(criterio estructural)
+- Centradas en grupos de nodos (se consideran las conexiones del grupo
+  globalmente) (criterio estructural)
+- Centradas en jerarquía (clustering jerárquico)
+- Centradas en red (particionamiento de grafos), dividiendo la red
+  completa.
+** Métodos centrados en nodos y grupos de nodos                       :drill:
+   :PROPERTIES:
+   :ID:       bd3b5aa4-27ad-44fb-9126-b8939541b2a8
+   :END:
+Métodos
+*** Respuesta
+- Mutualidad (cliques)
+- Frecuencia de enlaces entre los miembros (al menos k miembros)
+- Alcanzabilidad entre miembros (ncliques, centradas en grupos),
+  máximo n saltos
+- Cohesión interna del grupo (p-cliques, quasi-cliques y \gamma
+  densos). Frecuencia relativa de enlaces entre los miembros del grupo
+  en comparación con la de los no miembros. Densidad del grupo
+** Identificación de cliques                                          :drill:
+   :PROPERTIES:
+   :ID:       70a55f75-03a5-4295-9915-e1cb0961b53c
+   :END:
+Características
+*** Respuesta
+- NP-completo
+- No robusto
+- No es interesante
+*** Cohesión de enlaces
+- Particionamiento de la red en clusters en los que los nodos tienen
+  como mínimo una proporción de vecinos dentro del grupo
+** Identificación de quasi cliques                                    :drill:
+   :PROPERTIES:
+   :ID:       304c0c96-3a06-4027-9345-f7ce3f5da775
+   :END:
+Características
+*** Respuesta
+- Exigido que la densidad sea mayor que un umbral
+- Estrategia similar a los cliques
+*** Cohesión de enlaces
+- Grado interno: conjunto de enlaces que lo conectan con otro nodo del
+  mismo subgrafo
+- Grado externo del nodo: si k_i^{ext} = 0, todos los vectinos
+  pertenecen al subgrafo y es buena comunidad.
+- Comunidad fuerte_ cada nodo tiene más enlaces que con el resto del
+  grafo
+- Comunidad  débil: grado interno total mayor que su grado externo
+  total
+** Métodos centrados en red y jerarquía                               :drill:
+   :PROPERTIES:
+   :ID:       a87603b7-109f-43e6-a043-120f11cfa63c
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:56]
+   :END:
+Líneas de investigación
+*** Descubrimiento de comunidades a nivel global
+- clustering jerárquico
+- Particionamiento de grafos
+*** Propósito:
+- Descubrir grupos de nodos relacionados y estructura jerárquica
+  correspondiente
+- Devuelven particiones disjuntas
+- Heurística :Eliminar iterativamente puentes
+** Centrados en jerarquía                                             :drill:
+   :PROPERTIES:
+   :ID:       1379dd85-f6f5-4ea5-9900-9b5a9399c8b6
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 3
+   :DRILL_FAILURE_COUNT: 3
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:03]
+   :END:
+Definición
+*** Respuesta
+- Construir estructura jerárquica de comunidades basada en la
+  topología de la red
+- Permite analizar la red a distintas resoluciones
+- Enforques representativos: aglomerativos /jerárquico
+** Clustering aglomerativo                                            :drill:
+   :PROPERTIES:
+   :ID:       7278d955-21eb-407d-a52d-8e1620b02f13
+   :END:
+Descripción
+*** Respuesta
+ Similitud alta para pares de nodo con probabilidad
+    alta de pertenecer a la misma comunidad
+*** Algoritmo de ravasz
+	define similitud. Decisión del mecanismo de
+      agregación de grupos. Aplicación de clustering
+      jerárquico. Construcción de dendograma. O(N^3)
+*** Selección de partición óptima. 
+Cálculo de valor de modularidad para cada partición posible
+
+** Clustering divisivo                                                :drill:
+   :PROPERTIES:
+   :ID:       d4b4081d-fcaf-4d32-a0b4-3d28ff9b2223
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:45]
+   :END:
+Procedimiento
+*** Respuesta
+Agrupados en subconjuntos iniciales. Subconjujnto dividiendo con
+método basado en particionamiento de grafos. Eliminación recursiva del
+enlace más débil. Cada componente final es una comunidad
+*** Método de Girvan Newman
+- Medida de similititud basada en topología de la red: intermediación
+  de los enlaces (caminos geodésicos que pasan por el enlace)
+- Divide la red original en partes conectadas más pequeñas. 
+  - Calcular valor de intermediación de todos los nodos enlaces de la
+    red
+  - Eliminar enlaces de mayor intermediación
+  - Repetir
+- Es necesario recalcular intermediación en cada paso
+** Particionamiento de redes complejas                                :drill:
+   :PROPERTIES:
+   :ID:       232ed3b5-fc99-4ed5-b015-151ea40a8e95
+   :END:
+Estrategia
+*** Respuesta
+ Maximización de la modularidad: Este enfoque comprende métodos
+ heurísticos que tratan de maximizar directamente la modularidad Q. Se
+ espera $2|E(U_{i},U_{i})| > |E(U_{i}, N-U_{i})|, \forall i$
+- Tiene un problema de resolución pues no detecta comunidades de menos
+  de \sqrt{L} aristas.
+- La medida se extiende a redes ponderadas
+** Método greedy de newman                                            :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       6397192d-7c64-42fd-a329-ac7be653d40b
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 3
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 1.667
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:01]
+   :END:
+Detección de comunidades
+*** Algoritmo
+- Es greedy
+- Comienza con nodos sueltos
+- Realiza la mejor posible para Q
+- El cambio de Q sólo implica a dos comunidades y se calcula en tiempo
+  constante, luego es $O(N^{2})$ para redes dispersas.
+** Método de Lovaina                                                  :drill:
+   :PROPERTIES:
+   :ID:       1c14c356-a9be-417e-9beb-5b3745540d21
+   :END:
+Maximización de la modularidad
+*** Algoritmo
+- Método aglomerativo. Eficiente. Redes ponderadas y no ponderadas. 
+- Iteración de dos pasos: optimización y agregación donde se colapsan
+  las comunidades
+- Para si no hay mejora en Q
+** Métodos que consideran solapamiento                                :drill:
+   :PROPERTIES:
+   :ID:       8727bc8e-24c0-4177-ae00-659e03a8f880
+   :END:
+Detección de comunidades
+*** Algoritmos
+- Clique percolation method:
+  - Relajar definición de cliques y usarlos como semillas para
+    detectar comunidades más grandes. Recibe como entrada red y valor
+    del parámetro k.
+  - Detectar cliques, construir grafo de cliques, cada componente
+    conexa de ese graf forma una comunidad.
+
+* Bloque I: Procesos en redes
+** Difusión de información                                            :drill:
+   :PROPERTIES:
+   :ID:       f7785a11-4d3d-4317-849a-8e17c967aad9
+   :END:
+Def
+*** Definición
+- Proceso mediante el cual una unidad se difunde en una red y alcanza
+- Se estudia en sociología, epidemiología y etnografía
+** Difusión en redes                                                  :drill:
+   :PROPERTIES:
+   :ID:       4775c47f-3d0b-4fcd-b9d9-db0ac3507c80
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:43]
+   :END:
+Tipos de modelos
+*** Situaciones modelables
+- Cascadas de información y modelos epidémicos en redes. 
+- Difusión de innovaciones en redes. tres variantes con información
+  global y local. Sólo innovación (global), solo imitación (local) y
+  mixto
+- Enlos modelos epidémicos y de cascada centrados en el emisor, el
+  individuo no toma la decisión por sí mismo
+- Contagios simples o complejos (umbrales)
+** Tipos de procesos
+Categorización
+*** Taxonomía
+- Difusión de la información
+  - Red explícita
+	- Información global - Comportamiento de rebaño
+	- Información local: Cascada de información
+  - Red explícita
+	- Información local
+	- Información local
+	  - Difusión de innovación
+	  - Epidemias
+** Modelado epidémico                                                 :drill:
+   :PROPERTIES:
+   :ID:       7080ab51-6ba3-43f4-8536-3e9bcbad8242
+   :END:
+Hipótesis
+*** Respuestas
+- Individuos son Susceptibles, Infectados, Recobrados
+- Mezclado homogéneo
+
+** Modelo SIR
+Transiciones
+*** Transiciones
+- S -> I -> R
+- I -> S
+- R -> S
+
+** Comportamiento Epidemia                                            :drill:
+   :PROPERTIES:
+   :ID:       1c96be35-d96e-44db-a2f2-9ae1bd2a68a4
+   :END:
+Comportamientos importantes de modelos epidémicos
+*** Respuesta
+- Temprano: patrón de comportamiento en las fases iniciales. Se
+  necesita tiempo para desarrollar las vacunas y las intervenciones
+  médicas
+  - La mejor forma de detener o contener la epidemia es la cuarentena
+    yla vacunación temprana: modelo SI
+- Tardío: permite medir alcance, pico...
+** Modelo SI                                                          :drill:
+   :PROPERTIES:
+   :ID:       9e77ecdb-1376-41d8-87a9-159caa05ca81
+   :END:
+Parámetros
+*** Parámetros
+- Ratio de transmisión, tiempo característico para que se contagie una
+  fracción 1/e de la población. Ecuación logística
+** Modelado de epidemias en redes complejas                           :drill:
+   :PROPERTIES:
+   :ID:       1b3f0ba2-9ed8-429a-a644-e2f64df0804a
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:54]
+   :END:
+Descripción
+*** Descripción
+- Enfoque clásico no tiene en cuenta explícitamente que la propagación
+  se produce en una red compleja. 
+- Asume que se da un mezclado homogéneo, lo que implica que un
+  individuo es infectado con probabilidad \beta
+*** Estructura de la red
+- En la topología de la red influyen procesos que ocurren en el
+  sistema complejo
+- Mecanismo del proceso de difusión influye en proceso global
+** Modelo SIR
+Modelo SIR en redes complejas
+*** Descripción
+- consideran contactos definidos porla red para la propagación
+- Alternativa es simular mediante técnicas demodelado social basado en
+  agentes ABM.
+- No se consideran globalmente radios sino a nivel de individuo.
+- Distintos modelos con complejidad creciente según nuevas
+  características
+- La epidemia según lo localizado del nodo inicial
+- En el modelo SIR los agentes recuperados no son susceptibles
+** Tiposs de modelos                                                  :drill:
+   :PROPERTIES:
+   :ID:       f1d579c8-a201-49d4-81e6-fec042bb8581
+   :END:
+- Tipos
+*** Difusión de la innovación
+- Curva de adopción. innovación idea percibida como nueva
+- Modelo de Bass sin redes
+- Asume mezclado homogéneo, sólo se consideran ratios
+*** Cascadas de información
+- nodos vecinos influyen al individuo
+- Independent cascade model: centrado en el emisor, no existe
+  posibilidadd de desactivarse. 
+- Modelo de contagio complejo y umbral: tiene estados de equilibrio. 
+  - Maximización de propagación de una csacada con selección de
+    semillas
+- Influencia de la topología de la red
+  - Depende de la estructura de la red. 
+** Papel de las comunidades en procesos de contagio complejo          :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       5b7834eb-d299-4725-b5c2-818cb93b53ef
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 1.5
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:02]
+   :END:
+. 
+*** Respuesta
+- Posibilitar que las ideas se difundan en presencia de umbrales
+- Crear bolsas aisladas
+- Permitir distintas opiniones coexistan en distintas partes de la red
+** Marketing                                                          :drill:
+   :PROPERTIES:
+   :ID:       57d6979f-7dae-4179-bd7f-68f72c792d14
+   :END:
+Marketing
+*** Modelado de comportamiento de consumidor
+- WoM
+- Modelo básico de Janssen. Agentes deciden qué producto de N
+  comprar. Utilidad individual y efecto social
+- Micro efectos individuales y macroefectos como resultado
+- Parámetros
+  - Densidad de la red
+  - Presencia de hubs
+*** Proceso de compra: 
+- Se asume conocimiento completo (esto es falso) 
+- Umbrales, tiempo
+- Repetición, deliberación, imitación, comparación social
+- Se añade reconocimiento y olvido de productos
+* Bloque II: Minería de texto
+** KDD: Knowledge Discovery in Databases                              :drill:
+	:PROPERTIES:
+	:ID:       12614d29-f438-4f49-91d7-aed3e2dd213f
+	:END:
+Respuesta
+*** Definición
+Proceso no trivial de identificar patrones válidos, novedosos,
+potencialmente útiles y en última instancia comprensibles a partir de
+los datos. 
+** Minería de datos                                                   :drill:
+   SCHEDULED: <2017-06-11 dom>
+   :PROPERTIES:
+   :ID:       86c63f6f-6bc9-45c6-a28b-554542a6e4cd
+   :DRILL_LAST_INTERVAL: 4.07
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 5.0
+   :DRILL_EASE: 2.6
+   :DRILL_LAST_QUALITY: 5
+   :DRILL_LAST_REVIEWED: [2017-06-07 mié 11:04]
+   :END:
+Respuesta
+Respuesta
+*** Definición
+Proceso de descubrimiento eficiente de patrones, desconocidos a priori
+en grandes bases de datos. 
+*** Relación con KDD
+- DM como fase de KDD
+- DM como sinónimo
+** KDT                                                                :drill:
+   :PROPERTIES:
+   :ID:       9e1fbc06-c301-469c-9b83-3eb0940d6f66
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 4
+   :DRILL_FAILURE_COUNT: 4
+   :DRILL_AVERAGE_QUALITY: 0.5
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:03]
+   :END:
+Respuesta
+*** Definición
+- Proceso de descubrir información útil que no está explícitamente en
+  ninguno de los documentos analizados y que aparece cuando estos son
+  relacionados.
+*** Fases
+- Selección
+- Preprocesamiento
+- Minería de texto
+  - Transformación
+  - Minería de datos
+- Interpretación
+*** Diferencias con KDT
+- Búsqueda de conceptos
+- Datos vía RI o manualmente
+- Textos y conceptos se representan en forma intermedia
+- Algoritmos propios
+*** KDT vs RI
+- RI ayuda a KDT para la recuperación de documentos y su
+  preprocesamiento.
+- Diferencias
+  - Optimizar consulta, búsqueda y recuperación de documentos vs
+    extracción del conocimiento no explícito.
+*** KDT vs EI
+- EI localiza unidades de texto relevantes, transforma en
+  representación estructurada o basada en slots. Preprocesamiento de
+  KDT. 
+** Formas intermedias                                                 :drill:
+   :PROPERTIES:
+   :ID:       13f445fc-27c9-4384-8430-b7a224c43c87
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:52]
+   :END:
+Respuesta
+*** Definición
+- Modelo de representación del conocimiento capaz de expresar el
+  contenido implícito del texto de una forma computable mediante un
+  algoritmo o un programa.
+- La técnica para conseguir la forma intermedia determina el tipo de
+  información a conseguir.
+
+| Preprocesamiento            | Representación                    | Descubrimiento         |
+|-----------------------------+-----------------------------------+------------------------|
+| [Categorización]            | [Vector términos representativos] | [Relaciones términos]  |
+| [Análisis textos completos] | [secuencias de palabras]          | [patrones]             |
+| [extracción de información] | [tabla de base de datos]          | [relaciones entidades] |
+
+*** Ejemplos
+- Términos 
+- Conceptos
+- BOW
+- Taxonomía
+- Frases de texto multitérminos
+** Técnicas de preprocesamiento                                       :drill:
+   :PROPERTIES:
+   :ID:       ae4d5b8c-1c98-4658-a53f-640bdee2215f
+   :END:
+Respuesta
+*** Ejemplos
+- Análisis texto completo
+- Categorización
+- PLN
+  - Etiquetado de parte del discurso
+  - Tokenización
+  - Lematización
+- EI
+  - Categorización
+  - Adquisición de patrones léxico sintácticos
+  - Localización de trozos de texto
+- RI
+  - Indexación
+** Fases del preprocesamiento                                         :drill:
+   :PROPERTIES:
+   :ID:       67680456-05bf-46cd-b8e2-9a07a5b375e7
+   :END:
+Respuesta
+*** Fases
+- Recolección
+- Estandarización
+- Tokenización
+- Lematización
+- Diccionario
+** Stemming                                                           :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       1e318423-f50f-4341-912a-397d53056f6d
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 3.0
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:56]
+   :END:
+Respuesta
+*** Definición
+- Análisis morfológico. Eliminar diferentes formas de la misma palabra
+- Ejemplos
+  - plural y singular, tiempos verbales
+** Diccionario                                                        :drill:
+   :PROPERTIES:
+   :ID:       39ab6c1c-8762-47b9-9f2e-a1f27eb6a97b
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 3
+   :DRILL_FAILURE_COUNT: 3
+   :DRILL_AVERAGE_QUALITY: 0.667
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 1
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:00]
+   :END:
+Respuesta
+*** Formato
+$p_{ij}$ es el peso del término $i$ésimo en el documento $j$ésimo y
+puede estar basado en:
+- esquemas binarios de ausencia
+- freq normalizadas
+- tf-idf
+\[ tfidf(t_{i}) = tf(t_{i}) idf(t_{i}) \]
+\[ idf(t_{i})  = \log\left(\frac{N}{df(t_{i})}\right) \]
+*** Técnicas de reducción de diccionario
+- Diccionario local
+- Stopwords
+- Palabras frecuentes
+** POS                                                                :drill:
+   :PROPERTIES:
+   :ID:       dfae92e5-e807-4481-82a7-2c0c8aa9b454
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:57]
+   :END:
+Respuesta
+*** Definición
+- Etiquetado del discurso. Categoría gramatical.
+** Name entity recognition                                            :drill:
+   :PROPERTIES:
+   :ID:       2cba8e9f-3527-4f79-8425-5c6ea1c2f749
+   :END:
+Respuesta
+*** Definición
+- Encontrar y clasificar nombres en un texto.
+** Ejemplo de preprocesamiento                                        :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       cd126853-bfcd-47db-be24-2a8362de72bd
+   :DRILL_LAST_INTERVAL: 3.999
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 8
+   :DRILL_FAILURE_COUNT: 6
+   :DRILL_AVERAGE_QUALITY: 1.375
+   :DRILL_EASE: 2.46
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:01]
+   :END:
+Respuesta
+*** Ejemplo
+- Identificar separadores
+- Substituir acrónimos
+- Construir diccionarios
+- Calcular frecuencias
+- Itemsets frecuentes
+- Obtener de forma intermedia
+** Proceso de minería                                                 :drill:
+   :PROPERTIES:
+   :ID:       5285032c-0ee9-47a6-9b87-2332f6ecb29b
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 3
+   :DRILL_FAILURE_COUNT: 3
+   :DRILL_AVERAGE_QUALITY: 1.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 1
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:00]
+   :END:
+Respuesta
+*** Minería de textos
+- Descriptiva: sin clasificación a priori
+- Predictiva: Con clasificación, más intuitiva
+** Minería descriptiva                                                :drill:
+   SCHEDULED: <2017-06-11 dom>
+   :PROPERTIES:
+   :ID:       bf383ec8-798a-43ed-84d4-ea21850abf61
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 7
+   :DRILL_FAILURE_COUNT: 6
+   :DRILL_AVERAGE_QUALITY: 0.572
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-07 mié 11:37]
+   :END:
+Respuesta
+*** Técnicas
+- clustering de documentos
+- conceptual
+- reglas de asociación
+** Minería predictiva                                                 :drill:
+   :PROPERTIES:
+   :ID:       68dafd62-dd48-4e1a-9684-8d7244b99478
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.5
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:40]
+   :END:
+Respuesta
+*** Técnicas
+- NN
+- Reglas de decisión
+** Medidas de similitud entre clusters                                :drill:
+   :PROPERTIES:
+   :ID:       0324550a-e01d-4ab5-87f9-0aef1f63c758
+   :END:
+Respuesta
+*** Medidas
+- Single link
+- complete link
+- centroide
+- group-average, similitud media entre todos los pares de documentos,
+  incluyeno los pertenecientes al mismo cluster
+** Medidas de similitud entre documentos                              :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       8d073f7f-30e7-4d70-96a8-482872f253ad
+   :DRILL_LAST_INTERVAL: 4.0
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 4.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 4
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:46]
+   :END:
+Respuesta
+*** Medidas
+- Distancia
+  - Euclídea
+  - Manhattan
+  - Minkowski
+  - Correlación
+- Similitud entre documentos
+  - Coeff jaccard
+  - Coseno
+** Clustering jerárquico                                              :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       a8927fbb-ee62-4699-a93d-7847e6702064
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 3.0
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:57]
+   :END:
+Respuesta
+*** Hierarchical agglomerative clustering
+- No es necesario conocer a priori el número de clusters
+- Jerarquía en forma de árbol (dendograma).
+- Asume medida de similitud.
+** Clustering particional                                             :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       fbcb439b-3589-4b86-bd94-fd0d8f525c70
+   :DRILL_LAST_INTERVAL: 4.0
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 2.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 4
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:40]
+   :END:
+Respuesta
+*** K means
+- Necesita número de clusters $k$
+- Se minimiza el error cuadrático entre el documento y la media del
+  cluster. Se va dividiendo.
+** Clustering difuso                                                  :drill:
+   :PROPERTIES:
+   :ID:       de0c273c-8712-4453-8900-16b170f2f534
+   :END:
+Respuesta
+*** Motivación
+- Jerárquico y $k$ medias generan partición. Difuso permite más de un
+  cluster con grado de pertenencia. 
+- Minimización de 
+\[ J = \sum_{i}^{nd} \sum_{j}^{nc} u_{ij} ||d_{i} - ce_{i}|| \]
+- Más rápido y fácil de conocer solapamiento.
+- Necesidad de $\alpha$ corte. 
+** Clustering conceptual                                              :drill:
+   :PROPERTIES:
+   :ID:       c51a5e0b-9fb3-4c22-a417-4349d6a4b776
+   :END:
+Respuesta
+*** Motivación
+- $k$medias con problemas si atributos no numéricos. 
+- Clustering cualitativo, conceptos como agrupación de elementos con
+  atributos similares (Michalski, 83)
+- Descripciones de características para cada clase.
+- Esquema de clasificación para {objetos} sin etiquetas.
+** Evaluación de clustering                                           :drill:
+   SCHEDULED: <2017-06-11 dom>
+   :PROPERTIES:
+   :ID:       9e30af2e-e4d2-4b88-81eb-235e78588fd3
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 3.0
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-07 mié 11:14]
+   :END:
+Respuesta
+*** Bondad de algoritmo 
+- Depende de la medida de similitud, método y de implementación
+  - Similitud intra clases alta
+  - Similitud inter clases baja
+*** Purity
+- A cada cluster se le asigna la clase más frecuente en el cluster
+- Precisión de la asignación. 
+** Regla de asociación                                                :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       ff9c8c7f-c2cb-4ddd-a091-468b86ef2c98
+   :DRILL_LAST_INTERVAL: 4.0
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 4.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 4
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:48]
+   :END:
+Respuesta
+*** Concepto
+- $I$ conjunto de items
+- $T$ conjunto de transacciones
+- $I_{1} \longrightarrow I_{2}$: la aparición de $I_{1}$ en $T$
+  implica la aparición de $I_{2}$ en $T$. 
+*** Soporte
+\[ sup(I_{1} \longrightarrow I_{2}) = sup(I_{1}\cup I_{2}) \]
+*** Confianza
+\[ Conf(I_{1} \longrightarrow I_{2}) = \frac{sup(I_{2} \cup I_{1})}{sup(I_{1})} \]
+
+** Transacciones difusas                                              :drill:
+   :PROPERTIES:
+   :ID:       ec6bc67d-a2f7-4b74-8abb-7ae8e2f01371
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:55]
+   :END:
+Respuesta
+*** Transacciones difusas
+- $I$ conjunto de items
+- $\widetilde{\tau}$ una transacción difusa
+- $\widetilde{\tau}(I_{0})$ grado de pertenencia.
+- FT-set: Conjunto de transacciones difusas con pares $(\widetilde{\tau},I_{0})$ donde:
+\[ \tau(I_{0}) = \min_{i \in I_{0}} \widetilde{\tau}(i) \]
+** Transacciones de texto                                             :drill:
+   :PROPERTIES:
+   :ID:       7bb9d9a2-cf27-4a37-9fe8-9665c85573dd
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:51]
+   :END:
+Respuesta
+*** Trans texto
+- D colección de documentos
+- I conjunto de términos asociados con pesos
+- Transacción de texo $\longrightarrow d_i \Longrightarrow \tau_{i} \in T$
+*** Trans difusas
+- W se calcula mediante tf-idf normalizado o frecuencia normalizada
+** Minería predictiva:                                                :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       b98e2701-d499-4668-8db0-c663008f5aa6
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 1.5
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:02]
+   :END:
+Respuesta
+*** Concepto
+- Se intentan predecir los valores de una o varias variables a partir
+  de un conjunto de datos.
+- Etiquetados a priori
+- Clasificación de términos y documentos
+** NN                                                                 :drill:
+   SCHEDULED: <2017-06-11 dom>
+   :PROPERTIES:
+   :ID:       dd3ac440-d4d9-4d84-932f-cf24c0854a62
+   :DRILL_LAST_INTERVAL: 4.0
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 0
+   :DRILL_AVERAGE_QUALITY: 4.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 4
+   :DRILL_LAST_REVIEWED: [2017-06-07 mié 11:39]
+   :END:
+Respuesta
+*** Algoritmo
+- Calcular similitud con documentos colección.
+- Selección de los $k$. 
+- Salida es la etiqueta más frecuente en los $j$ docs seleccionados. 
+** Reglas de decisión                                                 :drill:
+   :PROPERTIES:
+   :ID:       6021853d-5aa7-462d-8ed0-ac76ce207ca5
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 1.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 1
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:46]
+   :END:
+Respuesta
+*** Definición
+- Queremos reglas que proporcionen clasificación. 
+- Algoritmo de inducción de reglas para obtener conjunto de cobertura
+  de reglas
+  - Ir construyendo $F$ hasta 0 falsos positivos
+  - Guardar $F$ como la próxima regla $R$, eliminar documentos
+    cubiertos por $F$ y continuar con el paso 1
+** Evaluación de minería                                              :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       8d8a3348-7873-4da2-900a-20dea9ac6c5f
+   :DRILL_LAST_INTERVAL: 4.07
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 2.5
+   :DRILL_EASE: 2.6
+   :DRILL_LAST_QUALITY: 5
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:02]
+   :END:
+Respuesta
+*** Medidas
+\[ precision = \frac{tpr}{pos \ pred \r} \]
+\[ recall = \frac{tpr}{pos \ docs}\]
+\[ F_{measure} = \frac{2}{\frac{1}{prec} + 1/recall} \]
+** Tipos de minería de texto                                          :drill:
+   :PROPERTIES:
+   :ID:       cc1d8f89-dd0c-4683-a98e-9ae69e83f605
+   :END:
+Respuesta
+*** Tipos
+- Descubrimiento de tendencias
+- Descubrimiento de eventos
+- Descubrimiento de asociaciones
+** Descubrimiento de tendencias                                       :drill:
+   :PROPERTIES:
+   :ID:       8d1d44e2-5624-49e8-8e9e-ee951ab93944
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:44]
+   :END:
+Respuesta
+*** Def
+- Cambios bruscos en frecuencia de términos
+- momentos temporales a transacciones
+- varias transacciones: patrón secuencial
+- restricciones temporales para determinar períodos
+** Descubrimiento de eventos                                          :drill:
+   :PROPERTIES:
+   :ID:       5a8bc89d-df84-4dd2-9908-4d0d32670a9c
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 3
+   :DRILL_FAILURE_COUNT: 3
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:03]
+   :END:
+Respuesta
+*** Def
+- Aplicado a noticias transmitidas por canales
+- Identificar eventos previaemnte no identificados
+- Métodos de clustering basados en las restricciones temporales
+*** Detección retrospectiva
+- Sobre colección de noticias almacenadas
+- Clustering incremental
+*** Detección online
+- Noticia procesada cuando llega
+- Umbral de detección
+- Umbral de clustering
+- Tamaño de la ventana
+** Minería de texto para refinamiento de consultas                    :drill:
+   :PROPERTIES:
+   :ID:       5f4a907f-8703-4ec3-b996-13a8af07b17e
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.5
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:38]
+   :END:
+Respuesta
+*** Refinamiento
+- Ayuda a los usuarios con la construcción de consultas. Se aplican
+  técnicas de minería mediante la estracción de reglas de asociación. 
+** Representación del texto:                                          :drill:
+   SCHEDULED: <2017-06-11 dom>
+   :PROPERTIES:
+   :ID:       723dedea-971b-40a3-9f39-60cb501eec57
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 7
+   :DRILL_FAILURE_COUNT: 6
+   :DRILL_AVERAGE_QUALITY: 0.572
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-07 mié 11:37]
+   :END:
+Respuesta
+*** Procedimiento
+- Términos de indexación
+- Esquemas de frecuencias o esquema tf-idf
+- Obtención de términos mediante ficheros directosp
+*** Representación
+- D colección de documentos
+- Extraer términos para D
+- Eliminar palabras inútiles
+- Lematizar
+- términos $S$ y sus pesos para cada documento
+** Refinamiento automático                                            :drill:
+   :PROPERTIES:
+   :ID:       0eaa8c5d-032f-4cfd-a42a-be7e1f8e65d7
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 3
+   :DRILL_FAILURE_COUNT: 3
+   :DRILL_AVERAGE_QUALITY: 0.333
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 1
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:01]
+   :END:
+Respuesta
+*** Proceso
+- Consulta inicial
+- Recuperación de lista inicial ordenada
+- Se construyen transacciones difusas de texto y se extraen las reglas
+  de asociación.
+- términos en reglas se añaden a la consulta
+- Se pregunta otra vez al sistema con la consulta refinada
+** Refinamiento semiautomático                                        :drill:
+   :PROPERTIES:
+   :ID:       f40b7fce-b700-4b8a-b7d9-5d42b38243f0
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:52]
+   :END:
+Respuesta
+*** Diferencias
+- términos de las mejores regalse se muestran al usuario. 
+** Generalización y especialización                                   :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       80c88b4a-0b73-4aba-b747-351a583b6d42
+   :DRILL_LAST_INTERVAL: 4.07
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 3.0
+   :DRILL_EASE: 2.6
+   :DRILL_LAST_QUALITY: 5
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:40]
+   :END:
+Respuesta
+*** Generalización
+- términos aparecen en el consecuente de la regla se añaden a la consulta
+*** Especialización 
+- términos en el antecedente de la regla se añaden a la consulta
+** Categorización de Documentos                                       :drill:
+   :PROPERTIES:
+   :ID:       63ffdf99-bf74-4730-bd52-3722f11fe723
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.5
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:38]
+   :END:
+Respuesta
+*** Def
+- Puede haber una categorización previa de los documentos
+- Clases se añaden como items
+
+* Bloque II: Minería web
+** Minería web                                                        :drill:
+   :PROPERTIES:
+   :ID:       09d4a9d7-108b-4685-b263-4cefa0a673cd
+   :END:
+*** Def
+- Descubrimiento de contenido en docs web
+- Descubrimiento de patrones en las relaciones entre documentos hipertexto y los links
+- Descubrimiento de patrones en los accesos a servidores
+** Minería web del contenido                                          :drill:
+   :PROPERTIES:
+   :ID:       9d3fe784-deed-44e9-8a76-e64046f9e835
+   :END:
+*** Def
+- tiene los mismos pricipios que la recuperación de información multimedia basada en contenido
+- Como descubrimiento de asociaciones pero con documentos en la web
+** Minería web de la estructura                                       :drill:
+   :PROPERTIES:
+   :ID:       96352331-777b-4d8e-95d8-6ef991dc9245
+   :END:
+*** Def
+- Analiza estructura sitio web
+- Tiene en cuenta relaciones intra e inter páginas
+** Minería web uso                                                    :drill:
+   :PROPERTIES:
+   :ID:       0394da60-eb80-48bc-a3cc-dc3204eac2a0
+   :END:
+*** Def
+- Análisis de logs de datos de acceso
+- Comportamiento en navegación de las páginas
+- transacciones de los ficheros para reglas de asociación
+** Modelo de datos                                                    :drill:
+   :PROPERTIES:
+   :ID:       74e17074-35aa-49f9-8ea1-b2b5406c9699
+   :END:
+*** Web
+- página web documento HTML identificable con URL
+- Sesión de usuario: secuencia de accesos temporales a un sitio
+  particular por un usuario. Determinao por conjunto de clicks en la web: clickstream.
+- Relación entre página $p$ y sesión $s$ viene dada por la matriz $UP$
+  de pesos.
+
+** Patrones de navegación                                             :drill:
+   :PROPERTIES:
+   :ID:       10ff857b-1daa-4df8-b63b-f05128cbdae5
+   :END:
+*** Objetivo
+- Obtener patrones de navegación del usuario y así tener una mejor
+  descripción de su comportamiento en la web y así saber qué sucede
+*** Problema
+- Navegación temporal: intervalo-página
+- Navegación intrapágina: página visitada/referenciada
+*** Reglas difusas
+- Dado conjunto de items, definimos transacción difusa. 
+** Modelos asociado a navegación temporal                             :drill:
+   :PROPERTIES:
+   :ID:       8786e228-37db-4235-a6b8-e33ec5ad4c5a
+   :END:
+***  Clasificación
+- Fecha- pags visitadas
+  - Items: fecha-págs visitadas
+  - Transacciones: tablas transaccionales difusa para obtención de reglas
+- Fecha-referencia
+  - Navegación entre páginas
+  - Página visitada y página referenciasa
+  - Transacciones: trablas transaccionales difusa para la obtención de
+    las reglas, para los itemps páginas visitadas y páginas referenciadas.
+** Obtención de información en la web                                 :drill:
+   :PROPERTIES:
+   :ID:       c986005d-bcb0-444a-b3ec-67f1fe88f924
+   :END:
+*** Perfiles de usuarios en la web
+- Información de minería para el usuario
+  - Muestra información de acuerdo a las preferencias
+- Para el usuario de negocios o de márqueting
+  - Agrupación de perfieles por áreas de interés
+  - Generar conjunto de reglas para realizar inferencia de la relación entre usuarios y términos
+  - Conexión de usuarios a grupos sociales
+** Tecnología de minería en web de un portal                          :drill:
+   :PROPERTIES:
+   :ID:       12010e4d-2c09-4589-aa62-371610a16b63
+   :END:
+*** Asepctos
+- entrada de datos
+  - Explícita: Formularios, opiniones, 
+  - Implícita: Cookies, ficheros log
+- Generación de datos
+  - Ficheros de logs
+  - Ficheros de metadatos
+- Objetivo: Obtener grupos de sesiones de usuarios
+** Clustering en minería web de uso                                   :drill:
+   :PROPERTIES:
+   :ID:       4a64cce6-6841-4d3b-a8b8-a4d4f2237ed2
+   :END:
+*** Objetivo
+Obtener grupos de sesionesde usuarios 
+*** Modelo asociados
+- Sesiones
+- Páginas P
+- Matriz sesión página $m \times n$
+** Visualización                                                      :drill:
+   :PROPERTIES:
+   :ID:       a9982a0a-ae7c-48ff-89c3-083cd7c1233e
+   :END:
+*** Métodos
+- reglas de asociación en clusters
+- tag clouds
+
+* Bloque II: Ontologías
+** Minería de texto                                                   :drill:
+   :PROPERTIES:
+   :ID:       facc7df1-d220-4bbc-8fea-cd0908da6c70
+   :END:
+*** Herramientas
+Para dotar de significado al texto se usan herramientas de
+representación de estructuras conceptuales
+- Es necesario conocer la semántica
+- Tesauros
+- Ontologías
+** Ontologías                                                         :drill:
+   :PROPERTIES:
+   :ID:       bf52a9ff-35a2-41b0-807b-0e437beb88e8
+   :END:
+*** Función
+Permiten representar y organizar información semántica de cara a poder
+emplearla en procesos de minería de texto. 
+*** Definición
+Especificación explícita y formal sobre conceptualización compartida. 
+*** Descripción
+- Describen conceptos y relaciones existentes en algún dominio, de
+  forma compartida y consensuada.
+- Representan jerarquía de conceptos y otras relaciones que pueden ser
+  directas, transitivas
+- Permiten realizar razonamiento
+*** Formalización. 
+- Compuesta por 
+  - Clases
+  - Propiedades
+	- Relaciones
+	- Atributos
+  - Individuos
+  - Axiomas
+** Ontologías                                                         :drill:
+   :PROPERTIES:
+   :ID:       79cf034b-26e7-4f53-ad45-fc53acd7b4b1
+   :END:
+*** Clasificación
+- Alto nivel
+- Dominio
+- Tarea
+- Aplicación
+** Ontologías                                                         :drill:
+   :PROPERTIES:
+   :ID:       b35cd4d5-128c-4da6-a6e4-3957887ac94a
+   :END:
+*** Formalizaciones del conocimiento
+- Formalizan la parte intensional del conocimiento (estructura) sobre
+  un dominio mientras la parte extensional la proporciona una KB, que
+  contiene aserciones sobre las instancias de los conceptos y
+  relaciones de la ontología
+** Ontologías                                                         :drill:
+   :PROPERTIES:
+   :ID:       feb6b137-a04e-4150-b4c1-68b2073f25d8
+   :END:
+Respuesta
+*** Lenguajes	
+W3C consorcio internacional, desarrolla estándares
+- RDF Resource Description Framework
+- RDFS RDF Schema
+- OWL Web Ontology Language
+
+** OWL 2                                                              :drill:
+   :PROPERTIES:
+   :ID:       06342a57-745c-46fd-a66b-1c21af5411ed
+   :END:
+*** Características
+  - Es posible razonar sobre OWL2
+  - Lenguaje para definición de ontologías en web semántica
+  - Semántica directa en OWL 2 DL: Lógica descriptiva
+  - Semántica usada en RDF, limita capacidades razonamiento, no
+    siempre decidible
+*** Perfiles
+- EL: grandes ontologías, rendimiento
+- QL: Ligera con muchas instancias, consultas relacionales
+- RL: Ontologías ligeras se usan para organizar gran cantidad de
+  individuos
+** Ontología                                                          :drill:
+   :PROPERTIES:
+   :ID:       6904de47-6fbe-44ee-bf3c-66e9497046fe
+   :END:
+*** Recurso semántico
+- Para conocer significado del texto es necesario acudir a fuentes de
+  información. 
+- SUMO
+  - Propiedad de IEEE. Una de las mayores ontologías
+  - Mapeada a lexicon de WordNet
+  - Empleada en investigación y aplicaciones sobre búsqueda,
+    lingüística y razonamiento.
+- YAGO
+  - Extraída de forma automática a partir de Wikipedia, Wordnet y
+    Geonames.
+  - Desarrollada por el Max Planck.
+  - Utilizada en Watson
+- SNOMED
+  - Medicina.
+** Aprendizaje de ontologías                                          :drill:
+   :PROPERTIES:
+   :ID:       bce01ff9-1e0c-405a-ade8-a39cb7d7da01
+   :END:
+*** Definición
+- Generación automática o semiautomática de ontologías usando técnicas
+  de aprendizaje automático o procesamiento de lenguaje natural.
+- Si el aprendizaje de ontologías se realiza sobre fuentes textuales
+  no estructuradas, es cuando hablamos de aprendizaje de ontologías a
+  partir de texto. 
+- En el proceso de ceación de un texto sólo refleja el dominio de
+  conocimiento del autor de forma parcial, porlo qe el proceso de
+  ingeniería inversa como mucho podrá reconstruir parcialmente dicho
+  modelo de conocimiento.
+
+** Aprendizaje de ontologías                                          :drill:
+   :PROPERTIES:
+   :ID:       f3f0e357-529b-46ea-971b-109c000833dc
+   :END:
+*** Tareas
+- Términos
+- Sinónimos
+- Conceptos
+- Jerarquía de conceptos
+- Relaciones
+- Jerarquía de relaciones
+- Axiomas estructurales
+- Axiomas generales
+*** Usos
+- EI
+- RI
+- OL 
+- Población de ontologías OP
+- Detección de eventos NED
+** Otras técnicas que usan semántica                                  :drill:
+   :PROPERTIES:
+   :ID:       edd4be5a-5e3b-45b1-b69f-dfcac62e0a05
+   :END:
+*** Motivo 
+A través de técnicas estadísticas, no a través de fuentes externas:
+*** Ejemplos
+- Análisis de semántica latente
+- Latent Dirichlet Allocation
+** Análisis de semántica latente                                      :drill:
+   :PROPERTIES:
+   :ID:       d01342f3-7538-4897-8088-eb8cac54587f
+   :END:
+*** Definición
+- técnica algebraica de análisis factorial que permite reducir la
+  dimensionalidad de una matriz de términos documentos, capturando la
+  mayor parte de la varianza de un corpus textual. 
+- Hipótesis: palabras con significados similares ocurrirán en
+  contextos similares. 
+- Comparación a través de términos que pasan a ser conceptos.
+- Lo haremons mediante SVD.
+*** Ventajas
+- permite reducir la dimensionaliadad. 
+*** Limitaciones
+- Costoso
+- No tiene en cuenta el orden de las palabreas. 
+** Probabilistic LSA                                                  :drill:
+   :PROPERTIES:
+   :ID:       7f20e720-ce16-4b73-b0ed-3787d618346d
+   :END:
+*** Definición
+- Conocido como aspect model, alternativa a LSA. Asocia una variable
+  de clase no observada $c$ con cada documento de la colección $d$ y
+  representa cada aspecto como una distribución de palabras con una
+  determinada probabilidad.$P(w|c)$
+** LDA                                                                :drill:
+   :PROPERTIES:
+   :ID:       0097411f-dcdb-40c6-ad55-f5b6dc7e8d51
+   :END:
+*** Definición
+- Modelo generador probabilístico de un corpus de documentos. La idea
+  es que cada documento está representado por una mezclac de temas,
+  donde cada tema es una variable latente caracterizada por una
+  distribución sobre un vocabulario fijo e palabras. 
+- Se considera a priori una distribución de Dirichlet en el documento
+  sobre los temas y en los temas sobre las palabras. 
+- Usado para encontrar estructuras útiles en distintos tipos de
+  documentos
+- Variante online. En cada intervalo de tiempo un flujo de documentos
+  se recibe para ser procesado. 
+** Generación de ontologías                                           :drill:
+   :PROPERTIES:
+   :ID:       d7a0be52-a021-4c3b-bc77-53ca80916e01
+   :END:
+*** Proceso
+- Generación de ontología que represente los principales temas de los
+  que tratan los textos
+- Se emplea metodología genérica que puede instanciarse con distintas
+  herramientas
+- Preprocesamiento sintáctico
+- Preprocesamiento semántico
+  - Unifica términos
+  - Determina conjunto de sinónimos del término
+	- POS
+	- Desambiguación
+- Determinar el representante canónico de cada conjunto de sinónimos
+- Sustituir los términos por el representante canónico del conjunto de
+  sinónimos.
+- Generación de forma intermedia
+  - BOW
+  - Representación estructurada
+- Selección de términos apropiados
+- Información adicional de una ontología de referencia o herramienta
+  externa. 
+** Minería de textos multilingüe                                      :drill:
+   :PROPERTIES:
+   :ID:       1a9030bd-3769-4c1a-97fa-ec840e218347
+   :END:
+*** Intro
+- Contenidos en diversos idiomas.
+- En ocasiones la información no se encuentra en el idioma requerido
+- Recursos léxicos sólo existen para algunos idiomas.
+*** Herramientas
+- Machine translation
+- Recuperación de contenido multilingüe
+- Extracción entre lenguajes cross-language
+- Minería de opiniones entre lenguajes
+- Categorización de textos
+- Resumen de textos
+** Resumen de texto                                                   :drill:
+   :PROPERTIES:
+   :ID:       e123709d-265e-49cd-a137-659f43bb8c37
+   :END:
+*** Pasos
+- Vector medio del cluster
+- Ordenar documentos según similitud al vector medio
+- Seleccionar sentencias candidatas a partir de pesos
+- Comprobar similitud de la sentencia con otras presentes en el
+  resumen
+- Añadir sentencia candidata si no es redundante
+- Añadir sentencias hasta tamaño
+** LSA Multilingüe                                                    :drill:
+   :PROPERTIES:
+   :ID:       f3ffec4e-4e50-4204-84d3-dae0a81bc603
+   :END:
+*** Def
+- Se necesita corpus multiparalelo en el que los mismos textos estén
+  traducidos a distintos idiomas (biblia, corán, patentes). 
+- Aporta beneficio de capturar info complementaria del mismo evento en
+  varios lenguajes
+** Recursos multilingües                                              :drill:
+   :PROPERTIES:
+   :ID:       6955e217-8a17-46ca-ae83-aaf4ee01cb5e
+   :END:
+*** Wordnet
+- Base de datos léxica que contiene info sobre nombres, verbos,
+  adjetivos y adverbios
+- Debemos conocer lema y cat gramatical.
+- Agrupados en synsets, agrupación por relaciones:
+  - Hiponimia
+  - Hiperonimia
+  - Meronimia
+  - Holonimia
+  - Antonimia, Troponimia, Similitud
+*** Otros
+- EuroWordNet: Almacena WN en otros idiomas
+- MCR: Integra diversas versiones
+** Integración de ontologías y lexicons                               :drill:
+   :PROPERTIES:
+   :ID:       e47afe31-3a8c-45fe-83ca-c62ffa028902
+   :END:
+*** Integración
+- Para establecer comunicación y realizar intercambio de información,
+  es necesario compartir el mismo conjunto de palabras y conocer el
+  modelo subyacente a éste. Este modelo se representa como una
+  ontología, cuya función es agrupar conceptos similares, definir
+  relaciones mutuas y dar soporte a la herencia de propiedades y
+  razonamiento
+*** Tipos de información capturados
+- Lexicon: Info sintáctica específica del lenguaje e información
+  morfológica
+- Ontología: Independiente del lenguaje, captura el significado formal
+  y las interrelaciones entre conceptos que no se reflejan en el
+  lexicon.
+* Bloque II: Análisis de sentimientos
+** Análisis de sentimientos                                           :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       81c71a80-be03-4633-aa76-8c86d4b08512
+   :DRILL_LAST_INTERVAL: 3.93
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 1.5
+   :DRILL_EASE: 2.36
+   :DRILL_LAST_QUALITY: 3
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:01]
+   :END:
+Respuestan
+*** Definición
+- Minería de opiniones o sentimientos
+- Campo de estudio que analiza las opiniones, sentimientos,
+  evaluaciones, actitudes y emociones de las personas respecto a
+  entidades tales como productos, servicios, organizaciones...
+- Investigación en análisis de sentimientos ha tenido un gran impacto
+  en el NLP. 
+** Niveles de análisis                                                :drill:
+   :PROPERTIES:
+   :ID:       49f1e386-6241-4e86-bd71-5cc647976bce
+   :END:
+*** Niveles
+- Nivel de documento
+  - Clasificar si la opinión expresada en un documento es positiva o
+    negativa. Se aplica si el documento hace referencia a una entidad única
+- Nivel de sentencia
+  - Determina si la sentencia expresa una opinión positiva
+- Entidades y aspectos/características. 
+  - El análisis a nivel de sentencia no determina exactamente qué es
+    lo que gusta o no. Se analiza la opinión en sí misma, abstrayendo
+    de las estructuras. 
+** opiniones                                                          :drill:
+   :PROPERTIES:
+   :ID:       35734ad5-891c-4d39-9f48-5af625917e05
+   :END:
+*** Tipos
+- Regulares: Sentimientos sobre entidad o aspecto de ésta
+  - Directa: se expresa directamente
+  - Indirecta: Opinión expresada de forma indirecta sobre una entidad
+    basándose en los efectos sobre otra entidad. 
+- Comparativas: comparación 
+- Explícita: Expresa opinión subjetiva, regular o comparativa. 
+** Palabras de sentimiento/opinión                                    :drill:
+   :PROPERTIES:
+   :ID:       baf29e10-28ef-4e77-81ab-355b2ca5c884
+   :END:
+*** Definición
+- Palabras usadas habitualmente para expresar sentimientos positivos o
+  negativos. 
+- También frases hechas. 
+- Se organizan en un lexicon
+- Problemas:
+  - Dependencia del dominio: demasiado brillante
+  - Palabras de sentimiento puede que no exprese ningún sentimiento
+  - Sarcasmo
+** Opinion spammers                                                   :drill:
+   :PROPERTIES:
+   :ID:       5ec64627-7b68-4fe0-8085-e1eab1c68e8f
+   :END:
+*** Tipos
+- Reseñas falsas
+- reseñas solo sobre marcas
+- no reseñas
+** Entidad                                                            :drill:
+   :PROPERTIES:
+   :ID:       8f52dc57-6c02-46a8-89bc-f4aa5fbd6669
+   :END:
+*** Def
+- Producto, servicio, tema, problema, persona, organización o evento
+\[ e = (T,W) \]
+con $T$ jerarquía de partes, $W$ atributos.
+- Entidad como jerarquía de un número indeterminado de niveles,
+  necesita de relación anidada. Para simplificar, dos niveles y se usa
+  término aspecto para denotar a ambos elementos. 
+** Entidad                                                            :drill:
+   :PROPERTIES:
+   :ID:       c18492cf-3272-4576-aa2e-8d69fc3fde74
+   :END:
+*** Definiciones de entidad
+- Entidad categórica
+- Expresión de entidad
+- Cada entidad categórica debería tener un nombre único en una
+  aplicación. 
+- El proceso de agrupar expresiones de entidades en entidades
+  categóricas se denomina categorización de entidades. 
+** Expresiones de aspectos                                            :drill:
+   :PROPERTIES:
+   :ID:       4e3f9f12-ee0d-43f4-9b3a-ef05f1964432
+   :END:
+*** Definiciones
+- Aspecto categórico: Representa un único aspecto de la entidad
+- Expresión de aspecto: Palabra o frase que aparece en el texto
+  indicando un aspecto categórico. 
+  - Explícita: son nombres y frases
+  - Implícita: no son nombres o frases nominales: adjetivos o
+    adverbios. 
+** Modelos                                                            :drill:
+   :PROPERTIES:
+   :ID:       660c58db-a8a4-4132-a03f-3209ad3fbe08
+   :END:
+*** Categorización
+- Modelo de entidad: Una entidad $e$ representada como un todo y conjunto
+  finito de aspectos. 
+  - Puede expresarse con cualquier elemento del conjunto finito de sus
+    relaciones de entidad. Cada aspecto parteneciente a A de una
+    entidad $e$ puede expresearse con cualquier elemento de un
+    conjunto finito de expresiones.
+- Modelo de un documento de opinión.
+  - Un documento $d$ contiene opiniones sobre un conjunto de entidades
+    y un subconjunto de sus aspectos, dadas por un conjunto de
+    opinadores enun tiempo específico.
+** Tareas                                                             :drill:
+   :PROPERTIES:
+   :ID:       8a2d47a8-77b9-4efa-a1ec-5ef2ac982222
+   :END:
+*** Tareas
+- 1 extracción de entidades y cateegorización
+- 2 extracción de aspectos y categorización
+- 3 extracciónd e opinadores y categorización
+- 4 extracción de tiempo y estandarización
+- 5 clasificación de sentimientos de aspectos
+- 6 generación de las quíntuplas de opinión
+- el análisis de sentimientos basado en este método se conoce como
+  análisis de sentimientos basados en aspectos o análisis de
+  sentimientos basados en características.
+** Opiniones                                                          :drill:
+   :PROPERTIES:
+   :ID:       62ac8f24-4c47-4795-b8d1-81a16677924d
+   :END:
+*** Resumen de opiniones 
+- opiniones subjetivas. Una opinión es insuficiente. 
+- Resumen estructurado. 
+** Subjetividad y opinión                                             :drill:
+   :PROPERTIES:
+   :ID:       86f975dc-af00-459e-9e39-c335cb169f6c
+   :END:
+*** subjetividad
+- Una sentencia objetiva presenta información sobre hechos del mundo
+  real, mientras una sentencia subjetiva expresa sentimientos
+  personales, puntos de vista o creencias. 
+- Opinión: referencia a documento que expresa sentimiento. 
+- Clasificacion de subjetividad
+** Emoción                                                            :drill:
+   :PROPERTIES:
+   :ID:       92c47d9e-5c62-495d-ada5-632f912de17d
+   :END:
+*** Def
+- Sentimientos y pensamientos subjetivos. Cada emoción puede tener
+  diferentes intensidades. Evaluaciones categorizables en racionales y
+  emocionales.
+  - Racional: Evaluaciones razonadas sobre elementos tangibles
+  - Emocional: no tangibles.5 calificaciones de sentimientos.
+** Clasificación de documentos                                        :drill:
+   :PROPERTIES:
+   :ID:       40af994d-4dbd-43ec-bc1e-73a90221bc65
+   :END:
+*** Formalización de sentimientos
+- Determinar $s$ sobre el aspecto $G$ en la quíntupla
+\[ (\cdot,G,s,\cdot,\cdot)\]
+** Clasificación de sentimientos                                      :drill:
+   :PROPERTIES:
+   :ID:       0be24e4a-e28b-4bd3-bc62-66ae31125c4b
+   :END:
+*** Aprendizaje supervisado. 
+- Problema de clasificación de texto en positivo y negativo.
+- Se usan 1 gramas y ngramas
+- POS importante para detectar opiniones.
+- Palabras y frases de sentimiento. 
+- Reglas de opinión
+- Modificadores de sentimiento
+- Dependencias sintácticas
+*** Aprendizaje no supervisado
+- Palabras de sentimiento
+** Algoritmo de Turney                                                :drill:
+   :PROPERTIES:
+   :ID:       766b6cc7-329f-4044-b64c-41a4696e7517
+   :END:
+*** Fases
+- Pares de palabras cuyo POS se ajusta a alguno de los patrones
+- Se calcula orientación del sentimiento con la medida Pointwise
+  Mutual Information, que determina el grado de independencia
+  estadística. 
+- En una reseña se calcula la orientación del sentimiento para todas
+  las frases y se calcula la media. 
+* Bloque III: Gestión inteligente de procesos
+** Gestión de procesos                                                :drill:
+   :PROPERTIES:
+   :ID:       b58e94d8-2485-4293-b55b-8f9c7eda4bdd
+   :END:
+*** Resumen
+Descubrimiento de modelos de proceso que describen el comportamiento
+de personas/agentes a partir del regstro de su traza de actividad.
+** Process Mining                                                     :drill:
+   :PROPERTIES:
+   :ID:       faf0fab9-62b1-4c06-89a2-ae367b8dec30
+   :END:
+*** Motivación
+- registro de la actividad de personas en una organización
+- Conocer modelo de proceso para buscar la respuesta
+- Comportamiento de agentes en un entorno
+** Process Mining                                                     :drill:
+   :PROPERTIES:
+   :ID:       25e58939-3ca3-4019-b9b3-f1ef6018cf60
+   :END:
+*** Casos de uso
+- Proceso que realmente sigue la gente
+- Detectar cuellos de botella, 
+- desvío de la gente o las máquinas del proceso ideado
+** Process mining                                                     :drill:
+   :PROPERTIES:
+   :ID:       9240f7ac-36b6-459f-87ca-925d4a3c1a3c
+   :END:
+*** Definición
+- Conjunto de técnicas que relacionan
+  - logs de eventos: traza de actividades registrada por
+    comportamiento de uno o mas agentes
+  - modelos de proceso: Especificación del flujo de control (seq,
+    paralelo, condicional, ciclos, subprocesos) entre actividades,
+    considerando recursos, tiempo...
+** Process Mining                                                     :drill:
+   :PROPERTIES:
+   :ID:       a6f6a877-19d2-4559-8596-4c56510e85b8
+   :END:
+*** Para qué sirve
+- Ofrece respuestas
+  - Mediante descubrimiento de procesos
+  - Mediante comprobación de conformidad
+  - Mejora de un modelo
+** BPM                                                                :drill:
+   :PROPERTIES:
+   :ID:       fb3a16af-6742-49a8-8617-e3e3e9ab40b0
+   :END:
+*** Definición
+- Business Process Management
+- Disciplina que incorpora representación y gestión del conocimiento,
+  tecnologías de la información y ciencias de la gestión para estudiar
+  aspectos operativos de los procesos que se llevan a cabo en una
+  organización.
+- Es un conjunto de técnicas para automatizar tareas que lleva a cabo
+  una organización considerando RRHH y materiales
+- Es también el conjunto de actividades que debe llevarse a cabo para
+  cumplir una tarea u objetivo
+** BPM                                                                :drill:
+   :PROPERTIES:
+   :ID:       83bdafd1-4f8e-4414-9e8e-534ea9b2311a
+   :END:
+*** Definición
+- Conjunto de técnicas para automatizar tareas, considerando RRHH y
+  materiales
+- Proceso de negocio: Conjunto de actividades que se deben lleva a
+  cabo para cumplir una tarea.
+** BPM                                                                :drill:
+   :PROPERTIES:
+   :ID:       2a34312f-a524-4e22-95bc-e4d25ecec7b7
+   :END:
+*** Ciclo de vida
+- Modelado, 
+- instanciación
+- ejecución
+- monitorización 
+- revisión
+** BPM - Modelado                                                     :drill:
+   :PROPERTIES:
+   :ID:       c5b1b48e-8fa3-442b-9859-6cf616ded907
+   :END:
+*** Quién
+Analista de proceso
+*** Qué
+MOdelado de proceso
+*** Extra
+- BMPN notación estándar para modelado
+** BPM - Despliegue                                                   :drill:
+   :PROPERTIES:
+   :ID:       30cbfd34-aed1-48bb-9e13-b593e5adf354
+   :END:
+*** Quién
+Desarrollador
+*** Qué
+Instancia de proceso
+*** Extra
+XPDL
+** BPM - Ejecución                                                    :drill:
+   :PROPERTIES:
+   :ID:       00b56b01-9c64-4a14-a557-2457041087ea
+   :END:
+*** Quién
+BPM-ENgine usuario
+*** Qué
+Ejecución interactiva
+*** Extra
+- BMPN engine, consola BPM
+** BPM - Monitorización                                               :drill:
+   :PROPERTIES:
+   :ID:       be9339ef-9b3b-43b9-a162-1e93c63e7009
+   :END:
+*** Quién
+- BPM monitor
+- Usuarios
+*** Qué
+- Estado ejecución, gestión de excepciones
+- BAM: business activity monitoring
+- KPI: key process indicators
+** BPM - Optimización                                                 :drill:
+   :PROPERTIES:
+   :ID:       657bedd8-43c5-4221-bf06-f9ca9a43eeee
+   :END:
+*** Quién
+Analistas, PM, DM
+*** Qué
+modelo de proceso mejorado
+** Process Mining                                                     :drill:
+   :PROPERTIES:
+   :ID:       253453ad-f384-494e-8a93-0b6189ba87b1
+   :END:
+*** Visión general de diseño
+- Partir de la realidad
+- Usar sistema software paar dar soporte o controlar ese entorno
+- registro en logs de los eventos que se generan
+** Log de eventos                                                     :drill:
+   :PROPERTIES:
+   :ID:       39825556-11b0-4dcf-929f-2130f0491a0e
+   :END:
+*** Descripción
+- Registro de una secuencia de eventos que ocurren a lo largo del
+  tiempo
+- Cada evento se refiere a un caso, actividad y punto en el tiempo
+- Un caso puede verse como secuencia de eventos o trazas.
+*** Fuente
+- BD
+- log de transacciones
+- ERP 
+- Log de mensajes
+- API 
+*** Inconvenientes
+- Necesidad de registrar más información
+  - estados de una actividad, atributos de eventos propios
+*** Ejemplos
+Modelo representado con lenguaje o notación de procesos. Hay estándar
+para event-logs, pero no hay estándar para representar modelos de procesos.
+** Log                                                                :drill:
+   :PROPERTIES:
+   :ID:       3ffb01ba-93d3-446f-a853-badd1db8a8a6
+   :END:
+*** Representación
+- XES (eXtensible Event Stream)
+- The format is supported by tools,
+- Predecessorrs: MXML, SA- MXM
+** Log y modelos                                                      :drill:
+   :PROPERTIES:
+   :ID:       d8ca61f9-8b1d-4807-885d-100dcd8c168a
+   :END:
+*** Tipos de relaciones
+- Play out
+  - Log a partir de modelo 
+  - Puede ser la salida del despliegue de un modelo de un proceso en
+    un sistema BPM
+- Play in 
+  - Genero n modelo a partir de log
+  - Entrada de un algoritmo de descubrimiento de procesos
+- Replay
+  - Log y modelo y quiero analizar
+  - Entrada de un modelo de proceso para repetir experimentos offline
+** Play out                                                           :drill:
+   :PROPERTIES:
+   :ID:       09ad0b3a-597c-4f13-8d2b-9d65f4071423
+   :END:
+*** Proceso para obtener log
+- A partir del modelo de proceso, obtener un log
+  - crear instancias de proceso, ejecutarlas y registrar log
+  - Play out en el típico registro de incidencias o traza de actividades
+  - Clave del ciclo de vida clásico de BPM
+  - Simulación de posibles alternativas de ejecución.
+** Play in                                                            :drill:
+   :PROPERTIES:
+   :ID:       f0b9274f-cedf-47d1-abd7-8b69fe707279
+   :END:
+*** Proceso
+- A partir de log de eventos, modelo de proceso
+- No es necesario modelar a mano
+- Process discovery
+** Replay                                                             :drill:
+   :PROPERTIES:
+   :ID:       c7fb7bb1-732c-4b1c-9cc6-07a5d5963cec
+   :END:
+*** Proceso
+- Reproducir realidad de logs sobre modelo de proceso ya conocido
+- Conformance checking
+  - Ver si hay trazas que se ajustan
+  - Ver desvíos
+- Análisis de rendimiento. 
+  - Análisis sobre uso de recursos o tiempo
+  - Tomar una traza y registrar el tiempo que tarda cada actividad en
+    ejecutarse. 
+- Conformance checking
+- Enhancement
+** Redes de petri                                                     :drill:
+   :PROPERTIES:
+   :ID:       763527d7-3215-47df-a875-a665fdc525f6
+   :END:
+*** Def
+- Lenguaje de representación de modelos
+- Representación formal de modelos de proceso que se usa como salida
+  del algoritmo \alpha, algoritmo básico de process discovery
+*** Formalización
+- nodos: lugares, transiciones
+- arcos, lugares y transiciones
+- Lugares pueden tener tokens
+- Transiciones consumen token de entrada, producen token en salida
+*** Operaciones
+- Marcado: instantánea de la PN, una configuración o estado
+  - Tipos: inicial inalcanzable, alcanzable
+- Activación: transicion activada si cada lugar de entrada tiene un
+  token
+- Disparo: transición activada puede dispararse consumiendo un token y
+  produciendo un token en las salidas
+*** Uso:
+- Representación de patrones de proceso más frecuentes. traducción a
+  otras notaciones de proceso.
+*** Relaciones con logs
+- Play out comprobar todos los caminos de tokens
+- Play in determinar la red de petri que genera un conjunto de trazas
+  de entrada
+- Replay permite detectar dónde están los problemas en la red de Petri
+  cuando reciba como entrada una traza real que no puede ser
+  reproducida. 
+*** Propiedades
+- Análisis de la calidad bondad de un modelo. Podemos usar las PN para
+  estudiar la calidad de modelos obtenidos. 
+- Puedo garantizar que en mi modelo. 
+  - Seguridad: Las actividades concurrentes hacen buen uso de recursos
+    compartidos
+  - Libre de bloqueos: No hay actividades bloqueadas
+  - Vivacidad: No hay actividades inútiles
+** WF-nets                                                            :drill:
+   :PROPERTIES:
+   :ID:       e26bbc08-f012-4aa0-ae89-94943e660dd7
+   :END:
+*** Definicióon
+- caso particular de PN y formalismo básico usado en BMP.
+- Un solo lugar de inicio y uno solo de fin
+- Todos los otros nodos están en un camino desde inicio hasta fin
+- WF net correcta si se cumplen las siguientes propiedades
+  - Seguridad
+  - Completado propio: si final marcado, todos vacíos
+  - Opción de completado: siempre es posible alcanzar un marcado que
+    marca sólo el final
+  - Ausencia de partes muertas.
+- Limitaciones
+  - Verificación basada en modelos d emuy buena calidad.
+  - Si el modelo del proceso y la realidad tienen poco en común,
+    análisis basado en modelos pierde sentido.
+  - A menudo hay un alineamiento pobre entre modelos hechos a mano y
+    realidad
+  - Process mining trata de afrontar estos problemas
+** Descubrimiento de procesos                                         :drill:
+   :PROPERTIES:
+   :ID:       2caec452-5325-404b-ad6f-5cd2f7cebbf9
+   :END:
+*** Def
+- hacer corresponder log de eventos con modelo de proceso tal que sea
+  representativo del comportamiento
+** Algoritmo \alpha                                                   :drill:
+   :PROPERTIES:
+   :ID:       99af5459-a839-473f-b356-99800eb57172
+   :END:
+*** Def
+Objetivo: generar WF-net de proceso que pueda explicar secuencias de
+eventos de log
+- entrada log
+- salida modelo
+- Simplificación, sólo consideramos actividades
+*** Representación
+\[ L_{1} = [\langle a,b,c,d\rangle^{3}, \langle a,c,e,d \rangle^{2}]\]
+
+- Log de eventos simple. 
+- Sucesión directa $x>y$
+- Causalidad $x \longrightarrow y$ si $x>y$ y no $y>x$.
+- Paralelismo si $x>y$, $y>x$
+- Elección si no $x>y$ y no $y>x$
+- Footprint matriz de adyacencia anotada
+- Relaciones fundamentales permiten expresar patrones de proceso
+*** Algoritmo
+- Simplificar log
+- Footprint
+- Determinar conjuntos de transiciones relacionados
+- Determinar lugares a partir de estos conjuntos: Encontrar pares de
+  conjuntos tales que para cada par, cada elemento de A está
+  causalmente relacionado con todos los de B y los de elementos de A
+  sonn independientes entre sí y los de B también
+- Conectar lugares y transiciones
+*** Resumen
+- Aproximación básica a la minería de procesos (descubrimiento)
+- Limitaciones
+
+** Criterios de calidad                                               :drill:
+   :PROPERTIES:
+   :ID:       3cf4fdef-1559-47bb-9813-748c2c5b84f0
+   :END:
+*** Evaluación 
+- Recall
+- Precission
+- Log contiene fracción de trazas
+- Falsos negativos: trazas que existen pero no se pueden reproducir
+- Ciertos positivos: trazas que existen en la realidad y que se pueden
+  reproducir con el modelo.
+- Replay fitness = $\frac{TP'}{TP'+FN'}$
+*** Criterios
+- Fitness: capacidad de explicar comportamiento observado
+- Simplicity
+- Precisión
+- Generalización
+** Process mining basado en heurísticas                               :drill:
+   :PROPERTIES:
+   :ID:       c8cb1ed8-bfbb-4d40-ac01-b0c57fba3f39
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:50]
+   :END:
+Casual-nets
+*** Características generales
+- Modelo más robusto. 
+- Umbral para determinar fortaleza de las relaciones
+*** Cálculo de grafo de dependencia
+  - Umbrales para el valor mínimo de sucesiones directas y medida de
+    dependencia
+  - Contar sucesiones directas
+*** Formato
+- Representeción de PM
+- Extensión de grafo de dependencias causales
+- Arcos representan dependencias
+- Actividad con conjunto de ligaduras de entrada y salida
+*** Aprendizaje de C-Net
+- Generar c-net a partir de un log
+- Grafo de dependencia causal
+- Nodos y arcos corresponden a nodos y arcos del grafo
+- Aprender bindings: Permiten expresar mayor variedad de patrones de
+  proceso comunes
+- Si sólo hay un binding, es el que se toma. Para otros bindings, hay
+  que seleccionarsubconjuntos, haciendo replay del log sobre el grafo
+  de dependencias.
+  - 
+*** Semántica
+- Suministra semántica para poder hacer replay más que para ejecución
+- Tenemos obligations en lugar de tokens
+* Bloque III: ACM y Planificación
+** ACM y planificación                                                :drill:
+   :PROPERTIES:
+   :ID:       e6744ba8-8ac8-4b1e-939b-e1e6fef3050a
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:02]
+   :END:
+Resumen de del temario
+*** Resumen
+- Gestión inteligente de procesos
+- Limitaciones BPM
+- Características trabajo del conocimiento
+- ACM
+- Planificación automática para ACM
+- Cognocare
+- Monitorización y ejecución de planes
+** ACM                                                                :drill:
+   :PROPERTIES:
+   :ID:       01e3dce6-ba54-4fad-baf0-9cd5085fa568
+   :END:
+Introducción
+*** De qué va esto
+Nos centramos en procesos que requieren conocimiento experto humano
+para su realización.
+
+El experto obtiene información de: objetivos, conocimiento y la
+situación y decide plan de actuación
+*** Modelos de proceso con conocimiento experto
+El experto utiliza su conocimiento junto a protocolos, normas o guías
+que debe respetar para elaborar un proceso o plan de actuación
+adaptado a una situacioón concreta. 
+
+La clave del éxito en estas soluciones está en poder representar un
+modelo de proceso que refleje el conocimiento que usan los expertos
+para poder generar instancias
+
+** BPMN                                                               :drill:
+   :PROPERTIES:
+   :ID:       af386fe6-4044-4535-b090-b2d18b541ab9
+   :END:
+Definición
+*** Respuesta
+- Modelado
+- Quién: Analista
+- Modelo
+- Es la notación estándar para modelado
+*** Limitación
+En su mayor parte no nos sirven para representar este conocimiento
+experto porque están limitados a modelar el trabajo rutinario
+
+- Trabajo conocido a priori
+- Predecible y repetible
+** Knowledge work                                                     :drill:
+   :PROPERTIES:
+   :ID:       c702a2a2-be6b-4647-9d58-434b2ca1a085
+   :END:
+Definición
+*** Respuesta
+Son procesos orientados a objetivos, dan soporte a las decisiones y
+tareas diarias. 
+- La base de las operaciones es el conocimiento de los individuos
+*** Diferencias con trabajo habitual
+- Conforme avanza la secuencia, depende más de lo específico de la
+  situación
+- Parte del trabajo es hacer el propio plan
+- Puede incorporar elementos de procedimiento
+*** Naturaleza
+- La información sobre la situación cambia constantemente. Ciclo
+continuo de evaluar, planificar y ejecutar.
+- Robustez: Modelos muy detallados
+- No repetible: Rara vez el trabajo de un experto se repite de la
+  misma forma varias veces
+- El curso de acciones depende de la situación y ésta puede cambiar
+  mucho antes de finalizar el trabajo
+- Proceso de trabajo es emergente
+** ACM                                                                :drill:
+   :PROPERTIES:
+   :ID:       81374392-9c2f-4716-af34-0d7df0bfffa6
+   :END:
+Definición
+*** Respuesta
+Nueva generación de BPMS para dar respuesta a requisitos del trabajo
+del conocimiento
+*** Características
+- Procesos dinámicos
+- Flexibles
+- Adaptativos
+- ágiles
+** Planificación automática                                           :drill:
+   :PROPERTIES:
+   :ID:       715af9ab-dd22-42e4-87ed-b43648348adf
+   :END:
+Qué soluciona
+*** Respuesta
+- Modelado de procesos orientados a objetivos con conocimiento experto
+- Sintetización de procesos que dependen de una situación y de
+  objetivos
+- Modificación de procesos automáticamente
+- Descubrimiento de modelos de procesos
+*** Definición 
+Disciplina que estudia generación de planes a partir de un modelo de
+acciones, objetivos y situación de partida
+*** Esquema
+- Problema
+  - Estado actual
+  - Objetivos
+- Dominio
+
+- Algoritmo de planificación
+- Plan. Secuencia de acciones
+*** Visión 1
+Visto como resolución de problemas
+- Estado inicial, objetivo
+- Operadores
+- Proceso de búsqueda
+- Solución: secuencia de actividades
+*** Visión 2
+- Gestión de procesos
+- Un plan es un proceso
+- Proceso orientado a objetivos a partir de modelo de planificación
+*** Problema clásico
+Mundo de los bloques
+- Pickup(X)
+- Putdown(X,Y)
+- Stack(X,Y)
+- Unstack(X,Y)
+** Planificación clásica                                              :drill:
+   :PROPERTIES:
+   :ID:       6f246ceb-6247-4432-bc06-ed8929d4c51c
+   :END:
+Componentes
+*** Respuesta
+- Lenguaje de representación
+- Representación de acciones
+- Búsqueda de espacio de estados
+- Plan
+** Lenguaje de representación                                         :drill:
+   :PROPERTIES:
+   :ID:       a99ebebb-6059-4dbc-80fd-b81ab6e599a3
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:52]
+   :END:
+Descripción del lenguaje
+*** Respuesta
+- Representación de estados
+  - Conjunto de predicados instanciados describiendo una situación
+- Asunción del mundo cerrado: Cualquier hecho no presente se supone
+  falso. 
+** Representación de acciones                                         :drill:
+   :PROPERTIES:
+   :ID:       2884b103-990f-4cff-85e0-d8dcf03baa19
+   :END:
+cada acción descrita por tres  componentes
+*** Respuesta
+  - Lista de precondición
+  - Borrar lista
+  - Añadir lista
+** Búsqueda en un espacio de estados                                  :drill:
+   :PROPERTIES:
+   :ID:       eac29e9a-56b0-4178-b006-2d0343e90211
+   :END:
+*** Descripción
+- Operadores espacio búsqueda == acciones
+- Generación de estados sucesores mediante aplicación de acciones
+- Se detiene cuando encontramos el estado objetivo
+- Espacio de búsqueda crece exponencialmente
+- Técnicas de búsqueda heurística
+** Plan en planificación clásica                                      :drill:
+   :PROPERTIES:
+   :ID:       cc2433ed-705c-447a-9cfc-fe0e33ef8e04
+   :END:
+Descripciónn
+*** Respuesta
+- Plan obtenido es secuencia ordenada, camino 
+- Síntesis de un proceso orientado a objetivos
+** Planificación jerarquica                                           :drill:
+   :PROPERTIES:
+   :ID:       b314c114-c2f7-4edb-b49b-27db7d11c65d
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:55]
+   :END:
+Preguntas
+*** Comparación
+- Mejor resolución de problemas combinatorios
+- Limitaciones: exploran desechables, centrado en causa-efecto. 
+- Permite reducir espacio de búsqueda
+- Mejr representación de conocimiento humano para describir
+  estrategias para resolver problemas.
+*** Definición
+ Técnica de planificación que permite representar estrategias a
+ distintos niveles de abstracción para resolver problemas de
+ planificación
+
+** Planificación HTN                                                  :drill:
+   :PROPERTIES:
+   :ID:       0c58495d-3d82-4439-a4cd-e7e959d5fabb
+   :END:
+Descripción
+*** Respuesta
+Técnica de planificación jerárquica, dominio a partir de 
+- Conjunto de tareas compuestas
+- Alternativas de descomposición mediante métodos de descomposición
+- Conjunto de tareas primitivas
+** Planificación HTN                                                  :drill:
+   :PROPERTIES:
+   :ID:       9c439598-5d8a-4634-bba1-f7b95d9744ed
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:54]
+   :END:
+Componentes
+*** Acción primitiva
+Acción de nivel de abstracción inferior cuya ejecución produce un
+cambio en el estado
+*** Tarea compuesta
+Tarea de alto nivel que debe llevarse a cabo con la intervención de
+varias tareas de nivel inferior. Método: modo de llevar a cabo una
+tarea, representado como conjunto de subtareas.
+*** Diferencia en interpretación de objetivo
+En lugar de alcanzar objetivos, se desempeñan tareas para un objetivo
+cada una.
+*** Proceso genérico de planificación
+- Objetivo de planificación: red de tareas, i.e. conjunto de tareas de
+  alto nivel ordenadas. 
+- PRoceso: reducir tareas
+- red de tareas: reducción continua
+- planning goal: proceso de reducción de una tarea termina cuando las
+  subtareas son primitivas
+*** Plan resultante
+- Plan válido cuando los nodos de la red se han convertido en acciones
+  primitivas
+- Descomposiciones válidas: precondiciones srespetado, variables
+  correctamente instanciadas, restricciones de orden 
+*** Proceso de búsqueda
+- Operadores de reducción dan lugar a espacio de búsqueda diferente al
+  de la planificación clásica
+** Diferencias                                                        :drill:
+   :PROPERTIES:
+   :ID:       aa9309eb-c850-447b-90ec-5ead3acf04cc
+   :END:
+Entre planificación clásica y jerárquica
+*** Clásica
+- Estado inicial: conjunto predicados
+- Operadores: Acciones
+- Objetivo: conjunto de predicados
+- Proceso de búsqueda
+  - Espacio de búsqueda: Operadores espacio búsqueda === acciones,
+    generación de estados sucesores y se para cuando encontramos un
+    cambino desde el estado inicial al objetivo
+- Plan: camino hasta el objetivo
+*** Jerárquica
+- Estado inicial: conjuntode predicados instanciados
+- Nuevos conceptos: 
+  - Tarea y red de tareas
+- Operadores
+  - Acciones equivalentes a primitivas
+  - Métodos de descomposición
+- Objetivo red de tareas inicial
+- Proceso de búsqueda: espacio de redes en tareas:
+  - Operadores: descomposición
+  - Reducción recursiva de tareas iniciales generando árbol
+** Dominios HTN                                                       :drill:
+   :PROPERTIES:
+   :ID:       0cf2906b-ec23-4e21-ab10-0cab0a1d3371
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:03]
+   :END:
+HDPL 
+*** Descripción
+Expresivo para representar modelos de proceso con conocimiento experto humano
+- Lenguaje textual
+- Notación gráfica EKDL. 
+
+** Recapitulación HTN y ACM                                           :drill:
+   :PROPERTIES:
+   :ID:       b0b7e61f-9769-435c-843a-befd4588259e
+   :END:
+*** Características de los procesos
+- No repetibilidad
+- Impredictibilidad
+  - Generación de planes dependientes de la situación y guiada por objetivos
+- Emergente
+  - Ciclo de planificación continua 
+- Robustez ante situaciones variables
+  - Replanificación basada en HTN permite gestionar situaciones
+    ppredecibles
+
+** Planificación de arquitecturas                                     :drill:
+   :PROPERTIES:
+   :ID:       9881d55f-d493-4aa0-a89c-fda0fa4cd14c
+   :END:
+*** Necesidades:
+- Monitorización: Comprobación de que si una acción puede ser
+  ejecutada en el actual estado del mundo o sus efectos han sido
+  conseguidos en el mundo
+- Generación de plan: Action plans need to be generated
+- Manejo de excepciones
+- Arquitecturas integradas
+** AI planning                                                        :drill:
+   :PROPERTIES:
+   :ID:       019e8ddb-3384-4df8-bf86-f6a9fe621444
+   :END:
+Ciclo
+*** Respuesta
+- Domain Modeling
+- Aquisition
+- Validation
+- Plan generation
+- Plan validation
+- Execution
+- Domain improvement
+* Bloque III: Gestión inteligente y minería de procesos.
+** Introducción a minería de procesos                                 :drill:
+   :PROPERTIES:
+   :ID:       87f9c0e8-c240-4fc1-b347-b7233ad840b6
+   :END:
+Conceptos
+*** Conceptos
+Aprender modelos de procesos para knowledge work en el marco de
+Adaptive case management.
+** Planificación continua                                             :drill:
+   :PROPERTIES:
+   :ID:       f9682a72-1d09-44b4-b12d-f71c812e8021
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:45]
+   :END:
+Necesidad
+*** Necesidad
+- Manejar eventos inesperados que invalidan plan actual-
+- Decide si replanificar o reparar el plan, como manejo de excepción
+** Aprendizaje para mejorar autonomía                                 :drill:
+   :PROPERTIES:
+   :ID:       f5936135-82db-4b9b-94d4-7a74842bdc47
+   :END:
+Agente deliberativo
+*** Definición
+- Agente deliberativo decide qué acciones ejecutar representando y
+  razonando sobre consecuencia de sus acciones
+- Planificación contnua: base para autonomía total
+- Agentes físicos
+- agentes virtuales autónomos
+** Planificación                                                      :drill:
+   :PROPERTIES:
+   :ID:       ae0b526a-01d3-434b-b855-c5a9ba412127
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 1
+   :DRILL_FAILURE_COUNT: 1
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 14:46]
+   :END:
+Motivos por los que es necesario el aprendizaje
+*** Comportamiento autónomo
+- Reducción de barreras de usuarios
+*** Reducir esfuerzo modelado
+-  Para herramientas inteligentes el modelado es un cuello de botella 
+*** Ayudar a usuarios
+- Interacción con usuario y la experiencia acumulada permite mejorar
+  el modelo de proceso
+
+*** Eficiencia del proceso de planificación
+- planificación es un proceso de búsqueda con espacios de búsqueda exponenciales
+
+*** Qué se aprende
+- Objetivos
+- Modelo de proceso
+- Mejorar propio proceso de planificacion
+** Aprendizaje                                                        :drill:
+   SCHEDULED: <2017-06-12 lun>
+   :PROPERTIES:
+   :ID:       1e24bbd0-c14b-4e47-a962-9fb55ae4a099
+   :DRILL_LAST_INTERVAL: 4.07
+   :DRILL_REPEATS_SINCE_FAIL: 2
+   :DRILL_TOTAL_REPEATS: 5
+   :DRILL_FAILURE_COUNT: 4
+   :DRILL_AVERAGE_QUALITY: 1.0
+   :DRILL_EASE: 2.6
+   :DRILL_LAST_QUALITY: 5
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:02]
+   :END:
+Autonomía y aprendizaje en agentes autónomos
+*** Tipos
+- Agente reactivo
+  - No planifica, afina su reacción a partir de la experiencia
+- Aprendizaje por refuerzo
+  - Determinar cuál es la acción más adecuada para cada estado posible
+    en el mundo recibiendo recompensas por el comportamiento realizado
+  - Objetivo: determinar política de actuación
+  - Ciclo de vida: sólo aplicable si se apoya en la ejecución en
+    simulación o mundo real. Q-learning
+- Agente reactivo se preocupa de decidir qué acción ejecutar y extrae
+  conclusiones de la observación del estado posterior. 
+- Un agente deliberativo establece proyecciones de acciones para
+  alcanzar un estado más alejado en el tiempo. Planes incorporan
+  trayectorias de estados, los planes pueden fallar, hay que
+  plantearse qué hacer cuando hay un fallo...
+** Goal driven autonomy                                               :drill:
+   :PROPERTIES:
+   :ID:       242bbd5b-75ef-4a05-b6fa-2892f0294b18
+   :END:
+Autonomía dirigida por objetivos
+*** Definición
+- Planificador integrado en un ciclo de planificación continua en el
+  que cada vez que hay un fallo en la ejecución el sistema se plantea
+  cómo resolver el fallo autoproponiéndose nuevos objetivos
+*** Proceso
+- Usuario establece objetivos y envía al planificador
+- Plan es secuencia de acciones 
+- El proceso de monitorización selecciona la siguiente acción a
+  ejecutar
+- El proceso de ejecución la hace efectiva
+- Se percibe el nuevo estado observado
+- El plan realmente ejecutado se registra en un log
+** Aprender a plantearse objetivos                                    :drill:
+   :PROPERTIES:
+   :ID:       eed9ebaf-24ea-4486-a889-14b81304819c
+   :END:
+- Aprendizaje de nuevos objetivos
+*** Clasificación
+- Supervisado: Aprendizaje activo mediante la interacción con el
+  usuario
+- No supervisado: Aprendizaje efectivo mediante aprendizaje por
+  refuerzo
+** Aprender a plantearse objetivos                                    :drill:
+   :PROPERTIES:
+   :ID:       d8218a4d-39e7-4351-a1d5-78ebb51581a5
+   :END:
+Proceso de aprendizaje supervisado
+*** Aprendizaje supervisado
+- Detección de discrepancias
+- Formulación de objetivos
+- Consulta para seleccionar goals
+  - Discrepancia
+  - Estado observado
+  - Objetivo seleccionado
+- Caso
+- Gestión excepciones
+  - Generalizar
+	- Generalización 1
+	- Caso generalizado -> gestión excepciones
+** Aprender a plantearse objetivos                                    :drill:
+   :PROPERTIES:
+   :ID:       45ec1c6f-760b-4196-8476-fca7e457ab3b
+   :END:
+Proceso 
+*** No supervisado
+Se sustituye por un algoritmo de aprendizaje por refuerzo para
+objetivos
+** PM vs Learning in planning                                         :drill:
+   :PROPERTIES:
+   :ID:       ae70c9a9-cb55-4c90-b588-f707c8fe4323
+   :END:
+Comparación
+*** Representación de modelo
+- PM: Procesos rutinarios, estáticos
+- AP: Procesos dinámicos, orientados a objetos. Dominio de planificación
+*** Ejemplos de entrada
+- PM: Logs de eventos
+- AP: Logs de planes. 
+*** Algoritmos de aprendizaje
+- salida: modelo de proceso
+- basado en acciones; precondiciones y efectos de acciones
+*** Explotación
+- Despliegue de procesos rutinarios
+- Agentes deliberativos autónomos, soporte a decisiones
+** Aprender modelos de acciones clásicos                              :drill:
+   :PROPERTIES:
+   :ID:       520f7889-1b55-40c6-a525-fa021ef2a676
+   :END:
+Obtención del grafo casual
+*** Algoritmo
+- Un par de acciones conectado casualmente si algunos de sus tipos de
+  parámetros coinciden
+- Cada par conectado se etiqueta con soporte, tasa de soporte
+- Sólo considerar relaciones casuales que superen umbral
+*** Idea
+- Si un par aparece en el grafo causal es porque tiene que existir un
+predicado conector para a1 -> $p$ -> a2
+- Además p tiene que estar en la lista de adición de a1 y en las
+  precondiciones de a2.
+- Los predicados así obtenidos y asignados tienen que respetar las
+  reglas de escritura de dominios basados en operadores
+*** Determinación de predicado conector
+- Mediante búsqueda (prueba y error) entre los predicados dados como
+  entrada
+- Problema de optimización de restricciones
+- La solución apl problema de satisfacción de restricciones es una
+  asignación de predicados a las listas de precondiciones y efectos de
+  las acciones
+
+** Aprender dominios jerárquicos                                      :drill:
+   :PROPERTIES:
+   :ID:       0eb7d5ea-7f68-4928-81d9-187fbd58f96f
+   :END:
+Entradas y salidas
+*** Fases
+- dominio de acciones
+- Conjunto de trazas de planes con todos los estados intermedios
+- Tareas anotadas con pre y post condiciones
+- Conjunto de métodos preexistente
+*** Pasos del algoritmo
+- Considerar el subplan conteniendo sólo a_0
+** Resumen                                                            :drill:
+   :PROPERTIES:
+   :ID:       c38af4a2-f7d1-496c-a181-af3070310119
+   :DRILL_LAST_INTERVAL: 0.0
+   :DRILL_REPEATS_SINCE_FAIL: 1
+   :DRILL_TOTAL_REPEATS: 2
+   :DRILL_FAILURE_COUNT: 2
+   :DRILL_AVERAGE_QUALITY: 0.0
+   :DRILL_EASE: 2.5
+   :DRILL_LAST_QUALITY: 0
+   :DRILL_LAST_REVIEWED: [2017-06-08 jue 15:02]
+   :END:
+Resumen tema 3 bloque 3
+*** Resumen
+- ACM permite aprender modelos de procesos orientados a objetivos
+  aplicando técnicas de aprendizaje en planificación
+- Doble vertiente
+  - mejorar comportamiento de agentes autónomos
+  - Mejorar decisiones de expertos
+- Aprendizaje de 
+  - Objetivos: cómo un agente deliberativo puede autoplantearse
+    objetivos para continuar con su trabajo
+  - Dominios de planificación: Un agente deliberativo puede aprender a
+    comportarse mejorar su comportamiento orientado a objetivos a
+    partir de ejemplos de actuación

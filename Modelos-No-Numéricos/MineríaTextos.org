@@ -1,0 +1,63 @@
+#+TITLE: Minería de textos en KNIME
+#+SUBTITLE: Modelos de datos no numéricos
+#+DATE: 9 de junio
+#+OPTIONS: toc:nil
+
+* Descripción de los documentos
+
+Para la práctica de minería de textos en KNIME se ha usado una
+colección de documentos PDF relativos al uso de test estadísticos para
+la comparación de resultados de algoritmos de aprendizaje automático
+en problemas de clasificación. Estos artículos podríamos clasificarlos
+en varios tipos
+- Estadística frecuentista
+  - Metodologías paramétricas
+  - Metodologías no paramétricas
+	- Test permutacionales com subtipo de los métodos no paramétricos.
+- Estadística bayesiana.
+
+
+* Workflow
+
+#+NAME: Workflow
+#+CAPTION: Workflow
+[[./Workflow.png]]
+
+Los métodos para preprocesar los documentos han sido:
+- POS tagger.
+- Eliminación de la puntuación y filtro por números.
+- Filtro de /stop words/.
+- Conversión a minúsculas. 
+- /Porter stemmer/.
+- /Bag of words/.
+- Filtro por filas: Una vez que tenemos la bolsa de palabras y una
+  columna con los términos, vemos que aún siguen quedando términos con
+  signos como $\delta$, $\sum$... así que filtramos con una expresión
+  regular para quedarnos únicamente con palabras.
+
+* Resultados
+
+Mostramos en la [[img:tagcloud][Imagen 2]] la nube de palabras (aunque hemos mostrado
+las racíces de las palabras para evitar duplicidades en los
+términos). Observamos como /algorithm, test, bootstrap, dataset, rank,
+CV/ son términos relevantes.
+
+
+#+NAME: img:tagcloud
+#+CAPTION: Tagcloud
+[[./Tagcloud.png]]
+
+
+Una vez que hemos realizado la nube de términos, se genera un vector
+por documento para los términos más relevantes. Aplicamos el algoritmo
+de $k$ medias, y mostramos en la [[img:scatter][Figura 3]] para algunos de los términos más relevantes
+la matriz relativa a estos términos y la posición de los
+artículos. Observamos que la mayoría de los artículos han sido
+asignados a una clase, con lo que no se ha obtenido la partición
+esperada según el tipo de técnicas estadísticas usadas para la
+comparación de algoritmos. Sin embargo sí que vemos que separa los
+documentos que tratan sobre test basados en permutaciones.
+
+#+NAME: img:scatter
+#+CAPTION: Scatter matrix para los términos "test","statistic" y "permut"
+[[./Scatter.png]]

@@ -1,0 +1,260 @@
+% Created 2017-06-11 dom 21:05
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\author{Jacinto Carrasco Castillo. DNI 32056356Z \\  e-mail: jacintocc@correo.ugr.es}
+\date{}
+\title{Análisis y visualización básica de una red social con \emph{Gephi}\\\medskip
+\large Modelos de ciencia de datos no numéricos \\  Máster DATCOM. Curso 16-17.}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo. DNI 32056356Z \\  e-mail: jacintocc@correo.ugr.es},
+ pdftitle={Análisis y visualización básica de una red social con \emph{Gephi}},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.7)}, 
+ pdflang={Sp}}
+\begin{document}
+
+\maketitle
+\tableofcontents
+
+\newpage
+
+\section{Red}
+\label{sec:orgcc443b3}
+
+\subsection{Descripción de la red}
+\label{sec:org89545bb}
+
+La red utilizada ha sido la formada por los personajes de Los Simpson
+en la primera temporada, donde dos personajes están unidos si aparecen
+en el mismo capítulo. Esta red se puede descargar en formato \texttt{.gephi}
+desde el siguiente \href{https://gist.github.com/cpudney/6dfc60b2cf1d4d390e2e}{enlace}. Mostramos la red en la Figura \ref{fig:orge1d5d99}.
+Esta gráfica usa la centralidad para fijar el tamaño de los nodos y el
+grado para seleccionar el color.
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/Red.png}
+\caption{\label{fig:orge1d5d99}
+Red completa}
+\end{figure}
+En esta red los nodos más destacados son los de la familia Simpson,
+como veremos más adelante. 
+
+
+
+\subsection{Tabla con valores de las medidas}
+\label{sec:org60422d0}
+
+\begin{table}[htbp]
+\caption{\label{tab:orgbfc146c}
+Medidas del grafo}
+\centering
+\begin{tabular}{lr}
+Medida & Valor\\
+\hline
+Número de nodos \(N\) & 238\\
+Número de enlaces \(L\) & 6192\\
+Número máximo de enlaces \(L_{max}\) & 28203\\
+Densidad del grafo \(L/L_{max}\) & 0.22\\
+\hline
+Grado medio \(\langle k \rangle\) & 52.034 / 64.252\\
+Diámetro \(d_{max}\) & 2\\
+Distancia media & 1.78\\
+Coeficiente medio de clustering \(\langle C \rangle\) & 0.881\\
+\hline
+Número de componentes conexas & 1\\
+Número de nodos componente gigante (y \%) & 238,  100\%\\
+Número de aristas componente gigante (y \%) & 6192, 100\%\\
+\end{tabular}
+\end{table}
+
+\subsection{Gráficos con las distribuciones}
+\label{sec:org1bb15db}
+
+\begin{enumerate}
+\item Grado medio
+\label{sec:org9f613c0}
+Mostramos en la Figura \ref{fig:org520fdb0} la distribución de número de nodos
+por grado.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/AvgDegree/degree-distribution.png}
+\caption{\label{fig:org520fdb0}
+Distribución número de nodos por grado}
+\end{figure} 
+
+\begin{enumerate}
+\item Grado medio ponderado
+\label{sec:org09ea5d4}
+
+En la Figura \ref{fig:org618bbbe} se muestra la distribución de número de
+nodos por la ponderación de grados. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/AvgWeightDegree/w-degree-distribution.png}
+\caption{\label{fig:org618bbbe}
+Distribución número de nodos por grado con pesos}
+\end{figure}
+\end{enumerate}
+
+
+\item Distribución de distancias
+\label{sec:org0e2cc79}
+
+Incluimos en la Figura \ref{fig:orgabd3dd8} la distribución de la
+centralidad de los nodos. Observamos tanto en esta gráfica como en las
+anteriores la existencia de los cinco nodos conectados con todos los
+demás.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/Diameter/Closeness Centrality Distribution.png}
+\caption{\label{fig:orgabd3dd8}
+Distribución de medida de centralidad}
+\end{figure}
+
+\item Coeficiente medio de clustering
+\label{sec:org26b26df}
+
+En la Figura \ref{fig:org41cc9ee} observamos la distribución de número de
+nodos por coeficiente de clustering.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/AvgClusteringCoefficient/clustering-coefficient.png}
+\caption{\label{fig:org41cc9ee}
+Distribución de número de nodos por coeficiente de clustering}
+\end{figure}
+\end{enumerate}
+
+
+\section{Análisis}
+\label{sec:org53aebc9}
+
+Por la característica de la red y al aparecer todos los componentes de
+la familia Simpson en todos los capítulos, éstos están conectados con
+todos los demás nodos de la ciudad. Entonces, tenemos que de cualquier
+personaje podríamos llegar a cualquier otro sin más que pasar porp
+cualquier personaje central. 
+
+Como vemos en la Figura \ref{fig:org520fdb0}, el menor grado es de 20 y lo
+poseen algunos nodos. Esto significa que algunos nodos aparecen
+únicamente en un capítulo con pocos personajes. Aunque la moda es
+también cercana a 20, por lo que hay algún capítulo en el que hay más
+personajes que sólo aparecen en ese capítulo. Conforme aumentamos el
+grado, vemos que va habiendo menos nodos, hasta llegar al grado
+máximo, donde nos encontramos con los cinco nodos centrales. 
+
+En cuanto a la medida de clustering, vemos que hay un muy alto número
+de puntos con coeficiente de clustering 1. Estos nodos serán todos
+aquellos que salgan en un único capítulo, pues todos sus vecinos
+también estarán interconectados y formarán un clique entre ellos. 
+
+
+\section{Actores centrales}
+\label{sec:org81f1cd9}
+
+\subsection{Tabla con actores centrales y medidas}
+\label{sec:orgca66121}
+
+Para mostrar a los actores principales hemos agrupado a los cinco
+personajes (Marge, Homer, Bart, Lisa y Maggie) de la familia
+Simpson, pues tienen los mismos valores y así mostramos un poco más de
+información sobre la red. 
+
+\begin{center}
+\begin{tabular}{lrrrr}
+Personaje & Grado & Intermediación & Cercanía & Vector propio\\
+\hline
+Familia Simpson & 237 & 2479.63 & 1 & 1\\
+Moe Syzlak & 166 & 792.58 & 0.7695 & 0.8286\\
+Barney Gumble & 166 & 792.58 & 0.7695 & 0.8286\\
+Lewis Clark & 163 & 674.72 & 0.7621 & 0.8216\\
+Milhouse & 152 & 551.28 & 0.7362 & 0.7896\\
+\end{tabular}
+\end{center}
+
+\section{Detección de comunidades}
+\label{sec:orgede750a}
+
+El estudiante escogerá distintos valores para \emph{resolución} que
+determina el número de comunidades. Deberá perseguir la obtención de
+un número razonableque permita realizar un buen análisis de la
+estructura de comunidades obtenida. Mostrará los valores de la medida
+de modularidad asociados a cada particionamiento realizado y analizara
+la composición de las comunidades generadas para determinar si tienen
+algún tipo de influencia en la estructura de la red.
+
+
+
+\subsection{Resolución 1}
+\label{sec:org47aa166}
+
+Tanto en la Figura \ref{fig:orge1d5d99} como en la Figura \ref{fig:orgd7d5a91} se observan
+distintas zonas (y colores en ésta segunda figura) que guardan
+relación con los capítulos de la temporada, donde personajes que
+aparecen en el mismo capítulo (y sólo en ese capítulo) están situados
+más cerca y con el mismo color.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/RedComunidades.png}
+\caption{\label{fig:orgd7d5a91}
+Distribución de tamaño de comunidades. Resolución = 1.}
+\end{figure}
+
+
+\subsection{Resolución 1.5}
+\label{sec:org3b735b3}
+
+Si aumentamos el valor de resolución, se reduce el número de grupos y
+surge un grupo central con los personajes de mayor relevancia que
+acoge a varios de los grupos que relacionamos con capítulos
+independientes, como observamos en la Figura \ref{fig:org8e51ae5}.
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/RedComunidades1-5.png}
+\caption{\label{fig:org8e51ae5}
+Distribución de tamaño de comunidades. Resolución = 1.5 .}
+\end{figure}
+
+
+\subsection{Resolución 0.5}
+\label{sec:orgf2fb671}
+
+Si reducimos el valor de \emph{resolución} esperamos encontrarnos con
+distintos clusters según el capítulo. Nos encontramos con resultado
+poco esperados, como que la familia Simpson se ha dividido y Lisa
+y Maggie pertenecen a distintos clusters que el resto de la familia
+(pese a tener los mismos enlaces), y nos encontramos un cluster
+formado únicamente por dos nodos (en color marrón oscuro): Los de Patti y Selma Bouvier, las
+hermanas de Marge, con lo que el algoritmo ha sabido identificar un
+conjunto que es inseparable. 
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./GephiOutput/RedComunidades05.png}
+\caption{\label{fig:orgadcc2b2}
+Distribución de tamaño de comunidades. Resolución = 0.5 .}
+\end{figure}
+\end{document}

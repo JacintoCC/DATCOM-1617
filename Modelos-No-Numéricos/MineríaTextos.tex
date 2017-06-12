@@ -1,0 +1,111 @@
+% Created 2017-06-09 vie 22:45
+% Intended LaTeX compiler: pdflatex
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{graphicx}
+\usepackage{grffile}
+\usepackage{longtable}
+\usepackage{wrapfig}
+\usepackage{rotating}
+\usepackage[normalem]{ulem}
+\usepackage{amsmath}
+\usepackage{textcomp}
+\usepackage{amssymb}
+\usepackage{capt-of}
+\usepackage{hyperref}
+\usepackage{minted}
+\author{Jacinto Carrasco Castillo}
+\date{9 de junio}
+\title{Minería de textos en KNIME\\\medskip
+\large Modelos de datos no numéricos}
+\hypersetup{
+ pdfauthor={Jacinto Carrasco Castillo},
+ pdftitle={Minería de textos en KNIME},
+ pdfkeywords={},
+ pdfsubject={},
+ pdfcreator={Emacs 25.2.1 (Org mode 9.0.7)}, 
+ pdflang={English}}
+\begin{document}
+
+\maketitle
+
+\section{Descripción de los documentos}
+\label{sec:org84e2938}
+
+Para la práctica de minería de textos en KNIME se ha usado una
+colección de documentos PDF relativos al uso de test estadísticos para
+la comparación de resultados de algoritmos de aprendizaje automático
+en problemas de clasificación. Estos artículos podríamos clasificarlos
+en varios tipos
+\begin{itemize}
+\item Estadística frecuentista
+\begin{itemize}
+\item Metodologías paramétricas
+\item Metodologías no paramétricas
+\begin{itemize}
+\item Test permutacionales com subtipo de los métodos no paramétricos.
+\end{itemize}
+\end{itemize}
+\item Estadística bayesiana.
+\end{itemize}
+
+
+\section{Workflow}
+\label{sec:org74724de}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./Workflow.png}
+\caption{\label{fig:org8427546}
+Workflow}
+\end{figure}
+
+Los métodos para preprocesar los documentos han sido:
+\begin{itemize}
+\item POS tagger.
+\item Eliminación de la puntuación y filtro por números.
+\item Filtro de \emph{stop words}.
+\item Conversión a minúsculas.
+\item \emph{Porter stemmer}.
+\item \emph{Bag of words}.
+\item Filtro por filas: Una vez que tenemos la bolsa de palabras y una
+columna con los términos, vemos que aún siguen quedando términos con
+signos como \(\delta\), \(\sum\)\ldots{} así que filtramos con una expresión
+regular para quedarnos únicamente con palabras.
+\end{itemize}
+
+\section{Resultados}
+\label{sec:orgd77498d}
+
+Mostramos en la \hyperref[fig:orgda7cefc]{Imagen 2} la nube de palabras (aunque hemos mostrado
+las racíces de las palabras para evitar duplicidades en los
+términos). Observamos como \emph{algorithm, test, bootstrap, dataset, rank,
+CV} son términos relevantes.
+
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./Tagcloud.png}
+\caption{\label{fig:orgda7cefc}
+Tagcloud}
+\end{figure}
+
+
+Una vez que hemos realizado la nube de términos, se genera un vector
+por documento para los términos más relevantes. Aplicamos el algoritmo
+de \(k\) medias, y mostramos en la \hyperref[fig:orge0f1e51]{Figura 3} para algunos de los términos más relevantes
+la matriz relativa a estos términos y la posición de los
+artículos. Observamos que la mayoría de los artículos han sido
+asignados a una clase, con lo que no se ha obtenido la partición
+esperada según el tipo de técnicas estadísticas usadas para la
+comparación de algoritmos. Sin embargo sí que vemos que separa los
+documentos que tratan sobre test basados en permutaciones.
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=.9\linewidth]{./Scatter.png}
+\caption{\label{fig:orge0f1e51}
+Scatter matrix para los términos "test","statistic" y "permut"}
+\end{figure}
+\end{document}
